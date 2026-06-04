@@ -1,9 +1,9 @@
-# AGENTS.md - Playwright Automation Agent Guide
+﻿# AGENTS.md - Playwright Automation Agent Guide
 
-Bu dokuman, bu projede Codex ile Playwright TypeScript otomasyon testleri uretirken uyulacak mimariyi, klasor yapisini, kodlama standartlarini ve test uretim kurallarini tanimlar.
+Bu dokuman, bu projede Codex ile Cucumber + Playwright TypeScript otomasyon testleri uretirken uyulacak mimariyi, klasor yapisini, kodlama standartlarini ve test uretim kurallarini tanimlar.
 
 Amac:
-Manuel test case'leri hizli, stabil ve bakimi kolay Playwright otomasyon testlerine donusturmek.
+Manuel test case'leri hizli, stabil, okunabilir ve bakimi kolay Cucumber + Playwright otomasyon testlerine donusturmek.
 
 Bu projede klasik Page Object Model kullanilmayacaktir. Her sayfa icin ayri `Page.ts` class dosyasi olusturulmayacaktir. Baslangic mimarisi sade tutulacaktir: data, locator, action ve assertion katmanlari tek dosya olarak yonetilecektir. Bu tek dosya modeli baslangic hizini artirmak icindir; proje buyudukce best practice, POM'a donmeden domain bazli katman dosyalarina ayrilmaktir.
 
@@ -12,16 +12,16 @@ Bu projede klasik Page Object Model kullanilmayacaktir. Her sayfa icin ayri `Pag
 ## 1. Kullanilacak Teknolojiler
 
 - TypeScript
-- Playwright Test
+- Playwright
+- Cucumber
+- Gherkin
+- @cucumber/cucumber
 - VS Code
 - Codex
-- Native Playwright test runner
 
 Bu projede asagidaki yapilar kullanilmayacaktir:
 
-- Gauge
-- Cucumber
-- Gherkin
+- Gauge runner
 - Klasik Page Object Model
 - Her sayfa icin ayri Page class yapisi
 
@@ -37,11 +37,11 @@ Locator   -> src/locators/locators.ts
 Action    -> src/actions/actions.ts
 Assertion -> src/assertions/assertions.ts
 Flow      -> src/flows
-Fixture   -> src/fixtures
-Setup     -> src/setup
+Cucumber  -> features
+Step Def  -> features/step-definitions
+Support   -> features/support
 Config    -> src/config
-Utils     -> src/utils
-Test      -> tests/generated
+Feature   -> features/generated
 ```
 
 Katmanlarin sorumluluklari:
@@ -62,20 +62,18 @@ src/assertions/assertions.ts
 src/flows
   Birden fazla action ve assertion iceren business akislarini tutar.
 
-src/fixtures
-  Ortak test context ve fixture tanimlarini tutar.
+features/generated
+  Manuel test case'lerden uretilen Cucumber feature dosyalarini tutar.
 
-src/setup
-  Login session, storage state gibi on hazirliklari tutar.
+features/step-definitions
+  `*` ile yazilan Gherkin adimlarinin TypeScript `Step(...)` karsiliklarini tutar.
+
+features/support
+  Cucumber World, hook, login session ve Playwright browser/page lifecycle yapilarini tutar.
 
 src/config
   Ortam ve environment ayarlarini tutar.
 
-src/utils
-  Random data, tarih, fiyat formatlama gibi genel yardimci fonksiyonlari tutar.
-
-tests/generated
-  Manuel test case'lerden uretilen Playwright spec dosyalarini tutar.
 ```
 
 ---
@@ -86,16 +84,20 @@ tests/generated
 playwright-automation/
 |
 ├── AGENTS.md
-├── playwright.config.ts
+├── cucumber.js
 ├── package.json
 ├── tsconfig.json
 |
-├── tests/
-│   └── generated/
-│       ├── TC_001_login.spec.ts
-│       ├── TC_002_product_search.spec.ts
-│       ├── TC_003_add_to_basket.spec.ts
-│       └── TC_004_checkout.spec.ts
+├── features/
+│   ├── generated/
+│   │   └── TC_001_login.feature
+│   │
+│   ├── step-definitions/
+│   │   └── auth.steps.ts
+│   │
+│   └── support/
+│       ├── world.ts
+│       └── hooks.ts
 |
 └── src/
     ├── data/
@@ -111,24 +113,12 @@ playwright-automation/
     │   └── assertions.ts
     │
     ├── flows/
-    │   ├── auth.flow.ts
-    │   ├── product.flow.ts
-    │   ├── basket.flow.ts
-    │   └── checkout.flow.ts
-    │
-    ├── fixtures/
-    │   └── test.ts
-    │
-    ├── setup/
-    │   └── auth.setup.ts
+    │   └── auth.flow.ts
     │
     ├── config/
     │   └── env.ts
     │
-    └── utils/
-        ├── random.ts
-        ├── price.ts
-        └── date.ts
+    └── utils/              # Sadece gercek ortak helper ihtiyaci olursa eklenir
 ```
 
 `components/` klasoru baslangicta kullanilmayacaktir. Modal, ortak component veya tekrar eden kompleks UI yapilari ortaya cikarsa daha sonra eklenebilir.
@@ -137,30 +127,32 @@ playwright-automation/
 
 ## 4. Mimari Akis
 
-Bir test yazilirken akis su sekilde olmalidir:
+Bir scenario yazilirken akis su sekilde olmalidir:
 
 ```text
-Test
-  -> Flow
-    -> Action
-      -> Locator
-    -> Assertion
-      -> Locator
-    -> Data
+Feature
+  -> Step Definition
+    -> Flow
+      -> Action
+        -> Locator
+      -> Assertion
+        -> Locator
+      -> Data
 ```
 
 Ornek kullanim mantigi:
 
 ```text
-tests/generated/TC_003_add_to_basket.spec.ts
-  -> flows/basket.flow.ts
+features/generated/TC_001_login.feature
+  -> features/step-definitions/auth.steps.ts
+    -> flows/auth.flow.ts
     -> actions/actions.ts
     -> assertions/assertions.ts
     -> locators/locators.ts
     -> data/data.ts
 ```
 
-Test dosyasi mumkun oldugunca sade kalmalidir. Test dosyasinda locator karmasasi olmamalidir.
+Feature dosyasi mumkun oldugunca sade kalmalidir. Feature dosyasinda locator karmasasi olmamalidir.
 
 ---
 
@@ -308,23 +300,10 @@ import { Page } from '@playwright/test';
 
 export const locators = (page: Page) => ({
   auth: {
-    emailInput: page.getByLabel('E-posta'),
-    passwordInput: page.getByLabel('Sifre'),
-    loginButton: page.getByRole('button', { name: 'Giris Yap' }),
-    accountMenu: page.getByTestId('account-menu'),
-  },
-
-  product: {
-    searchInput: page.getByPlaceholder('Urun ara'),
-    productCards: page.getByTestId('product-card'),
-    firstProductCard: page.getByTestId('product-card').first(),
-    productTitle: page.getByTestId('product-title'),
-    addToBasketButton: page.getByRole('button', { name: 'Sepete Ekle' }),
-  },
-
-  basket: {
-    basketLink: page.getByRole('link', { name: /Sepet|Basket/ }),
-    basketItems: page.getByTestId('basket-item'),
+    usernameInput: page.locator('#username'),
+    passwordInput: page.locator('#password'),
+    loginButton: page.locator('button[name="login"]'),
+    userProfileButton: page.getByRole('button', { name: /User Profile/i }),
   },
 });
 ```
@@ -349,23 +328,20 @@ Ornek:
 // src/data/data.ts
 export const users = {
   validUser: {
+    username: process.env.VALID_USER_USERNAME ?? '',
     email: process.env.VALID_USER_EMAIL ?? '',
     password: process.env.VALID_USER_PASSWORD ?? '',
   },
-} as const;
-
-export const products = {
-  defaultSearchKeyword: process.env.DEFAULT_PRODUCT_SEARCH_KEYWORD ?? '',
 } as const;
 ```
 
 Kurallar:
 
-- Test dosyasi icinde hard-coded data mumkun oldugunca kullanilmamalidir.
+- Feature dosyasi icinde hard-coded data mumkun oldugunca kullanilmamalidir.
 - Kullanici, urun, adres, odeme bilgileri ayni data dosyasinda gruplu olarak tutulmalidir.
 - Tek testte kullanilan gecici data test icinde olabilir.
 - Bir data iki veya daha fazla testte kullanilacaksa `src/data/data.ts` icine tasinmalidir.
-- Hassas bilgi, gercek sifre veya gercek kullanici datası commit edilmemelidir.
+- Hassas bilgi, gercek sifre veya gercek kullanici datasÄ± commit edilmemelidir.
 - Ortama gore degisen degerler environment variable uzerinden alinmalidir.
 
 ---
@@ -383,14 +359,15 @@ Ornek:
 import { Page } from '@playwright/test';
 import { locators } from '../locators/locators';
 
-export async function fillLoginForm(
-  page: Page,
-  email: string,
-  password: string
-) {
+export async function fillLoginUsername(page: Page, username: string) {
   const locator = locators(page);
 
-  await locator.auth.emailInput.fill(email);
+  await locator.auth.usernameInput.fill(username);
+}
+
+export async function fillLoginPassword(page: Page, password: string) {
+  const locator = locators(page);
+
   await locator.auth.passwordInput.fill(password);
 }
 
@@ -398,13 +375,6 @@ export async function clickLoginButton(page: Page) {
   const locator = locators(page);
 
   await locator.auth.loginButton.click();
-}
-
-export async function searchProduct(page: Page, keyword: string) {
-  const locator = locators(page);
-
-  await locator.product.searchInput.fill(keyword);
-  await locator.product.searchInput.press('Enter');
 }
 ```
 
@@ -442,13 +412,17 @@ import { locators } from '../locators/locators';
 export async function expectLoginSuccess(page: Page) {
   const locator = locators(page);
 
-  await expect(locator.auth.accountMenu).toBeVisible();
+  await expect(page).toHaveURL(/shell-app-ui\/#\/journal-audits/);
+  await expect(locator.auth.usernameInput).not.toBeVisible();
+  await expect(locator.auth.userProfileButton).toBeVisible();
 }
 
-export async function expectProductListVisible(page: Page) {
+export async function expectLoginPageVisible(page: Page) {
   const locator = locators(page);
 
-  await expect(locator.product.productCards.first()).toBeVisible();
+  await expect(locator.auth.usernameInput).toBeVisible();
+  await expect(locator.auth.passwordInput).toBeVisible();
+  await expect(locator.auth.loginButton).toBeVisible();
 }
 ```
 
@@ -465,15 +439,15 @@ Kurallar:
 Iyi assertion ornekleri:
 
 ```ts
-await expect(page).toHaveURL(/basket|sepet/);
-await expect(locator.product.productCards.first()).toBeVisible();
-await expect(locator.basket.basketItems).toHaveCount(1);
+await expect(page).toHaveURL(/shell-app-ui\/#\/journal-audits/);
+await expect(locator.auth.userProfileButton).toBeVisible();
+await expect(locator.auth.usernameInput).not.toBeVisible();
 ```
 
 Kacinilacak ornek:
 
 ```ts
-expect(await locator.basket.basketItems.first().isVisible()).toBe(true);
+expect(await locator.auth.userProfileButton.isVisible()).toBe(true);
 ```
 
 ---
@@ -490,16 +464,32 @@ Ornek:
 // src/flows/auth.flow.ts
 import { Page } from '@playwright/test';
 import { users } from '../data/data';
-import { fillLoginForm, clickLoginButton } from '../actions/actions';
+import {
+  clickLoginButton,
+  fillLoginPassword,
+  fillLoginUsername,
+} from '../actions/actions';
 import { expectLoginSuccess } from '../assertions/assertions';
+import { env } from '../config/env';
+
+export async function openLoginPage(page: Page) {
+  await page.goto(env.baseUrl);
+}
+
+export async function submitLogin(page: Page, user = users.validUser) {
+  await fillLoginUsername(page, user.username || user.email);
+  await fillLoginPassword(page, user.password);
+  await clickLoginButton(page);
+}
+
+export async function verifyLoginSuccess(page: Page) {
+  await expectLoginSuccess(page);
+}
 
 export async function login(page: Page, user = users.validUser) {
-  await page.goto('/login');
-
-  await fillLoginForm(page, user.email, user.password);
-  await clickLoginButton(page);
-
-  await expectLoginSuccess(page);
+  await openLoginPage(page);
+  await submitLogin(page, user);
+  await verifyLoginSuccess(page);
 }
 ```
 
@@ -507,79 +497,132 @@ Kurallar:
 
 - Flow business anlamli olmalidir.
 - Flow icinde birden fazla action ve assertion olabilir.
+- Flow Cucumber step definition tarafindan cagrilacak reusable business akisini tutmalidir.
+- Flow icinde Cucumber/Gherkin metni veya `test.step()` bulunmamalidir.
+- Raporlanacak step metinleri `.feature` dosyalarinda ve `features/step-definitions` icinde tutulmalidir.
 - Flow testin okunabilirligini artirmalidir.
 - Flow icine asiri ozel test case mantigi konulmamalidir.
-- Sadece bir testte kullanilacak cok ozel akis dogrudan test dosyasinda yazilabilir.
-- Ayni akis iki veya daha fazla testte kullanilacaksa flow haline getirilmelidir.
+- Ayni akis iki veya daha fazla senaryoda kullanilacaksa flow olarak tanimlanmalidir.
 
 ---
 
-## 11. Fixture Kullanim Kurallari
+## 11. Cucumber Step Definition Best Practice
 
-Fixture dosyasi `src/fixtures/test.ts` altinda tutulmalidir.
+Bu projede Gauge concept veya `.cpt` katalogu kullanilmayacaktir. Cucumber feature dosyalari business seviyesinde okunur kalacak, step definition dosyalari ise bu business step'leri `src/flows` fonksiyonlarina baglayacaktir.
 
 Ornek:
 
-```ts
-// src/fixtures/test.ts
-import { test as base, expect } from '@playwright/test';
-import { users } from '../data/data';
-
-export const test = base.extend<{
-  validUser: typeof users.validUser;
-}>({
-  validUser: async ({}, use) => {
-    await use(users.validUser);
-  },
-});
-
-export { expect };
+```gherkin
+Scenario: TC_001 - Kullanici gecerli bilgilerle login olur
+  * kullanici login ekranini acar
+  * Kullanici gecerli bilgilerle giris yapar
+  * kullanici basarili sekilde login olur
 ```
 
-Test dosyasinda kullanim:
-
 ```ts
-import { test, expect } from '../../src/fixtures/test';
-import { login } from '../../src/flows/auth.flow';
+import { defineStep as Step } from '@cucumber/cucumber';
 
-test('TC_001 - Kullanici gecerli bilgilerle login olur @smoke @auth', async ({ page, validUser }) => {
-  await login(page, validUser);
-
-  await expect(page).toHaveURL(/account|home/);
+Step('Kullanici gecerli bilgilerle giris yapar', async function (this: CustomWorld) {
+  await submitLogin(getPage(this), users.validUser);
 });
 ```
 
 Kurallar:
 
-- Testlerde `@playwright/test` dogrudan import etmek yerine mumkunse `src/fixtures/test` import edilmelidir.
-- Ortak test context, default user, ortak setup gibi ihtiyaclar fixture uzerinden saglanabilir.
-- Fixture gereksiz karmasik hale getirilmemelidir.
-- Her kucuk data icin fixture yazilmamalidir.
+- Feature dosyasinda business seviyesinde anlamli adimlar yazilmalidir.
+- Feature dosyalarinda step keyword olarak `Given`, `When`, `Then`, `And`, `But` yerine `*` kullanilmalidir.
+- Step definition dosyalarinda `Given`, `When`, `Then` import edilmemelidir; `defineStep as Step` kullanilmalidir.
+- Step definition dosyasi Gherkin metnini teknik akisa baglamalidir.
+- Step definition icinde locator veya Playwright detayi bulunmamalidir; mumkunse `src/flows` fonksiyonu cagrilmalidir.
+- Cok kucuk teknik islemler icin `kullanici adi girilir`, `sifre girilir` gibi gereksiz mikro Cucumber step'leri olusturulmamalidir.
+- Tekrarlanan business akislar `src/flows` icinde reusable fonksiyon olarak tutulmalidir.
+- Gauge runner, `.cpt` dosyasi veya concept expansion runner kullanilmayacaktir.
 
 ---
 
-## 12. Setup ve Login Session Kurallari
+## 12. Cucumber Support ve World Kurallari
+
+Cucumber support dosyalari `features/support` altinda tutulmalidir.
+
+Ornek:
+
+```ts
+// features/support/world.ts
+import { World, setWorldConstructor } from '@cucumber/cucumber';
+import { Browser, BrowserContext, Page } from '@playwright/test';
+
+export class CustomWorld extends World {
+  browser?: Browser;
+  context?: BrowserContext;
+  page?: Page;
+}
+
+setWorldConstructor(CustomWorld);
+```
+
+Hook ornegi:
+
+```ts
+// features/support/hooks.ts
+import { Before, After } from '@cucumber/cucumber';
+import { chromium } from '@playwright/test';
+import { CustomWorld } from './world';
+
+Before(async function (this: CustomWorld) {
+  this.browser = await chromium.launch();
+  this.context = await this.browser.newContext({ ignoreHTTPSErrors: true });
+  this.page = await this.context.newPage();
+});
+
+After(async function (this: CustomWorld) {
+  await this.context?.close();
+  await this.browser?.close();
+});
+```
+
+Kurallar:
+
+- Playwright `browser`, `context` ve `page` lifecycle'i Cucumber hook'lari ile yonetilmelidir.
+- Step definition dosyalari `this.page` uzerinden ilerlemelidir.
+- Cucumber World gereksiz data deposuna donusturulmemelidir.
+- Test data icin yine `src/data/data.ts` kullanilmalidir.
+- Browser secimi script, world parameter veya environment variable ile yonetilebilir.
+
+---
+
+## 12. Cucumber Login Session Kurallari
 
 Eger testlerin buyuk bolumu login gerektiriyorsa her testte tekrar login yapmak yerine storage state kullanilmalidir.
 
-Ornek setup:
+Ornek hook:
 
 ```ts
-// src/setup/auth.setup.ts
-import { test as setup } from '@playwright/test';
-import { users } from '../data/data';
-import { fillLoginForm, clickLoginButton } from '../actions/actions';
-import { expectLoginSuccess } from '../assertions/assertions';
+// features/support/hooks.ts
+import { Before } from '@cucumber/cucumber';
+import { chromium } from '@playwright/test';
+import { users } from '../../src/data/data';
+import {
+  clickLoginButton,
+  fillLoginPassword,
+  fillLoginUsername,
+} from '../../src/actions/actions';
+import { expectLoginSuccess } from '../../src/assertions/assertions';
+import { env } from '../../src/config/env';
+import { CustomWorld } from './world';
 
-setup('authenticate', async ({ page }) => {
-  await page.goto('/login');
+Before({ tags: '@authState' }, async function (this: CustomWorld) {
+  this.browser = await chromium.launch();
+  this.context = await this.browser.newContext();
+  this.page = await this.context.newPage();
 
-  await fillLoginForm(page, users.validUser.email, users.validUser.password);
-  await clickLoginButton(page);
+  await this.page.goto(env.baseUrl);
+  await fillLoginUsername(this.page, users.validUser.username || users.validUser.email);
+  await fillLoginPassword(this.page, users.validUser.password);
+  await clickLoginButton(this.page);
 
-  await expectLoginSuccess(page);
+  await expectLoginSuccess(this.page);
 
-  await page.context().storageState({ path: '.auth/user.json' });
+  await this.context.storageState({ path: '.auth/user.json' });
 });
 ```
 
@@ -588,6 +631,7 @@ Kurallar:
 - Login cok fazla testte gerekiyorsa `storageState` kullanilmalidir.
 - Login testleri ayrica yazilmalidir.
 - Login olmayan senaryolar icin storage state kullanilmamalidir.
+- Storage state ihtiyaci Cucumber hook'lari ile yonetilmelidir; Playwright Test on hazirlik dosyasi olusturulmayacaktir.
 - `.auth/user.json` gibi session dosyalari git'e commit edilmemelidir.
 - `.auth/` klasoru `.gitignore` icine eklenmelidir.
 
@@ -595,7 +639,7 @@ Kurallar:
 
 ## 13. Config ve Environment Kurallari
 
-Ortam bilgileri `src/config/env.ts` veya `playwright.config.ts` uzerinden yonetilmelidir.
+Ortam bilgileri `src/config/env.ts` uzerinden yonetilmelidir.
 Uygulama URL'i sadece `BASE_URL` environment variable uzerinden yonetilmelidir.
 
 Ornek:
@@ -632,58 +676,43 @@ Kurallar:
 
 ## 14. Utils Kullanim Kurallari
 
-Genel yardimci fonksiyonlar `src/utils` altinda tutulmalidir.
-
-Ornek:
-
-```ts
-// src/utils/random.ts
-export function randomEmail() {
-  return `test_${Date.now()}@test.com`;
-}
-```
+`src/utils` klasoru baslangicta olusturulmayacaktir. Gercekten birden fazla domain tarafindan kullanilan ortak helper ihtiyaci ortaya cikarsa eklenmelidir.
 
 Kurallar:
 
-- `utils` klasoru genel amacli yardimcilar icin kullanilmalidir.
+- Genel amacli helper yoksa `src/utils` klasoru bos iskelet olarak tutulmamalidir.
 - Sayfaya veya business akisina ozel islemler utils icine konulmamalidir.
 - `utils` klasoru copluk haline getirilmemelidir.
 - Bir fonksiyon sadece tek domain icinse ilgili action, assertion veya flow dosyasinda kalmalidir.
 
 ---
 
-## 15. Test Dosyasi Yazim Kurallari
+## 15. Feature Dosyasi Yazim Kurallari
 
-Test dosyalari `tests/generated` altinda olusturulmalidir.
+Feature dosyalari `features/generated` altinda olusturulmalidir.
 
 Ornek:
 
-```ts
-// tests/generated/TC_003_add_to_basket.spec.ts
-import { test, expect } from '../../src/fixtures/test';
-import { addDefaultProductToBasket } from '../../src/flows/basket.flow';
+```gherkin
+# features/generated/TC_001_login.feature
+@smoke @auth
+Feature: Authentication login
 
-test('TC_003 - Kullanici urunu sepete ekler @smoke @basket', async ({ page }) => {
-  await test.step('Kullanici varsayilan urunu sepete ekler', async () => {
-    await addDefaultProductToBasket(page);
-  });
-
-  await test.step('Sepet sayfasi basariyla dogrulanir', async () => {
-    await expect(page).toHaveURL(/basket|sepet/);
-  });
-});
+  Scenario: TC_001 - Kullanici gecerli bilgilerle login olur
+    * kullanici login ekranini acar
+    * Kullanici gecerli bilgilerle giris yapar
+    * kullanici basarili sekilde login olur
 ```
 
 Kurallar:
 
-- Test adi manuel test case ID ile baslamalidir.
-- Test adinda ilgili tag'ler bulunmalidir.
-- Test icinde mumkunse locator detayi olmamalidir.
-- Test business senaryo gibi okunmalidir.
-- Test icinde gereksiz teknik detay olmamalidir.
-- Testte `test.step()` kullanilmalidir.
-- Testte beklenen sonuclar assertion veya flow icinde dogrulanmalidir.
-- Test bagimsiz calisabilir olmalidir.
+- Feature dosyasi manuel test case ID ile baslayan scenario icermelidir.
+- Tag'ler feature veya scenario seviyesinde yazilmalidir.
+- Feature dosyasinda locator, selector veya teknik Playwright detayi olmamalidir.
+- Feature dosyasi business senaryo gibi okunmalidir.
+- Beklenen sonuclar business anlamli `*` adimlari ile ifade edilmelidir.
+- Step implementation `features/step-definitions` altinda olmalidir.
+- Step definition icinden action/assertion dogrudan karistirilmak yerine mumkunse `src/flows` fonksiyonlari cagrilmalidir.
 - Test data mumkunse `src/data/data.ts` icinden gelmelidir.
 
 Ornek tag'ler:
@@ -699,17 +728,30 @@ Ornek tag'ler:
 
 ---
 
-## 16. test.step Kullanim Standardi
+## 16. Gherkin Step Kullanim Standardi
 
-Her onemli business adimi `test.step()` ile ayrilmalidir.
+Her onemli business adimi Cucumber step'i olarak `.feature` dosyasinda gorunmelidir. Raporlanabilir adim metinleri `*` satirlarinda tutulur; Playwright `test.step()` kullanilmaz.
+
+Ornek:
+
+```gherkin
+Scenario: TC_001 - Kullanici gecerli bilgilerle login olur
+  * kullanici login ekranini acar
+  * Kullanici gecerli bilgilerle giris yapar
+  * kullanici basarili sekilde login olur
+```
 
 Kurallar:
 
-- `test.step()` aciklamalari Turkce ve anlasilir olmalidir.
+- Step metinleri Turkce, kisa ve anlasilir olmalidir.
+- Feature dosyalarinda step keyword olarak sadece `*` kullanilmalidir.
+- `Given`, `When`, `Then`, `And`, `But` keyword'leri yeni feature dosyalarinda kullanilmamalidir.
+- Step definition dosyalarinda tum adimlar `defineStep as Step` ile tanimlanmalidir.
+- Step metinlerinde teknik locator, CSS, XPath veya implementation detayi olmamalidir.
+- Step definition dosyasi sadece Gherkin adimini TypeScript akisi ile baglamalidir.
 - Cok kucuk teknik islemler icin gereksiz step acilmamalidir.
 - Business anlamli adimlar icin step kullanilmalidir.
 - Rapor okunabilirligi hedeflenmelidir.
-
 ---
 
 ## 17. Wait Kullanim Kurallari
@@ -750,11 +792,12 @@ Codex yeni test uretirken asagidaki sirayi izlemelidir:
 5. Flow yoksa src/data/data.ts, src/actions/actions.ts, src/assertions/assertions.ts ve src/locators/locators.ts yapisini kontrol et.
 6. Eksik reusable parca varsa once mevcut tek dosya yapisina kucuk ve temiz ekleme yap.
 7. Tek dosya buyume esigini asiyorsa, sadece ilgili katmani/domain'i domain bazli dosyaya ayir.
-8. Test dosyasini tests/generated altinda olustur.
-9. Testte test.step kullan.
-10. Testi calistir.
-11. Hata varsa minimum degisiklikle duzelt.
-12. Hayali locator veya dogrulanmamis assertion birakma.
+8. Feature dosyasini `features/generated` altinda business seviyesinde olustur.
+9. Eksik Gherkin step karsiliklarini `features/step-definitions` icinde olustur.
+10. Step definition icinden mumkunse `src/flows` fonksiyonlarini cagir.
+11. Testi calistir.
+12. Hata varsa minimum degisiklikle duzelt.
+13. Hayali locator veya dogrulanmamis assertion birakma.
 ```
 
 Codex sunlari yapmamalidir:
@@ -778,7 +821,7 @@ Codex sunlari yapmamalidir:
 Bu projede yeni test uretirken asagidaki prompt kullanilabilir:
 
 ```text
-Bu projede Playwright TypeScript kullaniliyor.
+Bu projede Cucumber + Playwright TypeScript kullaniliyor.
 
 Lutfen AGENTS.md dosyasindaki mimari ve kurallara gore ilerle.
 
@@ -788,15 +831,16 @@ Ozet mimari:
 - Action: src/actions/actions.ts
 - Assertion: src/assertions/assertions.ts
 - Flow: src/flows
-- Fixture: src/fixtures
-- Setup: src/setup
+- Cucumber Feature: features/generated
+- Cucumber Step Definition: features/step-definitions
+- Cucumber Support: features/support
 - Config: src/config
-- Utils: src/utils
-- Testler: tests/generated
 
 Klasik Page Object Model kullanilmayacak.
 Her sayfa icin ayri Page class olusturulmayacak.
-Gauge, Cucumber veya Gherkin kullanilmayacak.
+Gauge runner kullanilmayacak.
+Cucumber ve Gherkin kullanilacak.
+Gauge concept veya `.cpt` kullanilmayacak.
 Baslangicta data/locator/action/assertion katmanlari tek dosya olacak.
 Dosyalar buyume esigini asarsa POM'a donmeden domain bazli katman dosyalarina ayrilacak.
 
@@ -810,10 +854,12 @@ Yeni test uretirken:
 6. Hayali locator yazma.
 7. waitForTimeout kullanma.
 8. Assertion icin Playwright expect kullan.
-9. Testleri tests/generated altinda olustur.
-10. Test isimleri TC ID ile baslasin.
-11. test.step kullan.
-12. Testi calistir ve hata varsa minimum degisiklikle duzelt.
+9. Feature dosyalarini features/generated altinda business seviyesinde olustur.
+10. Scenario isimleri TC ID ile baslasin.
+11. Feature adimlarinda `Given/When/Then` yerine `*` kullan.
+12. Step definition dosyalarini features/step-definitions altinda `defineStep as Step` ile olustur ve mumkunse flow fonksiyonlarini cagir.
+13. Gereksiz mikro step uretme; business seviyesindeki step'leri reusable flow'lara bagla.
+14. Testi calistir ve hata varsa minimum degisiklikle duzelt.
 
 Simdi asagidaki manuel test case'i Playwright otomasyon testine cevir:
 [TEST CASE BURAYA]
@@ -875,7 +921,14 @@ Yeni bir test veya kod uretildikten sonra asagidaki kontrol listesi uygulanmalid
 ```text
 [ ] Test adi TC ID ile basliyor mu?
 [ ] Test gerekli tag'leri iceriyor mu?
-[ ] test.step kullanilmis mi?
+[ ] Feature dosyasi `features/generated` altinda mi?
+[ ] Scenario adi TC ID ile basliyor mu?
+[ ] Gherkin step'leri business dilinde mi?
+[ ] Feature dosyasinda step keyword olarak sadece `*` kullanilmis mi?
+[ ] Step definition karsiliklari `features/step-definitions` altinda mi?
+[ ] Step definition dosyasinda `defineStep as Step` kullanilmis mi?
+[ ] Step definition'lar mumkunse `src/flows` fonksiyonlarini mi cagiriyor?
+[ ] Gereksiz mikro Cucumber step uretiminden kacinilmis mi?
 [ ] Gereksiz waitForTimeout var mi?
 [ ] Hayali locator var mi?
 [ ] Locator mevcut mimariye gore dogru locator dosyasinda mi?
@@ -900,7 +953,10 @@ Bu projede hedef hizli ama surdurulebilir Playwright otomasyon gelistirmektir.
 Kullanilacak:
 
 ```text
-- Native Playwright Test
+- Cucumber
+- Gherkin
+- @cucumber/cucumber
+- Playwright browser automation
 - TypeScript
 - Data / Locator / Action / Assertion / Flow ayrimi
 - Tek data dosyasi: src/data/data.ts
@@ -908,20 +964,18 @@ Kullanilacak:
 - Tek action dosyasi: src/actions/actions.ts
 - Tek assertion dosyasi: src/assertions/assertions.ts
 - Buyume esigi asildiginda domain bazli katman dosyalarina gecis
-- Fixture
-- Setup
+- Feature dosyalari: features/generated
+- Step definitions: features/step-definitions
+- Cucumber World/Hooks: features/support
 - Config
-- Utils
-- test.step
 - Playwright expect assertions
 ```
 
 Kullanilmayacak:
 
 ```text
-- Gauge
-- Cucumber
-- Gherkin
+- Gauge runner
+- Gauge concept / `.cpt`
 - Klasik Page Object Model
 - Her sayfa icin ayri Page class
 - Buyume esigi yokken domain bazli data/action/assertion/locator dosyalari

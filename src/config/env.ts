@@ -13,5 +13,4 @@ function getRequiredEnv(name: string) {
 export const env = {
   baseUrl: getRequiredEnv('BASE_URL'),
   runningEnv: process.env.RUNNING_ENV ?? 'test',
-  authStorageStatePath: process.env.AUTH_STORAGE_STATE_PATH ?? '.auth/user.json',
 } as const;

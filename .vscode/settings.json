@@ -1,0 +1,17 @@
+{
+  "editor.codeLens": true,
+  "files.associations": {
+    "*.feature": "cucumber"
+  },
+  "cucumber.features": [
+    "features/**/*.feature"
+  ],
+  "cucumber.glue": [
+    ".vscode/cucumber-editor-glue.ts",
+    "features/step-definitions/**/*.ts",
+    "features/support/**/*.ts"
+  ],
+  "cucumberRunner.runInTerminal": true,
+  "cucumberRunner.cwd": "",
+  "cucumberRunner.commandTemplate": "npm.cmd test -- {featurePath}:{line}"
+}

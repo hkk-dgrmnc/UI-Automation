@@ -1,10 +1,11 @@
 
-# Playwright
+# Dependencies
 node_modules/
-/test-results/
-/playwright-report/
-/blob-report/
-/playwright/.cache/
-/playwright/.auth/
-/.auth/
+
+# Local environment and auth state
 .env
+/.auth/
+
+# Cucumber reports
+cucumber-report.html
+cucumber-report.json
