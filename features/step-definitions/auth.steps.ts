@@ -1,4 +1,4 @@
-import { defineStep as Step } from '@cucumber/cucumber';
+import { Given, Then, When } from '@cucumber/cucumber';
 import { Page } from '@playwright/test';
 import { users } from '../../src/data/data';
 import {
@@ -16,14 +16,14 @@ function getPage(world: CustomWorld): Page {
   return world.page;
 }
 
-Step('kullanici login ekranini acar', async function (this: CustomWorld) {
+Given('Login ekranı açılır', async function (this: CustomWorld) {
   await openLoginPage(getPage(this));
 });
 
-Step('Kullanici gecerli bilgilerle giris yapar', async function (this: CustomWorld) {
+When('Kullanıcı bilgileri ile giriş yapılır', async function (this: CustomWorld) {
   await submitLogin(getPage(this), users.validUser);
 });
 
-Step('kullanici basarili sekilde login olur', async function (this: CustomWorld) {
+Then('Kullanıcının login oldugu dogrulanır', async function (this: CustomWorld) {
   await verifyLoginSuccess(getPage(this));
 });

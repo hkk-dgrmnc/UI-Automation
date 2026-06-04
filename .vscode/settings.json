@@ -3,11 +3,27 @@
   "files.associations": {
     "*.feature": "cucumber"
   },
+  "editor.unicodeHighlight.allowedLocales": {
+    "tr": true
+  },
+  "editor.unicodeHighlight.allowedCharacters": {
+    "Ç": true,
+    "Ğ": true,
+    "İ": true,
+    "Ö": true,
+    "Ş": true,
+    "Ü": true,
+    "ç": true,
+    "ğ": true,
+    "ı": true,
+    "ö": true,
+    "ş": true,
+    "ü": true
+  },
   "cucumber.features": [
     "features/**/*.feature"
   ],
   "cucumber.glue": [
-    ".vscode/cucumber-editor-glue.ts",
     "features/step-definitions/**/*.ts",
     "features/support/**/*.ts"
   ],

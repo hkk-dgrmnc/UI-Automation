@@ -66,7 +66,7 @@ features/generated
   Manuel test case'lerden uretilen Cucumber feature dosyalarini tutar.
 
 features/step-definitions
-  `*` ile yazilan Gherkin adimlarinin TypeScript `Step(...)` karsiliklarini tutar.
+  `*` ile yazilan Gherkin adimlarinin TypeScript `Given/When/Then` karsiliklarini tutar.
 
 features/support
   Cucumber World, hook, login session ve Playwright browser/page lifecycle yapilarini tutar.
@@ -514,15 +514,15 @@ Ornek:
 
 ```gherkin
 Scenario: TC_001 - Kullanici gecerli bilgilerle login olur
-  * kullanici login ekranini acar
-  * Kullanici gecerli bilgilerle giris yapar
-  * kullanici basarili sekilde login olur
+  * Login ekrani acilir
+  * Kullanici bilgileri ile giris yapilir
+  * Kullanicinin login oldugu dogrulanir
 ```
 
 ```ts
-import { defineStep as Step } from '@cucumber/cucumber';
+import { Given, Then, When } from '@cucumber/cucumber';
 
-Step('Kullanici gecerli bilgilerle giris yapar', async function (this: CustomWorld) {
+When('Kullanici bilgileri ile giris yapilir', async function (this: CustomWorld) {
   await submitLogin(getPage(this), users.validUser);
 });
 ```
@@ -531,7 +531,8 @@ Kurallar:
 
 - Feature dosyasinda business seviyesinde anlamli adimlar yazilmalidir.
 - Feature dosyalarinda step keyword olarak `Given`, `When`, `Then`, `And`, `But` yerine `*` kullanilmalidir.
-- Step definition dosyalarinda `Given`, `When`, `Then` import edilmemelidir; `defineStep as Step` kullanilmalidir.
+- Step definition dosyalarinda adimin anlamina gore `Given`, `When`, `Then` kullanilmalidir.
+- `defineStep as Step` kullanilmayacaktir.
 - Step definition dosyasi Gherkin metnini teknik akisa baglamalidir.
 - Step definition icinde locator veya Playwright detayi bulunmamalidir; mumkunse `src/flows` fonksiyonu cagrilmalidir.
 - Cok kucuk teknik islemler icin `kullanici adi girilir`, `sifre girilir` gibi gereksiz mikro Cucumber step'leri olusturulmamalidir.
@@ -699,9 +700,9 @@ Ornek:
 Feature: Authentication login
 
   Scenario: TC_001 - Kullanici gecerli bilgilerle login olur
-    * kullanici login ekranini acar
-    * Kullanici gecerli bilgilerle giris yapar
-    * kullanici basarili sekilde login olur
+    * Login ekrani acilir
+    * Kullanici bilgileri ile giris yapilir
+    * Kullanicinin login oldugu dogrulanir
 ```
 
 Kurallar:
@@ -736,9 +737,9 @@ Ornek:
 
 ```gherkin
 Scenario: TC_001 - Kullanici gecerli bilgilerle login olur
-  * kullanici login ekranini acar
-  * Kullanici gecerli bilgilerle giris yapar
-  * kullanici basarili sekilde login olur
+  * Login ekrani acilir
+  * Kullanici bilgileri ile giris yapilir
+  * Kullanicinin login oldugu dogrulanir
 ```
 
 Kurallar:
@@ -746,7 +747,8 @@ Kurallar:
 - Step metinleri Turkce, kisa ve anlasilir olmalidir.
 - Feature dosyalarinda step keyword olarak sadece `*` kullanilmalidir.
 - `Given`, `When`, `Then`, `And`, `But` keyword'leri yeni feature dosyalarinda kullanilmamalidir.
-- Step definition dosyalarinda tum adimlar `defineStep as Step` ile tanimlanmalidir.
+- Step definition dosyalarinda adimin anlamina gore `Given`, `When`, `Then` kullanilmalidir.
+- `defineStep as Step` kullanilmamalidir.
 - Step metinlerinde teknik locator, CSS, XPath veya implementation detayi olmamalidir.
 - Step definition dosyasi sadece Gherkin adimini TypeScript akisi ile baglamalidir.
 - Cok kucuk teknik islemler icin gereksiz step acilmamalidir.
@@ -857,7 +859,7 @@ Yeni test uretirken:
 9. Feature dosyalarini features/generated altinda business seviyesinde olustur.
 10. Scenario isimleri TC ID ile baslasin.
 11. Feature adimlarinda `Given/When/Then` yerine `*` kullan.
-12. Step definition dosyalarini features/step-definitions altinda `defineStep as Step` ile olustur ve mumkunse flow fonksiyonlarini cagir.
+12. Step definition dosyalarini features/step-definitions altinda `Given/When/Then` ile olustur ve mumkunse flow fonksiyonlarini cagir.
 13. Gereksiz mikro step uretme; business seviyesindeki step'leri reusable flow'lara bagla.
 14. Testi calistir ve hata varsa minimum degisiklikle duzelt.
 
@@ -926,7 +928,7 @@ Yeni bir test veya kod uretildikten sonra asagidaki kontrol listesi uygulanmalid
 [ ] Gherkin step'leri business dilinde mi?
 [ ] Feature dosyasinda step keyword olarak sadece `*` kullanilmis mi?
 [ ] Step definition karsiliklari `features/step-definitions` altinda mi?
-[ ] Step definition dosyasinda `defineStep as Step` kullanilmis mi?
+[ ] Step definition dosyasinda adimin anlamina gore `Given/When/Then` kullanilmis mi?
 [ ] Step definition'lar mumkunse `src/flows` fonksiyonlarini mi cagiriyor?
 [ ] Gereksiz mikro Cucumber step uretiminden kacinilmis mi?
 [ ] Gereksiz waitForTimeout var mi?

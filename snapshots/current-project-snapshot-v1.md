@@ -15,8 +15,7 @@ Current Project Snapshot - v1
 - Cucumber is the main test runner.
 - Playwright is used for browser automation and web-first assertions.
 - Feature files use `*` as the standard Gherkin step keyword.
-- Runtime step definition files use `defineStep as Step`.
-- VS Code uses an editor-only glue file so the Cucumber extension can resolve steps without changing runtime step style.
+- Runtime step definition files use semantic `Given`, `When`, and `Then` functions.
 - Gauge runner, `.cpt` concepts, and concept expansion tooling are not used.
 - Native Playwright spec files are not used.
 - Classic Page Object Model classes are not used.
@@ -26,7 +25,6 @@ Current Project Snapshot - v1
 
 ```text
 .vscode/
-  cucumber-editor-glue.ts
   extensions.json
   settings.json
 
@@ -79,28 +77,20 @@ Current feature style:
 Feature: Authentication login
 
   Scenario: TC_001 - Kullanici gecerli bilgilerle login olur
-    * kullanici login ekranini acar
-    * Kullanici gecerli bilgilerle giris yapar
-    * kullanici basarili sekilde login olur
+    * Login ekrani acilir
+    * Kullanici bilgileri ile giris yapilir
+    * Kullanicinin login oldugu dogrulanir
 ```
 
 Current runtime step definition style:
 
 ```ts
-import { defineStep as Step } from '@cucumber/cucumber';
+import { Given, Then, When } from '@cucumber/cucumber';
 
-Step('Kullanici gecerli bilgilerle giris yapar', async function (this: CustomWorld) {
+When('Kullanici bilgileri ile giris yapilir', async function (this: CustomWorld) {
   await submitLogin(getPage(this), users.validUser);
 });
 ```
-
-Editor-only glue:
-
-```text
-.vscode/cucumber-editor-glue.ts
-```
-
-This file exists only for VS Code Cucumber language-server diagnostics. It is not loaded by `cucumber.js` at runtime.
 
 ## Cucumber Config
 
