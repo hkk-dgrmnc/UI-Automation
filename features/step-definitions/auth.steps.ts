@@ -2,6 +2,7 @@ import { Given, Then, When } from '@cucumber/cucumber';
 import { Page } from '@playwright/test';
 import { users } from '../../src/data/data';
 import {
+  login,
   openLoginPage,
   submitLogin,
   verifyLoginSuccess,
@@ -18,6 +19,10 @@ function getPage(world: CustomWorld): Page {
 
 Given('Login ekranı açılır', async function (this: CustomWorld) {
   await openLoginPage(getPage(this));
+});
+
+Given('Kullanıcı login olur', async function (this: CustomWorld) {
+  await login(getPage(this), users.validUser);
 });
 
 When('Kullanıcı bilgileri ile giriş yapılır', async function (this: CustomWorld) {

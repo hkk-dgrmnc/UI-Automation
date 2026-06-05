@@ -35,14 +35,22 @@ Before(async function (this: CustomWorld) {
   const browserName = getBrowserName(this);
   const headed = parameters.headed === true || process.env.HEADED === 'true';
 
-  this.browser = await browserTypes[browserName].launch({
+  const launchOptions = {
     headless: !headed,
     slowMo: parameters.slowMo ?? 0,
-  });
+    ...(headed && browserName === 'chromium'
+      ? { args: ['--start-maximized'] }
+      : {}),
+  };
 
-  this.context = await this.browser.newContext({
+  this.browser = await browserTypes[browserName].launch(launchOptions);
+
+  const contextOptions = {
     ignoreHTTPSErrors: true,
-  });
+    ...(headed ? { viewport: null } : {}),
+  };
+
+  this.context = await this.browser.newContext(contextOptions);
   this.page = await this.context.newPage();
 });
 

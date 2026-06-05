@@ -258,6 +258,108 @@ Gecis kurallari:
 
 ---
 
+## 5.2 Ortak Akil, Reuse ve Standardizasyon Kurallari
+
+Bu projede farkli branch ve farkli PC'lerde calisan kisilerin ayni otomasyon dilini kullanmasi hedeflenir. Codex veya gelistirici yeni test uretirken once mevcut sozlugu ve reusable parcalari aramalidir.
+
+Yeni locator, action, assertion, flow veya step definition yazmadan once asagidaki aramalar yapilmalidir:
+
+```powershell
+rg "Oluştur|Kaydet|Sil|Ara|Temizle|Vazgeç|Onayla|Geri" src features
+rg "step metni veya beklenen ekran basligi" features src
+rg "locator adi veya UI metni" src/locators src/actions src/assertions src/flows features/step-definitions
+```
+
+Reuse karari su sirayla verilmelidir:
+
+```text
+1. Ayni business step zaten varsa ayni step metni kullanilir.
+2. Ayni locator zaten varsa mevcut locator kullanilir.
+3. Ayni action/assertion/flow zaten varsa mevcut fonksiyon kullanilir.
+4. Ortak UI elemaniysa `common` veya `navigation` gruplarina eklenir.
+5. Sadece ilgili sayfaya aitse ilgili domain/sayfa grubunda tutulur.
+6. Gercekten yeni ihtiyacsa dogru katmana kucuk ve temiz ekleme yapilir.
+```
+
+Ortak UI elemani tanimi:
+
+- Birden fazla sayfada ayni selector, ayni rol veya ayni davranisla kullanilan eleman ortak kabul edilir.
+- `Oluştur`, `Kaydet`, `Sil`, `Ara`, `Temizle`, `Vazgeç`, `Onayla`, `Geri` gibi global toolbar/form aksiyonlari once ortak kullanim adayi olarak degerlendirilmelidir.
+- Sidebar menu acma, menu path takip etme, secili menu linkini dogrulama gibi navigasyon davranislari `navigation` grubu ve reusable action ile yonetilmelidir.
+- Ortak eleman eklenmeden once gercek sitede locator dogrulanmalidir.
+- Sadece tek sayfaya ozel baslik, kolon, alan veya business durumlari ortak gruba alinmamalidir.
+
+Ortak locator gruplama standardi:
+
+```ts
+locators(page).common.createLink
+locators(page).navigation.sidebarMenuButton('MFYS')
+locators(page).navigation.sidebarMenuLink('Otomatik Parametre Tanımlama')
+locators(page).navigation.selectedSidebarMenuLink('Otomatik Parametre Tanımlama')
+locators(page).automaticParameters.listTitle
+```
+
+Step sozlugu kurallari:
+
+- Ayni anlama gelen farkli step metinleri uretilmemelidir.
+- Once `features/step-definitions` ve `features/generated` icinde ayni anlamda step aranmalidir.
+- Varsa mevcut step metni aynen kullanilmalidir.
+- Yoksa yeni step Turkce, kisa, business seviyesinde ve tekrar kullanilabilir yazilmalidir.
+- `Oluştur butonuna tıklanır`, `Create butonuna basılır`, `Kullanıcı oluşturur` gibi ayni isi yapan farkli step'ler birlikte bulunmamalidir.
+- Sayfaya ozel beklenen sonuc varsa step metni test case ID veya ekran anlami ile ayrismalidir.
+
+Yeni ortak parca ekleme kurallari:
+
+- Ortak parca sadece gercek tekrar veya mevcut testin acik ortak ihtiyaci varsa eklenir.
+- Kullanilmayan genel helper, kullanilmayan common locator veya ileride lazim olur diye action yazilmaz.
+- Ortak action icinde assertion yazilmaz.
+- Ortak assertion icinde click/fill gibi action yazilmaz.
+- Ortak step definition mumkunse flow cagirir; locator veya Playwright detayi icermez.
+- Yeni ortak parca eklendiyse mevcut ilgili test de o ortak parcayi kullanacak sekilde guncellenir.
+
+Branch ve PR standardi:
+
+- PR review'da ayni step metninin, ayni locator'in veya ayni action'in tekrar uretilip uretilmedigi kontrol edilir.
+- Ayni is icin iki farkli isim varsa yeni isim eklenmez; mevcut isim tercih edilir.
+- Ortak sozlukte degisiklik yapildiysa ilgili mevcut testler minimum degisiklikle guncellenir.
+- Farkli branch'lerde ayni common alan degistiriliyorsa merge sonrasi tekrar `rg` ile duplicate kontrolu yapilir.
+
+---
+
+## 5.3 TODO Birakmama ve Engelde Geri Alma Kurali
+
+Bu projede test kodu icinde TODO, gecici locator, bos step veya calismayan placeholder birakilmayacaktir. Kodu okuyamayan veya automation detayina hakim olmayan ekip uyeleri icin test ya calisan ve dogrulanmis halde kalmali ya da hic eklenmemelidir.
+
+Asagidaki durumlarda yeni test veya ilgili ekleme koda birakilmaz:
+
+- Zorunlu locator gercek sitede dogrulanamiyorsa.
+- Expected Result icin anlamli ve dogrulanabilir assertion yazilamiyorsa.
+- Ekran yetki, data, environment veya uygulama hatasi nedeniyle acilamiyorsa.
+- Manuel test case aksiyonu uygulamada mantikli bir karsilik bulmuyorsa.
+- Testi gecirmek icin fake selector, zorlama click, gereksiz hard-code veya anlamsiz assertion gerekecekse.
+
+Bu durumda Codex su sekilde davranmalidir:
+
+```text
+1. O prompt/turn icinde yaptigi yeni feature, step, flow, action, assertion, locator ve data degisikliklerini geri al.
+2. Kullaniciya veya onceki branch calismasina ait degisiklikleri geri alma.
+3. Kodda TODO, placeholder step, bos assertion veya gecici locator birakma.
+4. Final cevapta neyin denendigini, nerede bloklandigini ve neyin duzeltilmesi gerektigini net yaz.
+5. Gerekliyse kullanicidan istenecek bilgiyi soyle: dogru locator, yetki, test data, ekran yolu, beklenen sonuc veya uygulama fix'i.
+```
+
+Engel raporu su formata yakin olmalidir:
+
+```text
+Bu test kodda birakilmadi.
+Sebep: [dogrulanamayan locator / eksik yetki / beklenen sonuc belirsiz / ekran acilmiyor]
+Denendi: [login sonrasi izlenen ekran yolu veya aksiyon]
+Gereken duzeltme: [kullanicidan veya uygulamadan beklenen net bilgi]
+Geri alinanlar: [bu promptta olusturulan dosya veya degisiklik ozeti]
+```
+
+---
+
 ## 6. Locator Yazim Kurallari
 
 Locator tanimlari `src/locators/locators.ts` icinde tutulmalidir.
@@ -305,6 +407,18 @@ export const locators = (page: Page) => ({
     loginButton: page.locator('button[name="login"]'),
     userProfileButton: page.getByRole('button', { name: /User Profile/i }),
   },
+  common: {
+    createLink: page.locator('a#action-create'),
+  },
+  navigation: {
+    sidebarMenuButton: (name: string) => page.getByRole('button').filter({
+      has: page.getByText(name, { exact: true }),
+    }),
+    sidebarMenuLink: (name: string) => page.getByRole('link', { name }),
+    selectedSidebarMenuLink: (name: string) => page.locator('a[aria-current="page"]').filter({
+      hasText: name,
+    }),
+  },
 });
 ```
 
@@ -315,6 +429,9 @@ Kurallar:
 - Emin olunmayan locator once Playwright ile browser uzerinde denenmelidir.
 - Ayni locator birden fazla yerde kullanilacaksa `src/locators/locators.ts` icine alinmalidir.
 - Tek kullanimlik locator test icinde kalabilir; tekrar ederse locator dosyasina tasinmalidir.
+- Ortak toolbar/form aksiyonlari `common` grubunda tutulmalidir.
+- Sidebar, ust menu, breadcrumb gibi ortak navigasyon locator'lari `navigation` grubunda tutulmalidir.
+- Sayfaya ozel baslik, kolon, alan ve business durum locator'lari ilgili sayfa/domain grubunda tutulmalidir.
 
 ---
 
@@ -385,6 +502,17 @@ Kurallar:
 - `click`, `fill`, `press`, `selectOption`, `hover` gibi kullanici aksiyonlari burada bulunabilir.
 - Cok basit Playwright fonksiyonlari gereksiz wrapper haline getirilmemelidir.
 - Ancak ozel davranis veya tekrar varsa reusable action yazilabilir.
+- Birden fazla sayfada ortak kullanilan toolbar/form aksiyonu icin tek reusable action yazilmalidir.
+- Sidebar menu path acma gibi tekrar eden navigasyon davranislari sayfa sayfa kopyalanmamalidir.
+- Ortak action parametre alabiliyorsa hard-coded sayfa adi veya menu adi action icine gomulmemelidir.
+
+Ortak reusable action isimleri bu mantikta tutulabilir:
+
+```ts
+openSidebarMenuPath(page, ['MFYS', 'Genel Parametre Ayarları'], 'Hedef Ekran')
+clickSidebarMenuLink(page, 'Hedef Ekran')
+clickCreateLink(page)
+```
 
 Kacinilacak ornek:
 
@@ -789,17 +917,20 @@ Codex yeni test uretirken asagidaki sirayi izlemelidir:
 ```text
 1. Manuel test case'i oku.
 2. Test case ID, title, steps ve expected result alanlarini analiz et.
-3. Ilgili mevcut flow var mi kontrol et.
-4. Ilgili flow varsa onu kullan.
-5. Flow yoksa src/data/data.ts, src/actions/actions.ts, src/assertions/assertions.ts ve src/locators/locators.ts yapisini kontrol et.
-6. Eksik reusable parca varsa once mevcut tek dosya yapisina kucuk ve temiz ekleme yap.
-7. Tek dosya buyume esigini asiyorsa, sadece ilgili katmani/domain'i domain bazli dosyaya ayir.
-8. Feature dosyasini `features/generated` altinda business seviyesinde olustur.
-9. Eksik Gherkin step karsiliklarini `features/step-definitions` icinde olustur.
-10. Step definition icinden mumkunse `src/flows` fonksiyonlarini cagir.
-11. Testi calistir.
-12. Hata varsa minimum degisiklikle duzelt.
-13. Hayali locator veya dogrulanmamis assertion birakma.
+3. Mevcut step/locator/action/assertion/flow icin `rg` ile reuse aramasi yap.
+4. Ilgili mevcut flow var mi kontrol et.
+5. Ilgili flow varsa onu kullan.
+6. Flow yoksa src/data/data.ts, src/actions/actions.ts, src/assertions/assertions.ts ve src/locators/locators.ts yapisini kontrol et.
+7. Ortak UI veya navigasyon ihtiyaci varsa once `common` veya `navigation` gruplarini kullan.
+8. Eksik reusable parca varsa once mevcut tek dosya yapisina kucuk ve temiz ekleme yap.
+9. Tek dosya buyume esigini asiyorsa, sadece ilgili katmani/domain'i domain bazli dosyaya ayir.
+10. Feature dosyasini `features/generated` altinda business seviyesinde olustur.
+11. Eksik Gherkin step karsiliklarini `features/step-definitions` icinde olustur.
+12. Step definition icinden mumkunse `src/flows` fonksiyonlarini cagir.
+13. Testi calistir.
+14. Hata varsa minimum degisiklikle duzelt.
+15. Hayali locator, dogrulanmamis assertion veya TODO birakma.
+16. Zorunlu bir parca dogrulanamiyorsa o promptta yaptigin test degisikliklerini geri al ve engeli raporla.
 ```
 
 Codex sunlari yapmamalidir:
@@ -811,8 +942,11 @@ Codex sunlari yapmamalidir:
 - Domain bazli ayrima gecilecekse POM class olusturma.
 - Gereksiz abstraction uretme.
 - Locator'lari test dosyalarina kontrolsuz sekilde dagitma.
+- Var olan step/locator/action/assertion varken ayni is icin yenisini uretme.
+- Ortak UI elemanini sayfa sayfa yeniden tanimlama.
 - waitForTimeout kullanma.
 - Hayali data, hayali locator veya hayali assertion yazma.
+- TODO, placeholder step, bos assertion veya gecici locator birakma.
 - Ayni fonksiyonu farkli dosyalarda tekrar tekrar uretme.
 ```
 
@@ -847,21 +981,24 @@ Baslangicta data/locator/action/assertion katmanlari tek dosya olacak.
 Dosyalar buyume esigini asarsa POM'a donmeden domain bazli katman dosyalarina ayrilacak.
 
 Yeni test uretirken:
-1. Once mevcut flow/data/action/assertion/locator dosyalarini kontrol et.
+1. Once `rg` ile mevcut step/flow/data/action/assertion/locator aramasi yap.
 2. Var olan reusable yapilari kullan.
-3. Eksikse dogru katmana kucuk ve temiz ekleme yap.
-4. Tek dosya buyume esigini asiyorsa sadece ilgili katmani/domain'i ayir.
-5. Locator seciminde oncelik:
+3. Ayni anlama gelen yeni step metni uretme; mevcut step metnini kullan.
+4. Ortak UI elemaniysa `common`, ortak navigasyonsa `navigation` grubunu kullan.
+5. Eksikse dogru katmana kucuk ve temiz ekleme yap.
+6. Tek dosya buyume esigini asiyorsa sadece ilgili katmani/domain'i ayir.
+7. Locator seciminde oncelik:
    getByTestId > getByRole > getByLabel > getByPlaceholder > getByText > CSS > XPath
-6. Hayali locator yazma.
-7. waitForTimeout kullanma.
-8. Assertion icin Playwright expect kullan.
-9. Feature dosyalarini features/generated altinda business seviyesinde olustur.
-10. Scenario isimleri TC ID ile baslasin.
-11. Feature adimlarinda `Given/When/Then` yerine `*` kullan.
-12. Step definition dosyalarini features/step-definitions altinda `Given/When/Then` ile olustur ve mumkunse flow fonksiyonlarini cagir.
-13. Gereksiz mikro step uretme; business seviyesindeki step'leri reusable flow'lara bagla.
-14. Testi calistir ve hata varsa minimum degisiklikle duzelt.
+8. Hayali locator yazma.
+9. waitForTimeout kullanma.
+10. Assertion icin Playwright expect kullan.
+11. Feature dosyalarini features/generated altinda business seviyesinde olustur.
+12. Scenario isimleri TC ID ile baslasin.
+13. Feature adimlarinda `Given/When/Then` yerine `*` kullan.
+14. Step definition dosyalarini features/step-definitions altinda `Given/When/Then` ile olustur ve mumkunse flow fonksiyonlarini cagir.
+15. Gereksiz mikro step uretme; business seviyesindeki step'leri reusable flow'lara bagla.
+16. Testi calistir ve hata varsa minimum degisiklikle duzelt.
+17. Eksik locator, belirsiz expected result veya anlamsiz akis varsa TODO birakma; bu promptta yaptigin degisiklikleri geri al ve neyin duzeltilmesi gerektigini raporla.
 
 Simdi asagidaki manuel test case'i Playwright otomasyon testine cevir:
 [TEST CASE BURAYA]
@@ -930,12 +1067,19 @@ Yeni bir test veya kod uretildikten sonra asagidaki kontrol listesi uygulanmalid
 [ ] Step definition karsiliklari `features/step-definitions` altinda mi?
 [ ] Step definition dosyasinda adimin anlamina gore `Given/When/Then` kullanilmis mi?
 [ ] Step definition'lar mumkunse `src/flows` fonksiyonlarini mi cagiriyor?
+[ ] Yeni step yazmadan once mevcut step sozlugu `rg` ile aranmis mi?
+[ ] Ayni anlama gelen duplicate step metni uretilmemis mi?
 [ ] Gereksiz mikro Cucumber step uretiminden kacinilmis mi?
 [ ] Gereksiz waitForTimeout var mi?
+[ ] Kodda TODO, placeholder step, bos assertion veya gecici locator yok mu?
 [ ] Hayali locator var mi?
+[ ] Yeni locator yazmadan once mevcut locator'lar `rg` ile aranmis mi?
+[ ] Ortak UI elemani `common`, ortak navigasyon elemani `navigation` grubunda mi?
+[ ] Sayfaya ozel locator yanlislikla common gruba alinmamis mi?
 [ ] Locator mevcut mimariye gore dogru locator dosyasinda mi?
 [ ] Data mevcut mimariye gore dogru data dosyasinda mi?
 [ ] Reusable action mevcut mimariye gore dogru action dosyasinda mi?
+[ ] Yeni action yazmadan once mevcut action'lar `rg` ile aranmis mi?
 [ ] Assertion mevcut mimariye gore dogru assertion dosyasinda mi?
 [ ] Flow business anlamli mi?
 [ ] Page Object class olusturulmamis mi?
@@ -944,6 +1088,7 @@ Yeni bir test veya kod uretildikten sonra asagidaki kontrol listesi uygulanmalid
 [ ] Assertion expected result ile uyumlu mu?
 [ ] Test calistirilmis mi?
 [ ] Hata varsa minimum degisiklikle duzeltilmis mi?
+[ ] Zorunlu locator/assertion dogrulanamadiysa bu prompttaki degisiklikler geri alinip engel raporlanmis mi?
 ```
 
 ---
