@@ -1,11 +1,6 @@
 import { Locator, Page, expect } from '@playwright/test';
-import { locators } from '../locators/locators';
-import { reportAssertion } from '../utils/action-report';
-
-type LocatorReport = {
-  name: string;
-  value: string;
-};
+import { LocatorReport, reportAssertion } from '../utils/action-report';
+import { LOCATOR_REPORTS, locators } from '../locators/locators';
 
 type AssertionOptions = {
   timeout?: number;
@@ -81,33 +76,17 @@ async function expectNotAttribute(
 export async function expectLoginPageVisible(page: Page) {
   const locator = locators(page);
 
-  await expectVisible(
-    locator.auth.usernameInput,
-    { name: 'auth.usernameInput', value: '#username' },
-  );
-  await expectVisible(
-    locator.auth.passwordInput,
-    { name: 'auth.passwordInput', value: '#password' },
-  );
-  await expectVisible(
-    locator.auth.loginButton,
-    { name: 'auth.loginButton', value: 'button[name="login"]' },
-  );
+  await expectVisible(locator.auth.usernameInput, LOCATOR_REPORTS.auth.usernameInput);
+  await expectVisible(locator.auth.passwordInput, LOCATOR_REPORTS.auth.passwordInput);
+  await expectVisible(locator.auth.loginButton, LOCATOR_REPORTS.auth.loginButton);
 }
 
 export async function expectLoginSuccess(page: Page) {
   const locator = locators(page);
 
   await expectUrl(page, /shell-app-ui\/#\/journal-audits/);
-  await expectNotVisible(
-    locator.auth.usernameInput,
-    { name: 'auth.usernameInput', value: '#username' },
-  );
-  await expectVisible(
-    locator.auth.userProfileButton,
-    { name: 'auth.userProfileButton', value: 'role=button name="Kullanıcı Profil"' },
-    { timeout: 45_000 },
-  );
+  await expectNotVisible(locator.auth.usernameInput, LOCATOR_REPORTS.auth.usernameInput);
+  await expectVisible(locator.auth.userProfileButton, LOCATOR_REPORTS.auth.userProfileButton, { timeout: 45_000 });
 }
 
 export async function expectAutomaticParametersRouteOpened(page: Page) {
@@ -116,17 +95,11 @@ export async function expectAutomaticParametersRouteOpened(page: Page) {
   await expectUrl(page, /shell-app-ui\/#\/automatic-parameters/, { timeout: 30_000 });
   await expectVisible(
     locator.navigation.selectedSidebarMenuLink('Otomatik Parametre Tanımlama'),
-    {
-      name: "navigation.selectedSidebarMenuLink('Otomatik Parametre Tanımlama')",
-      value: 'a[aria-current="page"] has text "Otomatik Parametre Tanımlama"',
-    },
+    LOCATOR_REPORTS.navigation.selectedSidebarMenuLink('Otomatik Parametre Tanımlama'),
   );
   await expectVisible(
     locator.automaticParameters.listTitle,
-    {
-      name: 'automaticParameters.listTitle',
-      value: "getByText('Otomatik Parametre Listesi', { exact: true })",
-    },
+    LOCATOR_REPORTS.automaticParameters.listTitle,
     { timeout: 30_000 },
   );
 }
@@ -134,14 +107,10 @@ export async function expectAutomaticParametersRouteOpened(page: Page) {
 export async function expectAutomaticParametersCreateLinkAvailable(page: Page) {
   const locator = locators(page);
 
-  await expectCount(
-    locator.common.createLink,
-    { name: 'common.createLink', value: 'a#action-create' },
-    1,
-  );
+  await expectCount(locator.common.createLink, LOCATOR_REPORTS.common.createLink, 1);
   await expectNotAttribute(
     locator.common.createLink,
-    { name: 'common.createLink', value: 'a#action-create' },
+    LOCATOR_REPORTS.common.createLink,
     'aria-disabled',
     'true',
   );
@@ -153,10 +122,7 @@ export async function expectAutomaticParametersCreatePageOpened(page: Page) {
   await expectUrl(page, /shell-app-ui\/#\/automatic-parameters\/create/, { timeout: 30_000 });
   await expectVisible(
     locator.automaticParameters.infoTitle,
-    {
-      name: 'automaticParameters.infoTitle',
-      value: "getByText('Otomatik Parametre Bilgileri', { exact: true })",
-    },
+    LOCATOR_REPORTS.automaticParameters.infoTitle,
     { timeout: 30_000 },
   );
 }

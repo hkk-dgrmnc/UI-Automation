@@ -1,9 +1,17 @@
-﻿# AGENTS.md - Playwright Automation Agent Guide
+# CLAUDE.md - Playwright Automation Agent Guide
 
-Bu dokuman, bu projede Codex ile Cucumber + Playwright TypeScript otomasyon testleri uretirken uyulacak mimariyi, klasor yapisini, kodlama standartlarini ve test uretim kurallarini tanimlar.
+Bu dokuman, bu projede Claude Code ile Cucumber + Playwright TypeScript otomasyon testleri uretirken uyulacak mimariyi, klasor yapisini, kodlama standartlarini ve test uretim kurallarini tanimlar.
 
 Amac:
 Manuel test case'leri hizli, stabil, okunabilir ve bakimi kolay Cucumber + Playwright otomasyon testlerine donusturmek.
+
+Claude Code calisma prensibi:
+- Bu dosya proje kok dizininde `CLAUDE.md` olarak tutulmalidir.
+- Claude Code proje uzerinde calisirken bu dosyadaki kurallari ana kaynak kabul etmelidir.
+- Büyük refactor, framework degisikligi veya dependency ekleme gibi islemlerden once kullaniciya plan sunulmalidir.
+- Kullanici onayi olmadan proje mimarisi kokten degistirilmemelidir.
+- Var olan kod stili, klasor yapisi ve test uretim standardi korunmalidir.
+
 
 Bu projede klasik Page Object Model kullanilmayacaktir. Her sayfa icin ayri `Page.ts` class dosyasi olusturulmayacaktir. Baslangic mimarisi sade tutulacaktir: data, locator, action ve assertion katmanlari tek dosya olarak yonetilecektir. Bu tek dosya modeli baslangic hizini artirmak icindir; proje buyudukce best practice, POM'a donmeden domain bazli katman dosyalarina ayrilmaktir.
 
@@ -17,7 +25,7 @@ Bu projede klasik Page Object Model kullanilmayacaktir. Her sayfa icin ayri `Pag
 - Gherkin
 - @cucumber/cucumber
 - VS Code
-- Codex
+- Claude Code
 
 Bu projede asagidaki yapilar kullanilmayacaktir:
 
@@ -83,7 +91,7 @@ src/config
 ```text
 playwright-automation/
 |
-├── AGENTS.md
+├── CLAUDE.md
 ├── cucumber.js
 ├── package.json
 ├── tsconfig.json
@@ -260,7 +268,7 @@ Gecis kurallari:
 
 ## 5.2 Ortak Akil, Reuse ve Standardizasyon Kurallari
 
-Bu projede farkli branch ve farkli PC'lerde calisan kisilerin ayni otomasyon dilini kullanmasi hedeflenir. Codex veya gelistirici yeni test uretirken once mevcut sozlugu ve reusable parcalari aramalidir.
+Bu projede farkli branch ve farkli PC'lerde calisan kisilerin ayni otomasyon dilini kullanmasi hedeflenir. Claude Code veya gelistirici yeni test uretirken once mevcut sozlugu ve reusable parcalari aramalidir.
 
 Yeni locator, action, assertion, flow veya step definition yazmadan once asagidaki aramalar yapilmalidir:
 
@@ -350,7 +358,7 @@ Asagidaki durumlarda yeni test veya ilgili ekleme koda birakilmaz:
 - Manuel test case aksiyonu uygulamada mantikli bir karsilik bulmuyorsa.
 - Testi gecirmek icin fake selector, zorlama click, gereksiz hard-code veya anlamsiz assertion gerekecekse.
 
-Bu durumda Codex su sekilde davranmalidir:
+Bu durumda Claude Code su sekilde davranmalidir:
 
 ```text
 1. O prompt/turn icinde yaptigi yeni feature, step, flow, action, assertion, locator ve data degisikliklerini geri al.
@@ -497,7 +505,7 @@ Kurallar:
 - Kullanici, urun, adres, odeme bilgileri ayni data dosyasinda gruplu olarak tutulmalidir.
 - Tek testte kullanilan gecici data test icinde olabilir.
 - Bir data iki veya daha fazla testte kullanilacaksa `src/data/data.ts` icine tasinmalidir.
-- Hassas bilgi, gercek sifre veya gercek kullanici datasÄ± commit edilmemelidir.
+- Hassas bilgi, gercek sifre veya gercek kullanici datası commit edilmemelidir.
 - Ortama gore degisen degerler environment variable uzerinden alinmalidir.
 
 ---
@@ -954,9 +962,9 @@ Kurallar:
 
 ---
 
-## 18. Codex Test Uretim Kurallari
+## 18. Claude Code Test Uretim Kurallari
 
-Codex yeni test uretirken asagidaki sirayi izlemelidir:
+Claude Code yeni test uretirken asagidaki sirayi izlemelidir:
 
 ```text
 1. Manuel test case'i oku.
@@ -965,7 +973,8 @@ Codex yeni test uretirken asagidaki sirayi izlemelidir:
 4. Ilgili mevcut flow var mi kontrol et.
 5. Ilgili flow varsa onu kullan.
 6. Flow yoksa src/data/data.ts, src/actions/actions.ts, src/assertions/assertions.ts ve src/locators/locators.ts yapisini kontrol et.
-7. Ortak UI veya navigasyon ihtiyaci varsa once `common` veya `navigation` gruplarini kullan.
+7. Sidebar navigasyon ihtiyaci varsa `features/step-definitions/navigation.steps.ts` icindeki genel step'i kullan: `"UstMenu > AltMenu > SayfaAdi" menü yolundan sayfaya gidilir`. Ayri navigasyon step yazma.
+7b. Diger ortak UI ihtiyaci varsa once `common` veya `navigation` gruplarini kullan.
 8. Eksik reusable parca varsa once mevcut tek dosya yapisina kucuk ve temiz ekleme yap.
 9. Tek dosya buyume esigini asiyorsa, sadece ilgili katmani/domain'i domain bazli dosyaya ayir.
 10. Feature dosyasini `features/generated` altinda business seviyesinde olustur.
@@ -977,7 +986,7 @@ Codex yeni test uretirken asagidaki sirayi izlemelidir:
 16. Zorunlu bir parca dogrulanamiyorsa o promptta yaptigin test degisikliklerini geri al ve engeli raporla.
 ```
 
-Codex sunlari yapmamalidir:
+Claude Code sunlari yapmamalidir:
 
 ```text
 - Her test icin yeni Page Object class olusturma.
@@ -997,14 +1006,14 @@ Codex sunlari yapmamalidir:
 
 ---
 
-## 19. Codex'e Verilecek Ana Prompt
+## 19. Claude Code'a Verilecek Ana Prompt
 
 Bu projede yeni test uretirken asagidaki prompt kullanilabilir:
 
 ```text
 Bu projede Cucumber + Playwright TypeScript kullaniliyor.
 
-Lutfen AGENTS.md dosyasindaki mimari ve kurallara gore ilerle.
+Lutfen CLAUDE.md dosyasindaki mimari ve kurallara gore ilerle.
 
 Ozet mimari:
 - Data: src/data/data.ts
@@ -1055,7 +1064,7 @@ Simdi asagidaki manuel test case'i Playwright otomasyon testine cevir:
 
 ## 20. Manuel Test Case Formati
 
-Codex'e verilecek manuel test case mumkunse su formatta olmalidir:
+Claude Code'a verilecek manuel test case mumkunse su formatta olmalidir:
 
 ```text
 Test Case ID:
@@ -1181,4 +1190,4 @@ Kullanilmayacak:
 - Hayali locator
 ```
 
-Bu dokumandaki kurallar, Codex'in proje icinde yeni test uretirken ve mevcut kodu duzenlerken uymasi gereken temel standarttir.
+Bu dokumandaki kurallar, Claude Code'un proje icinde yeni test uretirken ve mevcut kodu duzenlerken uymasi gereken temel standarttir.

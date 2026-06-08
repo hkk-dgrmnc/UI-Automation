@@ -6,6 +6,11 @@ type ActionReportContext = {
   attach: Attach;
 };
 
+export type LocatorReport = {
+  name: string;
+  value: string;
+};
+
 type ReportActionOptions = {
   action: string;
   locatorName: string;

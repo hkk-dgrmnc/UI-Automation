@@ -1,8 +1,4 @@
-import {
-  IWorldOptions,
-  World,
-  setWorldConstructor,
-} from '@cucumber/cucumber';
+import { World, setWorldConstructor } from '@cucumber/cucumber';
 import { Browser, BrowserContext, Page } from '@playwright/test';
 
 export type BrowserName = 'chromium' | 'firefox' | 'webkit';
@@ -17,10 +13,14 @@ export class CustomWorld extends World {
   browser?: Browser;
   context?: BrowserContext;
   page?: Page;
+}
 
-  constructor(options: IWorldOptions) {
-    super(options);
+export function getPage(world: CustomWorld): Page {
+  if (!world.page) {
+    throw new Error('Playwright page is not initialized.');
   }
+
+  return world.page;
 }
 
 setWorldConstructor(CustomWorld);

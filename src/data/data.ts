@@ -1,5 +1,3 @@
-import 'dotenv/config';
-
 export const users = {
   validUser: {
     username: process.env.VALID_USER_USERNAME ?? '',

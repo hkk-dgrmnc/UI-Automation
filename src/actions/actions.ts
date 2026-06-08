@@ -1,11 +1,6 @@
 import { Locator, Page } from '@playwright/test';
-import { locators } from '../locators/locators';
-import { reportAction } from '../utils/action-report';
-
-type LocatorReport = {
-  name: string;
-  value: string;
-};
+import { LocatorReport, reportAction } from '../utils/action-report';
+import { LOCATOR_REPORTS, locators } from '../locators/locators';
 
 async function fillWithReport(
   locator: Locator,
@@ -37,7 +32,7 @@ export async function fillLoginUsername(page: Page, username: string) {
 
   await fillWithReport(
     locator.auth.usernameInput,
-    { name: 'auth.usernameInput', value: '#username' },
+    LOCATOR_REPORTS.auth.usernameInput,
     username,
   );
 }
@@ -47,7 +42,7 @@ export async function fillLoginPassword(page: Page, password: string) {
 
   await fillWithReport(
     locator.auth.passwordInput,
-    { name: 'auth.passwordInput', value: '#password' },
+    LOCATOR_REPORTS.auth.passwordInput,
     password,
     true,
   );
@@ -58,12 +53,12 @@ export async function clickLoginButton(page: Page) {
 
   await clickWithReport(
     locator.auth.loginButton,
-    { name: 'auth.loginButton', value: 'button[name="login"]' },
+    LOCATOR_REPORTS.auth.loginButton,
   );
 }
 
 async function isVisible(locator: Locator) {
-  return locator.filter({ visible: true }).first().isVisible().catch(() => false);
+  return (await locator.filter({ visible: true }).count()) > 0;
 }
 
 async function openMenuIfChildHidden(
@@ -93,10 +88,7 @@ export async function openSidebarMenuPath(
     await openMenuIfChildHidden(
       locator.navigation.sidebarMenuButton(parentMenuName),
       childLocator,
-      {
-        name: `navigation.sidebarMenuButton('${parentMenuName}')`,
-        value: `role=button has exact text "${parentMenuName}"`,
-      },
+      LOCATOR_REPORTS.navigation.sidebarMenuButton(parentMenuName),
     );
   }
 }
@@ -106,10 +98,7 @@ export async function clickSidebarMenuLink(page: Page, name: string) {
 
   await clickWithReport(
     locator.navigation.sidebarMenuLink(name).filter({ visible: true }).first(),
-    {
-      name: `navigation.sidebarMenuLink('${name}')`,
-      value: `role=link name="${name}"`,
-    },
+    LOCATOR_REPORTS.navigation.sidebarMenuLink(name),
   );
 }
 
@@ -118,6 +107,6 @@ export async function clickCreateLink(page: Page) {
 
   await clickWithReport(
     locator.common.createLink,
-    { name: 'common.createLink', value: 'a#action-create' },
+    LOCATOR_REPORTS.common.createLink,
   );
 }

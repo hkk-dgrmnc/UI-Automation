@@ -29,5 +29,6 @@
   ],
   "cucumberRunner.runInTerminal": true,
   "cucumberRunner.cwd": "",
-  "cucumberRunner.commandTemplate": "npm test -- {featurePath}:{line}"
+  "cucumberRunner.commandTemplate": "npx cucumber-js '{featurePath}:{line}'",
+  "terminal.integrated.defaultProfile.windows": "Git Bash"
 }

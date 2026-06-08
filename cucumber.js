@@ -1,4 +1,4 @@
-const common = {
+const sharedConfig = {
   requireModule: ['ts-node/register'],
   require: ['features/support/**/*.ts', 'features/step-definitions/**/*.ts'],
   format: [
@@ -10,9 +10,14 @@ const common = {
 };
 
 module.exports = {
-  default: common,
+  // Paths yok: VS Code cucumberRunner bu profili kullanır, CLI'dan gelen path tek kaynak olur
+  default: sharedConfig,
+  generated: {
+    ...sharedConfig,
+    paths: ['features/generated/**/*.feature'],
+  },
   all: {
-    ...common,
+    ...sharedConfig,
     paths: ['features/**/*.feature'],
   },
 };
