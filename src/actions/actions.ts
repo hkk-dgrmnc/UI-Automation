@@ -1,5 +1,5 @@
 import { Locator, Page } from '@playwright/test';
-import { LocatorReport, reportAction } from '../utils/action-report';
+import { LocatorReport, reportAction, reportError } from '../utils/action-report';
 import { LOCATOR_REPORTS, locators } from '../locators/locators';
 
 async function fillWithReport(
@@ -15,7 +15,12 @@ async function fillWithReport(
     value,
     maskValue,
   });
-  await locator.fill(value);
+  try {
+    await locator.fill(value);
+  } catch (error) {
+    await reportError({ action: 'Fill', locatorName: locatorReport.name, error });
+    throw error;
+  }
 }
 
 async function clickWithReport(locator: Locator, locatorReport: LocatorReport) {
@@ -24,7 +29,12 @@ async function clickWithReport(locator: Locator, locatorReport: LocatorReport) {
     locatorName: locatorReport.name,
     locatorValue: locatorReport.value,
   });
-  await locator.click();
+  try {
+    await locator.click();
+  } catch (error) {
+    await reportError({ action: 'Click', locatorName: locatorReport.name, error });
+    throw error;
+  }
 }
 
 export async function fillLoginUsername(page: Page, username: string) {

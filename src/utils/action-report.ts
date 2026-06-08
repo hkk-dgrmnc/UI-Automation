@@ -1,9 +1,10 @@
 import { AsyncLocalStorage } from 'node:async_hooks';
 
-type Attach = (data: string, mediaType: 'text/plain') => void | Promise<void>;
+type Attach = (data: string, mediaType: string) => void | Promise<void>;
 
 type ActionReportContext = {
   attach: Attach;
+  lines: string[];
 };
 
 export type LocatorReport = {
@@ -26,46 +27,107 @@ type ReportAssertionOptions = {
   expected: string;
 };
 
+type ReportErrorOptions = {
+  action: string;
+  locatorName: string;
+  error: unknown;
+};
+
 const actionReportContext = new AsyncLocalStorage<ActionReportContext>();
 
 export async function runWithActionReport<T>(
   attach: Attach,
   callback: () => Promise<T> | T,
 ): Promise<T> {
-  return actionReportContext.run({ attach }, async () => callback());
+  const lines: string[] = [];
+
+  try {
+    return await actionReportContext.run({ attach, lines }, async () => callback());
+  } finally {
+    if (lines.length > 0) {
+      await attach(lines.join('\n'), 'text/plain');
+    }
+  }
+}
+
+
+const C = {
+  reset:  '\x1b[0m',
+  bold:   '\x1b[1m',
+  dim:    '\x1b[2m',
+  cyan:   '\x1b[96m',
+  green:  '\x1b[92m',
+  red:    '\x1b[91m',
+  gray:   '\x1b[90m',
+};
+
+const INDENT = '        ';
+
+function logAction(action: string, locatorName: string, value?: string) {
+  const label = `${C.bold}${C.cyan} ACTION ${C.reset}`;
+  const line = [`${C.bold}${action}${C.reset}`, `${C.gray}${locatorName}${C.reset}`];
+  if (value !== undefined) line.push(`${C.dim}▸ ${value}${C.reset}`);
+  console.log(`${INDENT}${label}  ${line.join('  ')}`);
+}
+
+function logAssert(assertion: string, locatorName: string, expected: string) {
+  const label = `${C.bold}${C.green} ASSERT ${C.reset}`;
+  console.log(`${INDENT}${label}  ${C.bold}${assertion}${C.reset}  ${C.gray}${locatorName}${C.reset}  ${C.dim}→ ${expected}${C.reset}`);
+}
+
+function logError(action: string, locatorName: string, message: string) {
+  const label = `${C.bold}${C.red}  ERROR ${C.reset}`;
+  console.log(`${INDENT}${label}  ${C.bold}${action}${C.reset}  ${C.gray}${locatorName}${C.reset}`);
+  console.log(`${INDENT}         ${C.red}${C.dim}${message}${C.reset}`);
 }
 
 export async function reportAction(options: ReportActionOptions) {
   const context = actionReportContext.getStore();
 
+  const displayValue = options.value !== undefined
+    ? (options.maskValue ? '••••••••' : options.value)
+    : undefined;
+
+  logAction(options.action, options.locatorName, displayValue);
+
   if (!context) {
     return;
   }
 
-  const lines = [
-    `Action: ${options.action}`,
-    `Locator Name: ${options.locatorName}`,
-    `Locator Value: ${options.locatorValue}`,
-  ];
-
-  if (options.value !== undefined) {
-    lines.push(`Value: ${options.maskValue ? '********' : options.value}`);
-  }
-
-  await context.attach(lines.join('\n'), 'text/plain');
+  const parts = ['ACTION', options.action, `Locator Name: ${options.locatorName}`, `Locator Value: ${options.locatorValue}`];
+  if (displayValue !== undefined) parts.push(`▸ ${displayValue}`);
+  context.lines.push(parts.join('   '));
 }
 
 export async function reportAssertion(options: ReportAssertionOptions) {
   const context = actionReportContext.getStore();
 
+  logAssert(options.assertion, options.locatorName, options.expected);
+
   if (!context) {
     return;
   }
 
-  await context.attach([
-    `Assertion: ${options.assertion}`,
-    `Locator Name: ${options.locatorName}`,
-    `Locator Value: ${options.locatorValue}`,
-    `Expected: ${options.expected}`,
-  ].join('\n'), 'text/plain');
+  context.lines.push(['ASSERT', options.assertion, `Locator Name: ${options.locatorName}`, `Locator Value: ${options.locatorValue}`, `→ ${options.expected}`].join('   '));
+}
+
+export async function reportError(options: ReportErrorOptions) {
+  const context = actionReportContext.getStore();
+  const message = options.error instanceof Error
+    ? options.error.message
+        .split('\n')
+        .map(l => l.trim())
+        .filter(l => l.length > 0)
+        .slice(0, 4)
+        .join(' · ')
+    : String(options.error);
+
+  logError(`${options.action} failed`, options.locatorName, message);
+
+  if (!context) {
+    return;
+  }
+
+  context.lines.push(`ERROR    ${options.action} failed   ${options.locatorName}`);
+  context.lines.push(`         ${message}`);
 }

@@ -5,6 +5,14 @@ Bu dokuman, bu projede Codex ile Cucumber + Playwright TypeScript otomasyon test
 Amac:
 Manuel test case'leri hizli, stabil, okunabilir ve bakimi kolay Cucumber + Playwright otomasyon testlerine donusturmek.
 
+Codex calisma prensibi:
+- Bu dosya proje kok dizininde `AGENTS.md` olarak tutulmalidir.
+- Codex proje uzerinde calisirken bu dosyadaki kurallari ana kaynak kabul etmelidir.
+- Büyük refactor, framework degisikligi veya dependency ekleme gibi islemlerden once kullaniciya plan sunulmalidir.
+- Kullanici onayi olmadan proje mimarisi kokten degistirilmemelidir.
+- Var olan kod stili, klasor yapisi ve test uretim standardi korunmalidir.
+
+
 Bu projede klasik Page Object Model kullanilmayacaktir. Her sayfa icin ayri `Page.ts` class dosyasi olusturulmayacaktir. Baslangic mimarisi sade tutulacaktir: data, locator, action ve assertion katmanlari tek dosya olarak yonetilecektir. Bu tek dosya modeli baslangic hizini artirmak icindir; proje buyudukce best practice, POM'a donmeden domain bazli katman dosyalarina ayrilmaktir.
 
 ---
@@ -497,7 +505,7 @@ Kurallar:
 - Kullanici, urun, adres, odeme bilgileri ayni data dosyasinda gruplu olarak tutulmalidir.
 - Tek testte kullanilan gecici data test icinde olabilir.
 - Bir data iki veya daha fazla testte kullanilacaksa `src/data/data.ts` icine tasinmalidir.
-- Hassas bilgi, gercek sifre veya gercek kullanici datasÄ± commit edilmemelidir.
+- Hassas bilgi, gercek sifre veya gercek kullanici datası commit edilmemelidir.
 - Ortama gore degisen degerler environment variable uzerinden alinmalidir.
 
 ---
@@ -545,6 +553,7 @@ Kurallar:
 - Sidebar menu path acma gibi tekrar eden navigasyon davranislari sayfa sayfa kopyalanmamalidir.
 - Ortak action parametre alabiliyorsa hard-coded sayfa adi veya menu adi action icine gomulmemelidir.
 - Reusable action icinde raporlanabilir click/fill yapiliyorsa `reportAction` ile Action, Locator Name, Locator Value ve gerekiyorsa Value bilgisi Cucumber raporuna eklenmelidir.
+- Reusable action wrapper yazilirken Playwright cagrisi (click, fill vb.) try-catch icine alinmalidir; hata durumunda `reportError` ile Action adi ve Locator Name console ve Cucumber raporuna yazilmali, hata yeniden fırlatilmalidir (`throw error`).
 - Sifre, token, gizli cevap gibi hassas degerler rapora acik yazilmamalidir; maskelenmelidir.
 
 Ortak reusable action isimleri bu mantikta tutulabilir:
@@ -603,6 +612,7 @@ Kurallar:
 - Assertion metodu sadece dogrulama yapmalidir.
 - Assertion icinde gereksiz click/fill gibi action yapilmamalidir.
 - Reusable assertion icinde dogrulanacak locator icin `reportAssertion` ile Assertion, Locator Name, Locator Value ve Expected bilgisi Cucumber raporuna eklenmelidir.
+- Reusable assertion wrapper yazilirken `expect(...)` cagrisi try-catch icine alinmalidir; hata durumunda `reportError` ile Assertion adi ve Locator Name console ve Cucumber raporuna yazilmali, hata yeniden fırlatilmalidir (`throw error`).
 - Assertion raporu expect'ten once yazilmalidir; boylece fail durumunda da hangi locator ve beklenen sonuc oldugu raporda gorunur.
 - Business expected result netse assertion ona gore yazilmalidir.
 - Sadece gorunurluk degil, mumkunse URL, text, count, state veya business sonuc dogrulanmalidir.
@@ -965,7 +975,8 @@ Codex yeni test uretirken asagidaki sirayi izlemelidir:
 4. Ilgili mevcut flow var mi kontrol et.
 5. Ilgili flow varsa onu kullan.
 6. Flow yoksa src/data/data.ts, src/actions/actions.ts, src/assertions/assertions.ts ve src/locators/locators.ts yapisini kontrol et.
-7. Ortak UI veya navigasyon ihtiyaci varsa once `common` veya `navigation` gruplarini kullan.
+7. Sidebar navigasyon ihtiyaci varsa `features/step-definitions/navigation.steps.ts` icindeki genel step'i kullan: `"UstMenu > AltMenu > SayfaAdi" menü yolundan sayfaya gidilir`. Ayri navigasyon step yazma.
+7b. Diger ortak UI ihtiyaci varsa once `common` veya `navigation` gruplarini kullan.
 8. Eksik reusable parca varsa once mevcut tek dosya yapisina kucuk ve temiz ekleme yap.
 9. Tek dosya buyume esigini asiyorsa, sadece ilgili katmani/domain'i domain bazli dosyaya ayir.
 10. Feature dosyasini `features/generated` altinda business seviyesinde olustur.
@@ -1042,8 +1053,8 @@ Yeni test uretirken:
 13. Feature adimlarinda `Given/When/Then` yerine `*` kullan.
 14. Step definition dosyalarini features/step-definitions altinda `Given/When/Then` ile olustur ve mumkunse flow fonksiyonlarini cagir.
 15. Gereksiz mikro step uretme; business seviyesindeki step'leri reusable flow'lara bagla.
-16. Yeni reusable click/fill action yazilirse Cucumber raporuna Action, Locator Name, Locator Value ve gerekiyorsa Value bilgisi dusmelidir; hassas degerler maskelenmelidir.
-17. Yeni reusable assertion yazilirse Cucumber raporuna Assertion, Locator Name, Locator Value ve Expected bilgisi expect'ten once dusmelidir; fail durumunda hangi elementin fail verdigi raporda gorunmelidir.
+16. Yeni reusable click/fill action yazilirse Cucumber raporuna Action, Locator Name, Locator Value ve gerekiyorsa Value bilgisi dusmelidir; hassas degerler maskelenmelidir. Playwright cagrisi try-catch icine alinmali, hata durumunda `reportError` ile console ve rapora yazilmali, hata yeniden fırlatilmalidir.
+17. Yeni reusable assertion yazilirse Cucumber raporuna Assertion, Locator Name, Locator Value ve Expected bilgisi expect'ten once dusmelidir; fail durumunda hangi elementin fail verdigi raporda gorunmelidir. `expect(...)` cagrisi try-catch icine alinmali, hata durumunda `reportError` ile console ve rapora yazilmali, hata yeniden fırlatilmalidir.
 18. Testi calistir ve hata varsa minimum degisiklikle duzelt.
 19. Eksik locator, belirsiz expected result veya anlamsiz akis varsa TODO birakma; bu promptta yaptigin degisiklikleri geri al ve neyin duzeltilmesi gerektigini raporla.
 

@@ -1,11 +1,18 @@
 import 'dotenv/config';
-import { After, Before, Status, setDefaultTimeout } from '@cucumber/cucumber';
+import { After, Before, BeforeStep, Status, setDefaultTimeout } from '@cucumber/cucumber';
 import { chromium, firefox, webkit } from '@playwright/test';
 import {
   BrowserName,
   CustomWorld,
   TestWorldParameters,
 } from './world';
+
+const C = {
+  reset:  '\x1b[0m',
+  bold:   '\x1b[1m',
+  yellow: '\x1b[93m',
+  white:  '\x1b[97m',
+};
 
 const browserTypes = {
   chromium,
@@ -30,7 +37,9 @@ function getBrowserName(world: CustomWorld): BrowserName {
   return browserName;
 }
 
-Before(async function (this: CustomWorld) {
+Before(async function (this: CustomWorld, scenario) {
+  console.log(`\n${C.bold}${C.yellow}  ◆  ${scenario.pickle.name}${C.reset}`);
+
   const parameters = getWorldParameters(this);
   const browserName = getBrowserName(this);
   const headed = parameters.headed === true || process.env.HEADED === 'true';
@@ -52,6 +61,10 @@ Before(async function (this: CustomWorld) {
 
   this.context = await this.browser.newContext(contextOptions);
   this.page = await this.context.newPage();
+});
+
+BeforeStep(function (step) {
+  console.log(`\n    ${C.bold}${C.white}►  ${step.pickleStep.text}${C.reset}`);
 });
 
 After(async function (this: CustomWorld, scenario) {

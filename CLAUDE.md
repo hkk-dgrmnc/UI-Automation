@@ -553,6 +553,7 @@ Kurallar:
 - Sidebar menu path acma gibi tekrar eden navigasyon davranislari sayfa sayfa kopyalanmamalidir.
 - Ortak action parametre alabiliyorsa hard-coded sayfa adi veya menu adi action icine gomulmemelidir.
 - Reusable action icinde raporlanabilir click/fill yapiliyorsa `reportAction` ile Action, Locator Name, Locator Value ve gerekiyorsa Value bilgisi Cucumber raporuna eklenmelidir.
+- Reusable action wrapper yazilirken Playwright cagrisi (click, fill vb.) try-catch icine alinmalidir; hata durumunda `reportError` ile Action adi ve Locator Name console ve Cucumber raporuna yazilmali, hata yeniden fırlatilmalidir (`throw error`).
 - Sifre, token, gizli cevap gibi hassas degerler rapora acik yazilmamalidir; maskelenmelidir.
 
 Ortak reusable action isimleri bu mantikta tutulabilir:
@@ -611,6 +612,7 @@ Kurallar:
 - Assertion metodu sadece dogrulama yapmalidir.
 - Assertion icinde gereksiz click/fill gibi action yapilmamalidir.
 - Reusable assertion icinde dogrulanacak locator icin `reportAssertion` ile Assertion, Locator Name, Locator Value ve Expected bilgisi Cucumber raporuna eklenmelidir.
+- Reusable assertion wrapper yazilirken `expect(...)` cagrisi try-catch icine alinmalidir; hata durumunda `reportError` ile Assertion adi ve Locator Name console ve Cucumber raporuna yazilmali, hata yeniden fırlatilmalidir (`throw error`).
 - Assertion raporu expect'ten once yazilmalidir; boylece fail durumunda da hangi locator ve beklenen sonuc oldugu raporda gorunur.
 - Business expected result netse assertion ona gore yazilmalidir.
 - Sadece gorunurluk degil, mumkunse URL, text, count, state veya business sonuc dogrulanmalidir.
@@ -1051,8 +1053,8 @@ Yeni test uretirken:
 13. Feature adimlarinda `Given/When/Then` yerine `*` kullan.
 14. Step definition dosyalarini features/step-definitions altinda `Given/When/Then` ile olustur ve mumkunse flow fonksiyonlarini cagir.
 15. Gereksiz mikro step uretme; business seviyesindeki step'leri reusable flow'lara bagla.
-16. Yeni reusable click/fill action yazilirse Cucumber raporuna Action, Locator Name, Locator Value ve gerekiyorsa Value bilgisi dusmelidir; hassas degerler maskelenmelidir.
-17. Yeni reusable assertion yazilirse Cucumber raporuna Assertion, Locator Name, Locator Value ve Expected bilgisi expect'ten once dusmelidir; fail durumunda hangi elementin fail verdigi raporda gorunmelidir.
+16. Yeni reusable click/fill action yazilirse Cucumber raporuna Action, Locator Name, Locator Value ve gerekiyorsa Value bilgisi dusmelidir; hassas degerler maskelenmelidir. Playwright cagrisi try-catch icine alinmali, hata durumunda `reportError` ile console ve rapora yazilmali, hata yeniden fırlatilmalidir.
+17. Yeni reusable assertion yazilirse Cucumber raporuna Assertion, Locator Name, Locator Value ve Expected bilgisi expect'ten once dusmelidir; fail durumunda hangi elementin fail verdigi raporda gorunmelidir. `expect(...)` cagrisi try-catch icine alinmali, hata durumunda `reportError` ile console ve rapora yazilmali, hata yeniden fırlatilmalidir.
 18. Testi calistir ve hata varsa minimum degisiklikle duzelt.
 19. Eksik locator, belirsiz expected result veya anlamsiz akis varsa TODO birakma; bu promptta yaptigin degisiklikleri geri al ve neyin duzeltilmesi gerektigini raporla.
 

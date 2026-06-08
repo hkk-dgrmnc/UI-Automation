@@ -1,5 +1,5 @@
 import { Locator, Page, expect } from '@playwright/test';
-import { LocatorReport, reportAssertion } from '../utils/action-report';
+import { LocatorReport, reportAssertion, reportError } from '../utils/action-report';
 import { LOCATOR_REPORTS, locators } from '../locators/locators';
 
 type AssertionOptions = {
@@ -17,7 +17,12 @@ async function expectUrl(
     locatorValue: 'current page URL',
     expected: expectedUrl.toString(),
   });
-  await expect(page).toHaveURL(expectedUrl, options);
+  try {
+    await expect(page).toHaveURL(expectedUrl, options);
+  } catch (error) {
+    await reportError({ action: 'To Have URL', locatorName: 'page', error });
+    throw error;
+  }
 }
 
 async function expectVisible(
@@ -31,7 +36,12 @@ async function expectVisible(
     locatorValue: locatorReport.value,
     expected: 'visible',
   });
-  await expect(locator).toBeVisible(options);
+  try {
+    await expect(locator).toBeVisible(options);
+  } catch (error) {
+    await reportError({ action: 'To Be Visible', locatorName: locatorReport.name, error });
+    throw error;
+  }
 }
 
 async function expectNotVisible(locator: Locator, locatorReport: LocatorReport) {
@@ -41,7 +51,12 @@ async function expectNotVisible(locator: Locator, locatorReport: LocatorReport) 
     locatorValue: locatorReport.value,
     expected: 'not visible',
   });
-  await expect(locator).not.toBeVisible();
+  try {
+    await expect(locator).not.toBeVisible();
+  } catch (error) {
+    await reportError({ action: 'Not To Be Visible', locatorName: locatorReport.name, error });
+    throw error;
+  }
 }
 
 async function expectCount(
@@ -55,7 +70,12 @@ async function expectCount(
     locatorValue: locatorReport.value,
     expected: count.toString(),
   });
-  await expect(locator).toHaveCount(count);
+  try {
+    await expect(locator).toHaveCount(count);
+  } catch (error) {
+    await reportError({ action: 'To Have Count', locatorName: locatorReport.name, error });
+    throw error;
+  }
 }
 
 async function expectNotAttribute(
@@ -70,7 +90,12 @@ async function expectNotAttribute(
     locatorValue: locatorReport.value,
     expected: `${attributeName} is not "${attributeValue}"`,
   });
-  await expect(locator).not.toHaveAttribute(attributeName, attributeValue);
+  try {
+    await expect(locator).not.toHaveAttribute(attributeName, attributeValue);
+  } catch (error) {
+    await reportError({ action: 'Not To Have Attribute', locatorName: locatorReport.name, error });
+    throw error;
+  }
 }
 
 export async function expectLoginPageVisible(page: Page) {
