@@ -29,5 +29,5 @@
   ],
   "cucumberRunner.runInTerminal": true,
   "cucumberRunner.cwd": "",
-  "cucumberRunner.commandTemplate": "npm.cmd test -- {featurePath}:{line}"
+  "cucumberRunner.commandTemplate": "npm test -- {featurePath}:{line}"
 }
