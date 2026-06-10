@@ -270,13 +270,22 @@ Gecis kurallari:
 
 Bu projede farkli branch ve farkli PC'lerde calisan kisilerin ayni otomasyon dilini kullanmasi hedeflenir. Codex veya gelistirici yeni test uretirken once mevcut sozlugu ve reusable parcalari aramalidir.
 
-Yeni locator, action, assertion, flow veya step definition yazmadan once asagidaki aramalar yapilmalidir:
+Reuse aramasinin hizli yolu `INVENTORY.md` dosyasidir. Bu dosya otomatik uretilir (`npm run inventory`) ve mevcut tum step / locator / action / flow sozlugunu tek yerde listeler. Yeni test yazmadan once once bu dosya okunmali, ardindan gerekiyorsa `rg` ile derinlemesine arama yapilmalidir:
 
 ```powershell
 rg "Oluştur|Kaydet|Sil|Ara|Temizle|Vazgeç|Onayla|Geri" src features
 rg "step metni veya beklenen ekran basligi" features src
 rg "locator adi veya UI metni" src/locators src/actions src/assertions src/flows features/step-definitions
 ```
+
+Reuse kurallari mekanik kapilarla da korunur. `npm run check` (typecheck + `inventory:check`) su durumlarda hata verir ve test gecmez:
+
+- Ayni selector (locator value) iki farkli locator isminde tanimliysa.
+- `LOCATOR_REPORTS` icindeki `name`, kendi `grup.key` yolu ile uyusmuyorsa.
+- Normalize edildiginde (kucuk harf, noktalama, bosluk) ayni metne dusen iki step tanimi varsa.
+- `INVENTORY.md` guncel degilse (locator/step ekleyip `npm run inventory` calistirilmamissa).
+
+Yeni locator/step ekledikten sonra `npm run inventory` calistirilip uretilen `INVENTORY.md` commit edilmelidir.
 
 Reuse karari su sirayla verilmelidir:
 

@@ -14,6 +14,7 @@
   },
   "include": [
     "src/**/*.ts",
-    "features/**/*.ts"
+    "features/**/*.ts",
+    "scripts/**/*.ts"
   ]
 }

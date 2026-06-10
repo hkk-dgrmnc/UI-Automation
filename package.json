@@ -12,7 +12,10 @@
     "test:headed": "cucumber-js --profile generated --world-parameters \"{\\\"browser\\\":\\\"chromium\\\",\\\"headed\\\":true}\"",
     "test:debug": "cucumber-js --profile generated --world-parameters \"{\\\"browser\\\":\\\"chromium\\\",\\\"headed\\\":true,\\\"slowMo\\\":300}\"",
     "codegen": "playwright codegen",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "inventory": "ts-node scripts/check-inventory.ts",
+    "inventory:check": "ts-node scripts/check-inventory.ts --check",
+    "check": "npm run typecheck && npm run inventory:check"
   },
   "keywords": [],
   "author": "",
