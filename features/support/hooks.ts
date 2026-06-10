@@ -6,13 +6,7 @@ import {
   CustomWorld,
   TestWorldParameters,
 } from './world';
-
-const C = {
-  reset:  '\x1b[0m',
-  bold:   '\x1b[1m',
-  yellow: '\x1b[93m',
-  white:  '\x1b[97m',
-};
+import { COLORS as C } from '../../src/utils/console-format';
 
 const browserTypes = {
   chromium,

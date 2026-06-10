@@ -8,7 +8,7 @@ async function fillWithReport(
   value: string,
   maskValue = false,
 ) {
-  await reportAction({
+  reportAction({
     action: 'Fill',
     locatorName: locatorReport.name,
     locatorValue: locatorReport.value,
@@ -18,13 +18,13 @@ async function fillWithReport(
   try {
     await locator.fill(value);
   } catch (error) {
-    await reportError({ action: 'Fill', locatorName: locatorReport.name, error });
+    reportError({ action: 'Fill', locatorName: locatorReport.name, error });
     throw error;
   }
 }
 
 async function clickWithReport(locator: Locator, locatorReport: LocatorReport) {
-  await reportAction({
+  reportAction({
     action: 'Click',
     locatorName: locatorReport.name,
     locatorValue: locatorReport.value,
@@ -32,7 +32,7 @@ async function clickWithReport(locator: Locator, locatorReport: LocatorReport) {
   try {
     await locator.click();
   } catch (error) {
-    await reportError({ action: 'Click', locatorName: locatorReport.name, error });
+    reportError({ action: 'Click', locatorName: locatorReport.name, error });
     throw error;
   }
 }

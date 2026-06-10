@@ -1,4 +1,5 @@
 import { Page } from '@playwright/test';
+import type { LocatorReport } from '../utils/action-report';
 
 export const locators = (page: Page) => ({
   auth: {
@@ -24,6 +25,19 @@ export const locators = (page: Page) => ({
     infoTitle: page.getByText('Otomatik Parametre Bilgileri', { exact: true }),
   },
 });
+
+// LOCATOR_REPORTS, locators ile ayni grup/anahtar yapisina sahip olmak zorundadir.
+// Asagidaki tip, bir locator eklenip rapor metadatasi unutulursa (veya tersi)
+// `npm run typecheck`'i derleme zamaninda patlatir; sessiz yanlis rapor olusmaz.
+type Locators = ReturnType<typeof locators>;
+
+type LocatorReportsShape = {
+  [Group in keyof Locators]: {
+    [Key in keyof Locators[Group]]: Locators[Group][Key] extends (...args: infer Args) => unknown
+      ? (...args: Args) => LocatorReport
+      : LocatorReport;
+  };
+};
 
 export const LOCATOR_REPORTS = {
   auth: {
@@ -53,4 +67,4 @@ export const LOCATOR_REPORTS = {
     listTitle: { name: 'automaticParameters.listTitle', value: "getByText('Otomatik Parametre Listesi', { exact: true })" },
     infoTitle: { name: 'automaticParameters.infoTitle', value: "getByText('Otomatik Parametre Bilgileri', { exact: true })" },
   },
-};
+} satisfies LocatorReportsShape;

@@ -11,7 +11,7 @@ async function expectUrl(
   expectedUrl: RegExp,
   options?: AssertionOptions,
 ) {
-  await reportAssertion({
+  reportAssertion({
     assertion: 'To Have URL',
     locatorName: 'page',
     locatorValue: 'current page URL',
@@ -20,7 +20,7 @@ async function expectUrl(
   try {
     await expect(page).toHaveURL(expectedUrl, options);
   } catch (error) {
-    await reportError({ action: 'To Have URL', locatorName: 'page', error });
+    reportError({ action: 'To Have URL', locatorName: 'page', error });
     throw error;
   }
 }
@@ -30,7 +30,7 @@ async function expectVisible(
   locatorReport: LocatorReport,
   options?: AssertionOptions,
 ) {
-  await reportAssertion({
+  reportAssertion({
     assertion: 'To Be Visible',
     locatorName: locatorReport.name,
     locatorValue: locatorReport.value,
@@ -39,13 +39,13 @@ async function expectVisible(
   try {
     await expect(locator).toBeVisible(options);
   } catch (error) {
-    await reportError({ action: 'To Be Visible', locatorName: locatorReport.name, error });
+    reportError({ action: 'To Be Visible', locatorName: locatorReport.name, error });
     throw error;
   }
 }
 
 async function expectNotVisible(locator: Locator, locatorReport: LocatorReport) {
-  await reportAssertion({
+  reportAssertion({
     assertion: 'Not To Be Visible',
     locatorName: locatorReport.name,
     locatorValue: locatorReport.value,
@@ -54,7 +54,7 @@ async function expectNotVisible(locator: Locator, locatorReport: LocatorReport) 
   try {
     await expect(locator).not.toBeVisible();
   } catch (error) {
-    await reportError({ action: 'Not To Be Visible', locatorName: locatorReport.name, error });
+    reportError({ action: 'Not To Be Visible', locatorName: locatorReport.name, error });
     throw error;
   }
 }
@@ -64,7 +64,7 @@ async function expectCount(
   locatorReport: LocatorReport,
   count: number,
 ) {
-  await reportAssertion({
+  reportAssertion({
     assertion: 'To Have Count',
     locatorName: locatorReport.name,
     locatorValue: locatorReport.value,
@@ -73,7 +73,7 @@ async function expectCount(
   try {
     await expect(locator).toHaveCount(count);
   } catch (error) {
-    await reportError({ action: 'To Have Count', locatorName: locatorReport.name, error });
+    reportError({ action: 'To Have Count', locatorName: locatorReport.name, error });
     throw error;
   }
 }
@@ -84,7 +84,7 @@ async function expectNotAttribute(
   attributeName: string,
   attributeValue: string,
 ) {
-  await reportAssertion({
+  reportAssertion({
     assertion: 'Not To Have Attribute',
     locatorName: locatorReport.name,
     locatorValue: locatorReport.value,
@@ -93,7 +93,7 @@ async function expectNotAttribute(
   try {
     await expect(locator).not.toHaveAttribute(attributeName, attributeValue);
   } catch (error) {
-    await reportError({ action: 'Not To Have Attribute', locatorName: locatorReport.name, error });
+    reportError({ action: 'Not To Have Attribute', locatorName: locatorReport.name, error });
     throw error;
   }
 }

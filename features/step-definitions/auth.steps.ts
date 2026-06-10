@@ -1,5 +1,5 @@
 import { Given, Then, When } from '@cucumber/cucumber';
-import { users } from '../../src/data/data';
+import { getUser } from '../../src/data/data';
 import {
   login,
   openLoginPage,
@@ -12,12 +12,12 @@ Given('Login ekranı açılır', async function (this: CustomWorld) {
   await openLoginPage(getPage(this));
 });
 
-Given('Kullanıcı login olur', async function (this: CustomWorld) {
-  await login(getPage(this), users.validUser);
+Given('{string} kullanıcısı ile login olunur', async function (this: CustomWorld, username: string) {
+  await login(getPage(this), getUser(username));
 });
 
-When('Kullanıcı bilgileri ile giriş yapılır', async function (this: CustomWorld) {
-  await submitLogin(getPage(this), users.validUser);
+When('{string} kullanıcısı bilgileri ile giriş yapılır', async function (this: CustomWorld, username: string) {
+  await submitLogin(getPage(this), getUser(username));
 });
 
 Then('Kullanıcının login oldugu dogrulanır', async function (this: CustomWorld) {

@@ -1,4 +1,5 @@
 import { AsyncLocalStorage } from 'node:async_hooks';
+import { COLORS as C, INDENT } from './console-format';
 
 type Attach = (data: string, mediaType: string) => void | Promise<void>;
 
@@ -50,19 +51,6 @@ export async function runWithActionReport<T>(
   }
 }
 
-
-const C = {
-  reset:  '\x1b[0m',
-  bold:   '\x1b[1m',
-  dim:    '\x1b[2m',
-  cyan:   '\x1b[96m',
-  green:  '\x1b[92m',
-  red:    '\x1b[91m',
-  gray:   '\x1b[90m',
-};
-
-const INDENT = '        ';
-
 function logAction(action: string, locatorName: string, value?: string) {
   const label = `${C.bold}${C.cyan} ACTION ${C.reset}`;
   const line = [`${C.bold}${action}${C.reset}`, `${C.gray}${locatorName}${C.reset}`];
@@ -81,7 +69,7 @@ function logError(action: string, locatorName: string, message: string) {
   console.log(`${INDENT}         ${C.red}${C.dim}${message}${C.reset}`);
 }
 
-export async function reportAction(options: ReportActionOptions) {
+export function reportAction(options: ReportActionOptions) {
   const context = actionReportContext.getStore();
 
   const displayValue = options.value !== undefined
@@ -99,7 +87,7 @@ export async function reportAction(options: ReportActionOptions) {
   context.lines.push(parts.join('   '));
 }
 
-export async function reportAssertion(options: ReportAssertionOptions) {
+export function reportAssertion(options: ReportAssertionOptions) {
   const context = actionReportContext.getStore();
 
   logAssert(options.assertion, options.locatorName, options.expected);
@@ -111,7 +99,7 @@ export async function reportAssertion(options: ReportAssertionOptions) {
   context.lines.push(['ASSERT', options.assertion, `Locator Name: ${options.locatorName}`, `Locator Value: ${options.locatorValue}`, `→ ${options.expected}`].join('   '));
 }
 
-export async function reportError(options: ReportErrorOptions) {
+export function reportError(options: ReportErrorOptions) {
   const context = actionReportContext.getStore();
   const message = options.error instanceof Error
     ? options.error.message
