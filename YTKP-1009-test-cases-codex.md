@@ -413,30 +413,3 @@ Yok
 
 **Expected Result:**
 İşlem Kodu, Tür, Tür 2 ve KDV Oranı ilişkileri tutarlı olmalıdır. Veri tekrarı bulunmamalıdır.
-
----
-
-## Claude Code / Codex Kullanım Notu
-
-Bu dosyadaki test case'leri Claude Code veya Codex ile otomasyona çevirmek için aşağıdaki talimatı kullan:
-
-```text
-Bu projede Cucumber + Playwright TypeScript kullanılıyor.
-Eğer sen CLAUDE isen CLAUDE.md dosyasındaki mimari ve kurallara göre ilerle.
-Eğer sen Codex isen AGENT.md dosyasındaki mimari ve kurallara göre ilerle.
-Bu markdown dosyasındaki test case'leri sırayla otomasyona çevir.
-
-Üretim sırası:
-1. Önce `rg` ile mevcut step/flow/locator/action/assertion ara; varsa yenisini üretme.
-2. Eksik locator veya step varsa doğru katmana küçük ve temiz ekleme yap.
-3. Feature dosyasını `features/generated` altında business seviyesinde oluştur.
-4. Step definition'ları `features/step-definitions` altında `Given/When/Then` ile yaz; mümkünse `src/flows` fonksiyonlarını çağır.
-
-Önemli kurallar:
-- Locator gerçek sayfada doğrulanmadan yazılmaz.
-- TODO, placeholder step, boş assertion veya geçici locator bırakılmaz.
-- Doğrulanamayan locator veya belirsiz expected result varsa o test üretilmez;
-  bu promptta yapılan değişiklikler geri alınır ve engel raporlanır.
-- `waitForTimeout` kullanılmaz.
-- Hayali locator yazılmaz.
-```
