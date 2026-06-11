@@ -1,0 +1,175 @@
+# UI Automation
+
+Cucumber + Playwright + TypeScript ile yazılmış UI otomasyon projesidir. Amaç, manuel test case'leri okunabilir, tekrar kullanılabilir ve bakımı kolay Cucumber senaryolarına dönüştürmektir.
+
+Bu repoda klasik Page Object Model kullanılmaz. Test mimarisi data, locator, action, assertion ve flow katmanları üzerinden ilerler. Kod üretim ve bakım kurallarının ana kaynağı [AGENTS.md](./AGENTS.md) dosyasıdır.
+
+## Teknoloji
+
+- TypeScript
+- Playwright
+- Cucumber / Gherkin
+- `@cucumber/cucumber`
+- `ts-node`
+- `dotenv`
+
+## Proje Yapısı
+
+```text
+features/
+  generated/             # Cucumber feature dosyaları
+  step-definitions/      # Gherkin step karşılıkları
+  support/               # World, hook, formatter ve raporlama desteği
+
+src/
+  actions/               # Reusable kullanıcı aksiyonları
+  assertions/            # Reusable doğrulamalar
+  config/                # Environment ayarları
+  data/                  # Test verisi ve env kullanıcı okuma
+  flows/                 # Business akışları
+  locators/              # Reusable locator tanımları ve locator rapor metadatası
+  utils/                 # Ortak raporlama/console yardımcıları
+
+scripts/
+  check-inventory.ts     # Step/locator/action/flow envanteri ve duplicate kontrolü
+```
+
+Ana akış:
+
+```text
+Feature -> Step Definition -> Flow -> Action / Assertion -> Locator / Data
+```
+
+## Kurulum
+
+```powershell
+npm install
+```
+
+Ortam dosyasını oluştur:
+
+```powershell
+Copy-Item .env.example .env
+```
+
+`.env` içinde en az şu değerler tanımlanmalıdır:
+
+```env
+BASE_URL="https://example.test/shell-app-ui/#/journal-audits"
+RUNNING_ENV=test
+BROWSER=chromium
+HEADED=false
+
+USER1_USERNAME=
+USER1_PASSWORD=
+```
+
+Kullanıcı bilgileri `USER<N>_USERNAME` / `USER<N>_PASSWORD` bloklarıyla okunur. Örneğin feature içinde `"gm1" kullanıcısı ile login olunur` step'i kullanılıyorsa `.env` içinde `USER1_USERNAME=gm1` ve ilgili password değeri bulunmalıdır.
+
+## Test Çalıştırma
+
+```powershell
+npm test
+```
+
+Tarayıcı bazlı çalıştırma:
+
+```powershell
+npm run test:chromium
+npm run test:firefox
+npm run test:webkit
+npm run test:all
+```
+
+Görsel/debug çalıştırma:
+
+```powershell
+npm run test:headed
+npm run test:debug
+```
+
+Rapor çıktıları:
+
+```text
+cucumber-report.html
+cucumber-report.json
+```
+
+## Kalite Kontrolleri
+
+TypeScript kontrolü:
+
+```powershell
+npm run typecheck
+```
+
+Inventory güncelleme:
+
+```powershell
+npm run inventory
+```
+
+Inventory güncellik ve duplicate kontrolü:
+
+```powershell
+npm run inventory:check
+```
+
+Tüm temel kontrol:
+
+```powershell
+npm run check
+```
+
+`npm run check`, `typecheck` ve `inventory:check` komutlarını birlikte çalıştırır. Yeni step, locator, action veya flow eklendikten sonra `npm run inventory` çalıştırılmalı ve güncellenen [INVENTORY.md](./INVENTORY.md) dosyası commit'e dahil edilmelidir.
+
+## Inventory ve Reuse
+
+[INVENTORY.md](./INVENTORY.md), mevcut step, locator, action ve flow sözlüğünü listeler. Yeni test yazmadan önce önce bu dosyada, gerekirse `rg` ile kod içinde reuse aranmalıdır.
+
+Önerilen aramalar:
+
+```powershell
+rg "Oluştur|Kaydet|Sil|Ara|Temizle|Vazgeç|Onayla|Geri" src features
+rg "step metni veya beklenen ekran başlığı" features src
+rg "locator adı veya UI metni" src/locators src/actions src/assertions src/flows features/step-definitions
+```
+
+Inventory kontrolü şu durumları yakalar:
+
+- Aynı selector'ın farklı locator isimleriyle tekrar tanımlanması
+- `LOCATOR_REPORTS` içindeki `name` değerinin kendi `grup.key` yolu ile uyuşmaması
+- Normalize edildiğinde aynı metne düşen step tanımları
+- `INVENTORY.md` dosyasının güncel olmaması
+
+## Yeni Test Ekleme Akışı
+
+1. Manuel test case ve beklenen sonucu netleştir.
+2. [INVENTORY.md](./INVENTORY.md) içinde mevcut step, locator, action ve flow reuse'u ara.
+3. Gerekirse `rg` ile derin arama yap.
+4. Locator'ı gerçek uygulamada doğrula.
+5. Feature dosyasını `features/generated` altına ekle veya güncelle.
+6. Step definition içinde locator veya Playwright detayı yazma; mümkünse flow çağır.
+7. Gerekli action, assertion, locator ve data eklemelerini mevcut katmanlara yap.
+8. Yeni locator eklendiyse `LOCATOR_REPORTS` metadatasını da ekle.
+9. `npm run inventory` ve `npm run check` çalıştır.
+
+Belirsiz locator, yetki, veri veya beklenen sonuç varsa koda TODO, geçici selector veya boş step bırakılmaz. Bu durumda ekleme geri alınır ve engel net şekilde raporlanır.
+
+## Mevcut Senaryolar
+
+- `features/generated/TC_001_login.feature`: Geçerli kullanıcı ile login kontrolü
+- `features/generated/YTKP-1009.feature`: Otomatik Parametre Tanımlama ekranına erişim ve oluşturma ekranı yönlendirme kontrolü
+
+## Mimari Notlar
+
+- Feature dosyalarında step keyword olarak `*` kullanılır.
+- Step definition dosyalarında `Given`, `When`, `Then` kullanılır.
+- Klasik `pages/LoginPage.ts` gibi Page Object dosyaları oluşturulmaz.
+- Ortak sidebar menü geçişleri `features/step-definitions/navigation.steps.ts` içindeki genel step ile yapılır.
+- Action dosyası assertion içermez.
+- Assertion dosyası click/fill gibi kullanıcı aksiyonu içermez.
+- Reusable action ve assertion'lar Cucumber raporuna locator adı, locator değeri ve beklenen sonucu yazar.
+- Şifre gibi hassas değerler raporlarda maskelenir.
+
+Detaylı standartlar için [AGENTS.md](./AGENTS.md) referans alınmalıdır.
