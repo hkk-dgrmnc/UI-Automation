@@ -482,6 +482,8 @@ Kurallar:
 - Hayali locator yazilmayacaktir.
 - Locator gercek sayfada dogrulanmadan kullanilmayacaktir.
 - Emin olunmayan locator once Playwright ile browser uzerinde denenmelidir.
+- Yeni locator/senaryo uretirken locator'lar Playwright MCP server (`playwright`) ile gercek sayfada acilip dogrulanmalidir; tahmin edilen selector dogrulanmadan koda yazilmaz.
+- Playwright MCP ile locator dogrulanamiyorsa (ekran acilmiyor, yetki/data yok, eleman yok) Bolum 5.3 geregi o promptta yapilan degisiklikler geri alinir ve engel raporlanir; TODO veya gecici locator birakilmaz.
 - Ayni locator birden fazla yerde kullanilacaksa `src/locators/locators.ts` icine alinmalidir.
 - Tek kullanimlik locator test icinde kalabilir; tekrar ederse locator dosyasina tasinmalidir.
 - Ortak toolbar/form aksiyonlari `common` grubunda tutulmalidir.

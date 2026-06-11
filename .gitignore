@@ -6,9 +6,18 @@ node_modules/
 .env
 /.auth/
 
+# Personal Claude Code local settings (MCP approval vb.)
+.claude/settings.local.json
+
 # Cucumber reports
 cucumber-report.html
 cucumber-report.json
 
 # Playwright reports
 playwright-report/
+
+# Playwright MCP local artifacts (console logs, page snapshots)
+.playwright-mcp/
+
+# Local snapshot/backup archives
+snapshots/
