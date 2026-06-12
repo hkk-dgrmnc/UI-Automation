@@ -423,28 +423,50 @@ page.getByPlaceholder('Urun ara')
 page.getByText('Sepete Ekle')
 ```
 
-Tek dosyada locator gruplama ornegi (`locators` + `LOCATOR_REPORTS` birlikte):
+Tek dosyada locator gruplama ornegi (`SELECTORS`/`TEXTS` sabitleri + `locators` + `LOCATOR_REPORTS` birlikte):
 
 ```ts
 // src/locators/locators.ts
 import { Page } from '@playwright/test';
 
-export const locators = (page: Page) => ({
+// Selector ve UI metinleri tek kaynaktir: ayni string hem locator kurulumunda
+// hem LOCATOR_REPORTS value alaninda kullanilir. Elle iki kez yazilmaz.
+const SELECTORS = {
   auth: {
-    usernameInput: page.locator('#username'),
-    passwordInput: page.locator('#password'),
-    loginButton: page.locator('button[name="login"]'),
-    userProfileButton: page.getByRole('button', { name: 'Kullanıcı Profil' }),
+    usernameInput: '#username',
+    passwordInput: '#password',
+    loginButton: 'button[name="login"]',
   },
   common: {
-    createLink: page.locator('a#action-create'),
+    createLink: 'a#action-create',
+  },
+  navigation: {
+    selectedSidebarMenuLink: 'a[aria-current="page"]',
+  },
+} as const;
+
+const TEXTS = {
+  auth: {
+    userProfileButton: 'Kullanıcı Profil',
+  },
+} as const;
+
+export const locators = (page: Page) => ({
+  auth: {
+    usernameInput: page.locator(SELECTORS.auth.usernameInput),
+    passwordInput: page.locator(SELECTORS.auth.passwordInput),
+    loginButton: page.locator(SELECTORS.auth.loginButton),
+    userProfileButton: page.getByRole('button', { name: TEXTS.auth.userProfileButton }),
+  },
+  common: {
+    createLink: page.locator(SELECTORS.common.createLink),
   },
   navigation: {
     sidebarMenuButton: (name: string) => page.getByRole('button').filter({
       has: page.getByText(name, { exact: true }),
     }),
     sidebarMenuLink: (name: string) => page.getByRole('link', { name }),
-    selectedSidebarMenuLink: (name: string) => page.locator('a[aria-current="page"]').filter({
+    selectedSidebarMenuLink: (name: string) => page.locator(SELECTORS.navigation.selectedSidebarMenuLink).filter({
       hasText: name,
     }),
   },
@@ -452,13 +474,13 @@ export const locators = (page: Page) => ({
 
 export const LOCATOR_REPORTS = {
   auth: {
-    usernameInput: { name: 'auth.usernameInput', value: '#username' },
-    passwordInput: { name: 'auth.passwordInput', value: '#password' },
-    loginButton: { name: 'auth.loginButton', value: 'button[name="login"]' },
-    userProfileButton: { name: 'auth.userProfileButton', value: 'role=button name="Kullanıcı Profil"' },
+    usernameInput: { name: 'auth.usernameInput', value: SELECTORS.auth.usernameInput },
+    passwordInput: { name: 'auth.passwordInput', value: SELECTORS.auth.passwordInput },
+    loginButton: { name: 'auth.loginButton', value: SELECTORS.auth.loginButton },
+    userProfileButton: { name: 'auth.userProfileButton', value: `role=button name="${TEXTS.auth.userProfileButton}"` },
   },
   common: {
-    createLink: { name: 'common.createLink', value: 'a#action-create' },
+    createLink: { name: 'common.createLink', value: SELECTORS.common.createLink },
   },
   navigation: {
     sidebarMenuButton: (name: string) => ({
@@ -471,7 +493,7 @@ export const LOCATOR_REPORTS = {
     }),
     selectedSidebarMenuLink: (name: string) => ({
       name: `navigation.selectedSidebarMenuLink('${name}')`,
-      value: `a[aria-current="page"] has text "${name}"`,
+      value: `${SELECTORS.navigation.selectedSidebarMenuLink} has text "${name}"`,
     }),
   },
 };
@@ -490,6 +512,7 @@ Kurallar:
 - Sidebar, ust menu, breadcrumb gibi ortak navigasyon locator'lari `navigation` grubunda tutulmalidir.
 - Sayfaya ozel baslik, kolon, alan ve business durum locator'lari ilgili sayfa/domain grubunda tutulmalidir.
 - Her locator ile birlikte `LOCATOR_REPORTS` icine de rapor metadatasi (`name`, `value`) eklenmelidir. Action ve assertion dosyalari bu sabiti import ederek kullanir; inline string yazilmaz.
+- CSS selector ve UI metni gibi string'ler hem `locators` hem `LOCATOR_REPORTS` icinde elle iki kez yazilmamalidir; dosya basindaki `SELECTORS` / `TEXTS` sabitlerinde bir kez tanimlanir ve her iki yerde de o sabit kullanilir. Boylece locator degisip rapor value'su unutuldugunda rapor sessizce yanlis bilgi gosteremez.
 
 ---
 

@@ -1,28 +1,55 @@
 import { Page } from '@playwright/test';
 import type { LocatorReport } from '../utils/action-report';
 
-export const locators = (page: Page) => ({
+// Selector ve UI metinleri tek kaynaktir: ayni string hem locator kurulumunda
+// hem LOCATOR_REPORTS value alaninda kullanilir. Boylece locator degistirilip
+// rapor metadatasi unutuldugunda rapor sessizce yanlis bilgi gosteremez.
+const SELECTORS = {
   auth: {
-    usernameInput: page.locator('#username'),
-    passwordInput: page.locator('#password'),
-    loginButton: page.locator('button[name="login"]'),
-    userProfileButton: page.getByRole('button', { name: 'Kullanıcı Profil' }),
+    usernameInput: '#username',
+    passwordInput: '#password',
+    loginButton: 'button[name="login"]',
   },
   common: {
-    createLink: page.locator('a#action-create'),
+    createLink: 'a#action-create',
+  },
+  navigation: {
+    selectedSidebarMenuLink: 'a[aria-current="page"]',
+  },
+} as const;
+
+const TEXTS = {
+  auth: {
+    userProfileButton: 'Kullanıcı Profil',
+  },
+  automaticParameters: {
+    listTitle: 'Otomatik Parametre Listesi',
+    infoTitle: 'Otomatik Parametre Bilgileri',
+  },
+} as const;
+
+export const locators = (page: Page) => ({
+  auth: {
+    usernameInput: page.locator(SELECTORS.auth.usernameInput),
+    passwordInput: page.locator(SELECTORS.auth.passwordInput),
+    loginButton: page.locator(SELECTORS.auth.loginButton),
+    userProfileButton: page.getByRole('button', { name: TEXTS.auth.userProfileButton }),
+  },
+  common: {
+    createLink: page.locator(SELECTORS.common.createLink),
   },
   navigation: {
     sidebarMenuButton: (name: string) => page.getByRole('button').filter({
       has: page.getByText(name, { exact: true }),
     }),
     sidebarMenuLink: (name: string) => page.getByRole('link', { name }),
-    selectedSidebarMenuLink: (name: string) => page.locator('a[aria-current="page"]').filter({
+    selectedSidebarMenuLink: (name: string) => page.locator(SELECTORS.navigation.selectedSidebarMenuLink).filter({
       hasText: name,
     }),
   },
   automaticParameters: {
-    listTitle: page.getByText('Otomatik Parametre Listesi', { exact: true }),
-    infoTitle: page.getByText('Otomatik Parametre Bilgileri', { exact: true }),
+    listTitle: page.getByText(TEXTS.automaticParameters.listTitle, { exact: true }),
+    infoTitle: page.getByText(TEXTS.automaticParameters.infoTitle, { exact: true }),
   },
 });
 
@@ -41,13 +68,13 @@ type LocatorReportsShape = {
 
 export const LOCATOR_REPORTS = {
   auth: {
-    usernameInput: { name: 'auth.usernameInput', value: '#username' },
-    passwordInput: { name: 'auth.passwordInput', value: '#password' },
-    loginButton: { name: 'auth.loginButton', value: 'button[name="login"]' },
-    userProfileButton: { name: 'auth.userProfileButton', value: 'role=button name="Kullanıcı Profil"' },
+    usernameInput: { name: 'auth.usernameInput', value: SELECTORS.auth.usernameInput },
+    passwordInput: { name: 'auth.passwordInput', value: SELECTORS.auth.passwordInput },
+    loginButton: { name: 'auth.loginButton', value: SELECTORS.auth.loginButton },
+    userProfileButton: { name: 'auth.userProfileButton', value: `role=button name="${TEXTS.auth.userProfileButton}"` },
   },
   common: {
-    createLink: { name: 'common.createLink', value: 'a#action-create' },
+    createLink: { name: 'common.createLink', value: SELECTORS.common.createLink },
   },
   navigation: {
     sidebarMenuButton: (name: string) => ({
@@ -60,11 +87,11 @@ export const LOCATOR_REPORTS = {
     }),
     selectedSidebarMenuLink: (name: string) => ({
       name: `navigation.selectedSidebarMenuLink('${name}')`,
-      value: `a[aria-current="page"] has text "${name}"`,
+      value: `${SELECTORS.navigation.selectedSidebarMenuLink} has text "${name}"`,
     }),
   },
   automaticParameters: {
-    listTitle: { name: 'automaticParameters.listTitle', value: "getByText('Otomatik Parametre Listesi', { exact: true })" },
-    infoTitle: { name: 'automaticParameters.infoTitle', value: "getByText('Otomatik Parametre Bilgileri', { exact: true })" },
+    listTitle: { name: 'automaticParameters.listTitle', value: `getByText('${TEXTS.automaticParameters.listTitle}', { exact: true })` },
+    infoTitle: { name: 'automaticParameters.infoTitle', value: `getByText('${TEXTS.automaticParameters.infoTitle}', { exact: true })` },
   },
 } satisfies LocatorReportsShape;
