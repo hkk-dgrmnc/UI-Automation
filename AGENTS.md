@@ -522,24 +522,74 @@ Test datalari `src/data/data.ts` icinde tutulmalidir.
 
 Ornek:
 
+Kullanicilar `.env` icinde numarali `USER<N>` bloklari olarak tutulur; `getUser(username)` step'ten gelen username'i bu bloklarla eslestirip ilgili sifreyi dondurur. Boylece gercek sifre koda ve feature dosyasina hard-code edilmez.
+
 ```ts
 // src/data/data.ts
-export const users = {
-  validUser: {
-    username: process.env.VALID_USER_USERNAME ?? '',
-    email: process.env.VALID_USER_EMAIL ?? '',
-    password: process.env.VALID_USER_PASSWORD ?? '',
-  },
-} as const;
+export type TestUser = {
+  username: string;
+  password: string;
+};
+
+/**
+ * .env icindeki numarali kullanici bloklarini okur:
+ *   USER1_USERNAME=gm1
+ *   USER1_PASSWORD=admin
+ */
+function loadUsers(): TestUser[] {
+  const users: TestUser[] = [];
+
+  for (const [key, value] of Object.entries(process.env)) {
+    const match = key.match(/^USER(\d+)_USERNAME$/);
+
+    if (!match || !value) {
+      continue;
+    }
+
+    users.push({
+      username: value,
+      password: process.env[`USER${match[1]}_PASSWORD`] ?? '',
+    });
+  }
+
+  return users;
+}
+
+/**
+ * Step'ten gelen username'i .env bloklari ile eslestirir ve o kullanicinin
+ * bilgilerini (username + password) dondurur. Ornek: "gm1".
+ */
+export function getUser(username: string): TestUser {
+  const user = loadUsers().find((candidate) => candidate.username === username);
+
+  if (!user) {
+    throw new Error(`"${username}" kullanıcısı .env içinde tanımlı değil.`);
+  }
+
+  if (!user.password) {
+    throw new Error(`"${username}" kullanıcısının şifresi tanımlı değil.`);
+  }
+
+  return user;
+}
+```
+
+`.env` / `.env.example` karsiligi:
+
+```bash
+USER1_USERNAME=gm1
+USER1_PASSWORD=
+# USER2_USERNAME=gm2
+# USER2_PASSWORD=
 ```
 
 Kurallar:
 
-- Feature dosyasi icinde hard-coded data mumkun oldugunca kullanilmamalidir.
+- Feature dosyasi icinde hard-coded data mumkun oldugunca kullanilmamalidir; kullanici secimi `"gm1"` gibi username string'i ile yapilir, sifre asla feature'a yazilmaz.
 - Kullanici, urun, adres, odeme bilgileri ayni data dosyasinda gruplu olarak tutulmalidir.
 - Tek testte kullanilan gecici data test icinde olabilir.
 - Bir data iki veya daha fazla testte kullanilacaksa `src/data/data.ts` icine tasinmalidir.
-- Hassas bilgi, gercek sifre veya gercek kullanici datası commit edilmemelidir.
+- Hassas bilgi, gercek sifre veya gercek kullanici datası commit edilmemelidir; sifreler sadece lokal `.env` icindedir.
 - Ortama gore degisen degerler environment variable uzerinden alinmalidir.
 
 ---
@@ -678,21 +728,23 @@ Ornek:
 ```ts
 // src/flows/auth.flow.ts
 import { Page } from '@playwright/test';
-import { users } from '../data/data';
 import {
   clickLoginButton,
   fillLoginPassword,
   fillLoginUsername,
 } from '../actions/actions';
-import { expectLoginSuccess } from '../assertions/assertions';
+import { expectLoginPageVisible, expectLoginSuccess } from '../assertions/assertions';
 import { env } from '../config/env';
+import { TestUser } from '../data/data';
 
 export async function openLoginPage(page: Page) {
   await page.goto(env.baseUrl);
+
+  await expectLoginPageVisible(page);
 }
 
-export async function submitLogin(page: Page, user = users.validUser) {
-  await fillLoginUsername(page, user.username || user.email);
+export async function submitLogin(page: Page, user: TestUser) {
+  await fillLoginUsername(page, user.username);
   await fillLoginPassword(page, user.password);
   await clickLoginButton(page);
 }
@@ -701,7 +753,7 @@ export async function verifyLoginSuccess(page: Page) {
   await expectLoginSuccess(page);
 }
 
-export async function login(page: Page, user = users.validUser) {
+export async function login(page: Page, user: TestUser) {
   await openLoginPage(page);
   await submitLogin(page, user);
   await verifyLoginSuccess(page);
@@ -728,17 +780,20 @@ Bu projede Gauge concept veya `.cpt` katalogu kullanilmayacaktir. Cucumber featu
 Ornek:
 
 ```gherkin
-Scenario: TC_001 - Kullanici gecerli bilgilerle login olur
-  * Login ekrani acilir
-  * Kullanici bilgileri ile giris yapilir
-  * Kullanicinin login oldugu dogrulanir
+Scenario: TC_001 - Kullanıcı geçerli bilgilerle login olur
+  * Login ekranı açılır
+  * "gm1" kullanıcısı bilgileri ile giriş yapılır
+  * Kullanıcının login oldugu dogrulanır
 ```
 
 ```ts
 import { Given, Then, When } from '@cucumber/cucumber';
+import { getUser } from '../../src/data/data';
+import { submitLogin } from '../../src/flows/auth.flow';
+import { CustomWorld, getPage } from '../support/world';
 
-When('Kullanici bilgileri ile giris yapilir', async function (this: CustomWorld) {
-  await submitLogin(getPage(this), users.validUser);
+When('{string} kullanıcısı bilgileri ile giriş yapılır', async function (this: CustomWorld, username: string) {
+  await submitLogin(getPage(this), getUser(username));
 });
 ```
 
@@ -816,7 +871,7 @@ Ornek hook:
 // features/support/hooks.ts
 import { Before } from '@cucumber/cucumber';
 import { chromium } from '@playwright/test';
-import { users } from '../../src/data/data';
+import { getUser } from '../../src/data/data';
 import {
   clickLoginButton,
   fillLoginPassword,
@@ -831,9 +886,11 @@ Before({ tags: '@authState' }, async function (this: CustomWorld) {
   this.context = await this.browser.newContext();
   this.page = await this.context.newPage();
 
+  const user = getUser('gm1');
+
   await this.page.goto(env.baseUrl);
-  await fillLoginUsername(this.page, users.validUser.username || users.validUser.email);
-  await fillLoginPassword(this.page, users.validUser.password);
+  await fillLoginUsername(this.page, user.username);
+  await fillLoginPassword(this.page, user.password);
   await clickLoginButton(this.page);
 
   await expectLoginSuccess(this.page);
@@ -1117,11 +1174,11 @@ Precondition:
 - Gecerli kullanici bilgisi vardir.
 
 Test Data:
-- user: validUser
+- user: gm1   # .env icindeki USER<N>_USERNAME=gm1 blogu
 
 Steps:
 1. Login sayfasina git.
-2. E-posta alanina gecerli e-posta gir.
+2. Kullanici adi alanina gecerli kullanici adi gir.
 3. Sifre alanina gecerli sifre gir.
 4. Giris Yap butonuna tikla.
 
