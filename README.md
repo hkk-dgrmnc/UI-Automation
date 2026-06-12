@@ -64,7 +64,7 @@ USER1_USERNAME=
 USER1_PASSWORD=
 ```
 
-Kullanıcı bilgileri `USER<N>_USERNAME` / `USER<N>_PASSWORD` bloklarıyla okunur. Örneğin feature içinde `"gm1" kullanıcısı ile login olunur` step'i kullanılıyorsa `.env` içinde `USER1_USERNAME=gm1` ve ilgili password değeri bulunmalıdır.
+Kullanıcı bilgileri `USER<N>_USERNAME` / `USER<N>_PASSWORD` bloklarıyla okunur. Feature dosyasında kullanıcı, blok anahtarı ile seçilir: `"USER1" kullanıcısı ile login olunur` step'i `.env` içindeki `USER1_USERNAME` ve `USER1_PASSWORD` değerlerini kullanır; gerçek kullanıcı adı veya şifre feature'a yazılmaz.
 
 ## Test Çalıştırma
 

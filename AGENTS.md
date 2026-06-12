@@ -522,7 +522,7 @@ Test datalari `src/data/data.ts` icinde tutulmalidir.
 
 Ornek:
 
-Kullanicilar `.env` icinde numarali `USER<N>` bloklari olarak tutulur; `getUser(username)` step'ten gelen username'i bu bloklarla eslestirip ilgili sifreyi dondurur. Boylece gercek sifre koda ve feature dosyasina hard-code edilmez.
+Kullanicilar `.env` icinde numarali `USER<N>` bloklari olarak tutulur; her blok `USER<N>_USERNAME` ve `USER<N>_PASSWORD` ciftinden olusur. Step'ten kullanici, blok anahtari ile secilir (ornek: `"USER1"`); `getUser(userKey)` ilgili blogun username ve password degerlerini dondurur. Boylece gercek kullanici adi ve sifre koda veya feature dosyasina hard-code edilmez.
 
 ```ts
 // src/data/data.ts
@@ -532,45 +532,23 @@ export type TestUser = {
 };
 
 /**
- * .env icindeki numarali kullanici bloklarini okur:
- *   USER1_USERNAME=gm1
- *   USER1_PASSWORD=admin
+ * Step'ten gelen kullanici anahtarini (.env'deki blok adi) ilgili
+ * USER<N>_USERNAME / USER<N>_PASSWORD degerleri ile eslestirir.
+ * Ornek: "USER1" -> USER1_USERNAME ve USER1_PASSWORD okunur.
  */
-function loadUsers(): TestUser[] {
-  const users: TestUser[] = [];
+export function getUser(userKey: string): TestUser {
+  const username = process.env[`${userKey}_USERNAME`];
+  const password = process.env[`${userKey}_PASSWORD`];
 
-  for (const [key, value] of Object.entries(process.env)) {
-    const match = key.match(/^USER(\d+)_USERNAME$/);
-
-    if (!match || !value) {
-      continue;
-    }
-
-    users.push({
-      username: value,
-      password: process.env[`USER${match[1]}_PASSWORD`] ?? '',
-    });
+  if (!username) {
+    throw new Error(`"${userKey}" kullanıcısı .env içinde tanımlı değil.`);
   }
 
-  return users;
-}
-
-/**
- * Step'ten gelen username'i .env bloklari ile eslestirir ve o kullanicinin
- * bilgilerini (username + password) dondurur. Ornek: "gm1".
- */
-export function getUser(username: string): TestUser {
-  const user = loadUsers().find((candidate) => candidate.username === username);
-
-  if (!user) {
-    throw new Error(`"${username}" kullanıcısı .env içinde tanımlı değil.`);
+  if (!password) {
+    throw new Error(`"${userKey}" kullanıcısının şifresi tanımlı değil.`);
   }
 
-  if (!user.password) {
-    throw new Error(`"${username}" kullanıcısının şifresi tanımlı değil.`);
-  }
-
-  return user;
+  return { username, password };
 }
 ```
 
@@ -585,7 +563,7 @@ USER1_PASSWORD=
 
 Kurallar:
 
-- Feature dosyasi icinde hard-coded data mumkun oldugunca kullanilmamalidir; kullanici secimi `"gm1"` gibi username string'i ile yapilir, sifre asla feature'a yazilmaz.
+- Feature dosyasi icinde hard-coded data mumkun oldugunca kullanilmamalidir; kullanici secimi `"USER1"` gibi `.env` blok anahtari ile yapilir, gercek kullanici adi ve sifre asla feature'a yazilmaz.
 - Kullanici, urun, adres, odeme bilgileri ayni data dosyasinda gruplu olarak tutulmalidir.
 - Tek testte kullanilan gecici data test icinde olabilir.
 - Bir data iki veya daha fazla testte kullanilacaksa `src/data/data.ts` icine tasinmalidir.
@@ -782,7 +760,7 @@ Ornek:
 ```gherkin
 Scenario: TC_001 - Kullanıcı geçerli bilgilerle login olur
   * Login ekranı açılır
-  * "gm1" kullanıcısı bilgileri ile giriş yapılır
+  * "USER1" kullanıcısı bilgileri ile giriş yapılır
   * Kullanıcının login oldugu dogrulanır
 ```
 
@@ -792,8 +770,8 @@ import { getUser } from '../../src/data/data';
 import { submitLogin } from '../../src/flows/auth.flow';
 import { CustomWorld, getPage } from '../support/world';
 
-When('{string} kullanıcısı bilgileri ile giriş yapılır', async function (this: CustomWorld, username: string) {
-  await submitLogin(getPage(this), getUser(username));
+When('{string} kullanıcısı bilgileri ile giriş yapılır', async function (this: CustomWorld, userKey: string) {
+  await submitLogin(getPage(this), getUser(userKey));
 });
 ```
 
@@ -886,7 +864,7 @@ Before({ tags: '@authState' }, async function (this: CustomWorld) {
   this.context = await this.browser.newContext();
   this.page = await this.context.newPage();
 
-  const user = getUser('gm1');
+  const user = getUser('USER1');
 
   await this.page.goto(env.baseUrl);
   await fillLoginUsername(this.page, user.username);
@@ -1174,7 +1152,7 @@ Precondition:
 - Gecerli kullanici bilgisi vardir.
 
 Test Data:
-- user: gm1   # .env icindeki USER<N>_USERNAME=gm1 blogu
+- user: USER1   # .env icindeki USER1_USERNAME / USER1_PASSWORD blogu
 
 Steps:
 1. Login sayfasina git.
