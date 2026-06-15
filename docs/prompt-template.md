@@ -31,6 +31,10 @@ Aşağıda sadece en kritik ve en çok atlanan kuralları öne çıkarıyorum.
 - Sidebar/menü erişimi için `navigation` grubunu ve genel
   "{string} menü yolundan sayfaya gidilir" step'ini kullan; sayfa bazlı
   navigasyon step'i yazma.
+- Test sırasında seçilen/üretilen bir değeri sonraki adımda kullanacaksan
+  `CustomWorld.store` (ScenarioStore) ile isimle sakla; `data.ts`'e veya
+  feature'a hard-code etme. Generic save/use step + değer döndüren action
+  deseni AGENTS.md 12.1'de.
 
 ### ÖN KOŞUL (reuse zorunlu — yeniden yazma)
 - Login gerekiyorsa mevcut auth flow/step'ini kullan; yeni login akışı yazma.

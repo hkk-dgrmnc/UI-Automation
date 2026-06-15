@@ -120,3 +120,86 @@ export async function clickCreateLink(page: Page) {
     LOCATOR_REPORTS.common.createLink,
   );
 }
+
+// --- Dinamik deger: oku / yaz / metne gore tikla ----------------------------
+// Bu fonksiyonlar ScenarioStore'dan bagimsizdir: deger alir veya dondurur.
+// Store'a saklama/okuma step katmaninda `this.store.save/get` ile yapilir
+// (AGENTS.md 12.1). Boylece ayni fonksiyonlar literal degerle de kullanilabilir.
+
+type TextMatchOptions = {
+  /** true: metin verilen degere ESIT olmali; false: ICERMELI. Varsayilan true. */
+  exact?: boolean;
+};
+
+/** Verilen elementin gorunur metnini okur, raporlar ve dondurur (store'a yazmaz). */
+export async function readElementText(
+  locator: Locator,
+  locatorReport: LocatorReport,
+): Promise<string> {
+  try {
+    const text = (await locator.innerText()).trim();
+    reportAction({
+      action: 'Read text',
+      locatorName: locatorReport.name,
+      locatorValue: locatorReport.value,
+      value: text,
+    });
+    return text;
+  } catch (error) {
+    reportError({ action: 'Read text', locatorName: locatorReport.name, error });
+    throw error;
+  }
+}
+
+/** Verilen elementin bir attribute degerini okur, raporlar ve dondurur (store'a yazmaz). */
+export async function readElementAttribute(
+  locator: Locator,
+  locatorReport: LocatorReport,
+  attribute: string,
+): Promise<string> {
+  try {
+    const value = await locator.getAttribute(attribute);
+    if (value === null) {
+      throw new Error(`"${locatorReport.name}" elementinde "${attribute}" attribute'u yok.`);
+    }
+    reportAction({
+      action: `Read @${attribute}`,
+      locatorName: locatorReport.name,
+      locatorValue: locatorReport.value,
+      value,
+    });
+    return value;
+  } catch (error) {
+    reportError({ action: `Read @${attribute}`, locatorName: locatorReport.name, error });
+    throw error;
+  }
+}
+
+/** Verilen elemana verilen degeri yazar (deger store'dan da gelebilir). */
+export async function fillElement(
+  locator: Locator,
+  locatorReport: LocatorReport,
+  value: string,
+  maskValue = false,
+) {
+  await fillWithReport(locator, locatorReport, value, maskValue);
+}
+
+/** Metni verilen degere ESIT (exact) ya da ICEREN ilk gorunur elemana tiklar. */
+export async function clickByText(
+  page: Page,
+  value: string,
+  options: TextMatchOptions = {},
+) {
+  const exact = options.exact ?? true;
+  const target = page.getByText(value, { exact }).first();
+
+  // Runtime degerine bagli dinamik locator: LOCATOR_REPORTS'a statik giremez,
+  // bu yuzden rapor metadatasi burada uretilir.
+  const report: LocatorReport = {
+    name: `getByText(${exact ? '=' : '~'} "${value}")`,
+    value: `text ${exact ? 'equals' : 'contains'} "${value}"`,
+  };
+
+  await clickWithReport(target, report);
+}

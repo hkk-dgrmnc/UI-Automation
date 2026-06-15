@@ -569,6 +569,7 @@ Kurallar:
 - Bir data iki veya daha fazla testte kullanilacaksa `src/data/data.ts` icine tasinmalidir.
 - Hassas bilgi, gercek sifre veya gercek kullanici datası commit edilmemelidir; sifreler sadece lokal `.env` icindedir.
 - Ortama gore degisen degerler environment variable uzerinden alinmalidir.
+- `data.ts` sadece statik/sabit test verisi icindir. Test sirasinda yakalanan runtime degerler (secilen dropdown vb.) buraya yazilmaz; `CustomWorld.store` (ScenarioStore, bkz. 12.1) ile yonetilir.
 
 ---
 
@@ -799,11 +800,15 @@ Ornek:
 // features/support/world.ts
 import { World, setWorldConstructor } from '@cucumber/cucumber';
 import { Browser, BrowserContext, Page } from '@playwright/test';
+import { ScenarioStore } from './scenario-store';
 
 export class CustomWorld extends World {
   browser?: Browser;
   context?: BrowserContext;
   page?: Page;
+
+  // Senaryo boyunca isimle saklanan runtime degerler (bkz. 12.1)
+  readonly store = new ScenarioStore();
 }
 
 setWorldConstructor(CustomWorld);
@@ -835,7 +840,66 @@ Kurallar:
 - `getPage(world)` yardimci fonksiyonu `features/support/world.ts` icinde tanimli ve export edilmistir. Step definition dosyalari bu fonksiyonu `../support/world`'dan import etmelidir; her dosyada ayri tanimlanmamalidir.
 - Cucumber World gereksiz data deposuna donusturulmemelidir.
 - Test data icin yine `src/data/data.ts` kullanilmalidir.
+- Statik test datasi World'e konmaz; ancak test sirasinda yakalanan runtime degerler (orn. secilen dropdown) `CustomWorld.store` (ScenarioStore) ile isimle saklanir. Bkz. 12.1.
 - Browser secimi script, world parameter veya environment variable ile yonetilebilir.
+
+---
+
+## 12.1 Runtime Dinamik Deger Saklama (ScenarioStore)
+
+Test sirasinda ekranda olusan veya secilen dinamik bir degeri (orn. dropdown'dan secilen secenek, uretilen kayit ID'si, ekrandaki bir metin) bir sonraki adimda kullanmak gerekebilir. Bu degerler **test datasi degildir** — statik veri `src/data/data.ts`'tedir; bunlar senaryo-anlik runtime state'tir ve `features/support/scenario-store.ts` icindeki `ScenarioStore` ile yonetilir.
+
+`ScenarioStore`, `CustomWorld.store` olarak compose edilmistir. Cucumber her senaryo icin yeni bir World urettiginden her senaryo kendi bos store'u ile baslar; bir senaryoda saklanan deger digerine sizmaz (izolasyon otomatik).
+
+API:
+
+```ts
+this.store.save(name, value);     // isimle sakla (ayni isim tekrar yazilirsa uzerine yazar)
+this.store.get<T = string>(name); // isimle oku; kaydedilmemisse net hata firlatir
+this.store.has(name);             // saklanmis mi?
+```
+
+Deger tipi `unknown` tutulur (string disi degerler de saklanabilsin diye); okurken beklenen tip `get<T>()` ile verilir, varsayilan `string`.
+
+Hazir generic motor (store'dan bagimsiz; deger alir/dondurur, store islemi step'te yapilir):
+
+```text
+src/actions/actions.ts
+  readElementText(locator, report)               -> elementin text'ini okur ve dondurur
+  readElementAttribute(locator, report, attr)    -> elementin attribute degerini okur ve dondurur
+  fillElement(locator, report, value)            -> verilen degeri input'a yazar
+  clickByText(page, value, { exact })            -> metni degere ESIT/ICEREN ilk elemana tiklar
+
+src/assertions/assertions.ts
+  expectTextPresent(page, value, { exact })      -> metni degere ESIT/ICEREN eleman var mi dogrular (baska sayfada da)
+```
+
+`exact: true` (varsayilan) "esit", `exact: false` "iceren" demektir. Bu fonksiyonlar hazirdir; eksik olan sadece bunlari `this.store` ile baglayan sayfa-bazli step'lerdir (asagidaki desen).
+
+Kullanim deseni:
+
+```text
+1. actions.ts'e secip SECILEN DEGERI DONDUREN reusable action yaz.
+   - page-only imza (`page: Page`), store'u bilmez, sadece degeri return eder.
+   - reportAction'li, locator Bolum 6 kurali ile MCP'de dogrulanmis.
+2. Step, action'in donen degerini `this.store.save(name, ...)` ile saklar.
+   - `name` step'e `{string}` parametresi olarak gelir.
+3. Sonraki step `this.store.get(name)` ile okuyup ilgili action'a verir.
+```
+
+Kurallar:
+
+- Saklama/okuma icin GENERIC step yazilir; sayfa-bazli "X kaydet" step'i acilmaz (navigation step mantigi gibi). Dropdown locatorı sayfaya ozeldir, saklama mekanizmasi ortaktir.
+- `ScenarioStore` saf tutulur; reporting bagimliligi icermez. Raporlama action/step katmaninda yapilir.
+- Statik veya sabit deger store'a konmaz; o `src/data/data.ts`'e gider.
+- Henuz olmayan save/use step'leri "varmis gibi" yazilmaz; ilk gercek dropdown'li test geldiginde yukaridaki desen ile eklenir.
+
+Ornek (gelecekteki kullanim):
+
+```gherkin
+* Para birimi dropdown'ından rastgele bir seçenek seçilir ve "option-1" olarak kaydedilir
+* "option-1" olarak kaydedilen değer ile kayıt aranır
+```
 
 ---
 
@@ -1046,6 +1110,7 @@ Codex yeni test uretirken asagidaki sirayi izlemelidir:
 6. Flow yoksa src/data/data.ts, src/actions/actions.ts, src/assertions/assertions.ts ve src/locators/locators.ts yapisini kontrol et.
 7. Sidebar navigasyon ihtiyaci varsa `features/step-definitions/navigation.steps.ts` icindeki genel step'i kullan: `"UstMenu > AltMenu > SayfaAdi" menü yolundan sayfaya gidilir`. Ayri navigasyon step yazma.
 7b. Diger ortak UI ihtiyaci varsa once `common` veya `navigation` gruplarini kullan.
+7c. Bir degeri kaydedip baska adimda kullanacaksan (12.1) hazir generic fonksiyonlari kullan (`readElementText`/`readElementAttribute`/`fillElement`/`clickByText`/`expectTextPresent`); degeri `this.store` ile sakla, `data.ts`'e veya feature'a hard-code etme.
 8. Eksik reusable parca varsa once mevcut tek dosya yapisina kucuk ve temiz ekleme yap.
 9. Tek dosya buyume esigini asiyorsa, sadece ilgili katmani/domain'i domain bazli dosyaya ayir.
 10. Feature dosyasini `features/generated` altinda business seviyesinde olustur.
@@ -1073,6 +1138,7 @@ Codex sunlari yapmamalidir:
 - Hayali data, hayali locator veya hayali assertion yazma.
 - TODO, placeholder step, bos assertion veya gecici locator birakma.
 - Ayni fonksiyonu farkli dosyalarda tekrar tekrar uretme.
+- Test sirasinda yakalanan runtime degeri (secilen dropdown, okunan text/attribute) `data.ts`'e veya feature'a hard-code etme; `CustomWorld.store` (ScenarioStore, 12.1) ile sakla.
 ```
 
 ---
@@ -1208,6 +1274,7 @@ Yeni bir test veya kod uretildikten sonra asagidaki kontrol listesi uygulanmalid
 [ ] Sayfaya ozel locator yanlislikla common gruba alinmamis mi?
 [ ] Locator mevcut mimariye gore dogru locator dosyasinda mi?
 [ ] Data mevcut mimariye gore dogru data dosyasinda mi?
+[ ] (Varsa) Test sirasinda yakalanan dinamik deger `data.ts`'e/feature'a hard-code edilmemis, `ScenarioStore` (`this.store`, 12.1) ile mi yonetilmis?
 [ ] Reusable action mevcut mimariye gore dogru action dosyasinda mi?
 [ ] Yeni action yazmadan once mevcut action'lar `rg` ile aranmis mi?
 [ ] Assertion mevcut mimariye gore dogru assertion dosyasinda mi?

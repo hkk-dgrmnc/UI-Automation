@@ -157,6 +157,7 @@ npm run check
 - Yeni step/locator/action/flow sonrası `npm run inventory` çalıştırılmalıdır.
 - Commit öncesi `npm run check` temiz geçmelidir.
 - Belirsiz expected result, eksik yetki, doğrulanamayan locator veya eksik test data varsa koda TODO/placeholder bırakılmamalıdır.
+- Test sırasında yakalanan dinamik değerler (seçilen dropdown, okunan text/attribute) `ScenarioStore` (`World.store`) ile saklanır; `data.ts`'e veya feature'a hard-code edilmez.
 
 ## Kısa Özet
 

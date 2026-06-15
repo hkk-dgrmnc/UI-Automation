@@ -1,5 +1,6 @@
 import { World, setWorldConstructor } from '@cucumber/cucumber';
 import { Browser, BrowserContext, Page } from '@playwright/test';
+import { ScenarioStore } from './scenario-store';
 
 export type BrowserName = 'chromium' | 'firefox' | 'webkit';
 
@@ -13,6 +14,9 @@ export class CustomWorld extends World {
   browser?: Browser;
   context?: BrowserContext;
   page?: Page;
+
+  /** Senaryo boyunca isimle saklanan runtime degerler (orn. secilen dropdown degeri). */
+  readonly store = new ScenarioStore();
 }
 
 export function getPage(world: CustomWorld): Page {

@@ -171,5 +171,6 @@ Belirsiz locator, yetki, veri veya beklenen sonuç varsa koda TODO, geçici sele
 - Assertion dosyası click/fill gibi kullanıcı aksiyonu içermez.
 - Reusable action ve assertion'lar Cucumber raporuna locator adı, locator değeri ve beklenen sonucu yazar.
 - Şifre gibi hassas değerler raporlarda maskelenir.
+- Test sırasında yakalanan dinamik değerler (seçilen dropdown, okunan text/attribute) `ScenarioStore` (`World.store`) ile isimle saklanıp sonraki adımlarda kullanılır; `data.ts`'e veya feature'a hard-code edilmez. Detay: AGENTS.md 12.1.
 
 Detaylı standartlar için [AGENTS.md](./AGENTS.md) referans alınmalıdır.

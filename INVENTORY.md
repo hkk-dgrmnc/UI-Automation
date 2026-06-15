@@ -57,6 +57,10 @@ _src/actions/actions.ts_
 - `openSidebarMenuPath()`
 - `clickSidebarMenuLink()`
 - `clickCreateLink()`
+- `readElementText()`
+- `readElementAttribute()`
+- `fillElement()`
+- `clickByText()`
 
 ## Flows
 

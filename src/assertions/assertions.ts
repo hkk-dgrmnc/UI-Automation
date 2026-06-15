@@ -151,3 +151,34 @@ export async function expectAutomaticParametersCreatePageOpened(page: Page) {
     { timeout: 30_000 },
   );
 }
+
+// --- Dinamik deger: metne gore varlik dogrulama -----------------------------
+// Store'dan bagimsizdir: deger alir. Kayitli degerle kullanim step katmaninda
+// `this.store.get(name)` ile yapilir (AGENTS.md 12.1). Baska sayfada da calisir.
+
+/**
+ * Sayfada metni verilen degere ESIT (exact) ya da ICEREN en az bir gorunur
+ * eleman bulundugunu dogrular.
+ */
+export async function expectTextPresent(
+  page: Page,
+  value: string,
+  options: { exact?: boolean } & AssertionOptions = {},
+) {
+  const { exact = true, timeout } = options;
+  const target = page.getByText(value, { exact }).first();
+  const name = `getByText(${exact ? '=' : '~'} "${value}")`;
+
+  reportAssertion({
+    assertion: 'To Be Visible',
+    locatorName: name,
+    locatorValue: `text ${exact ? 'equals' : 'contains'} "${value}"`,
+    expected: `metni "${value}" ${exact ? 'degerine esit' : 'degerini iceren'} eleman var`,
+  });
+  try {
+    await expect(target).toBeVisible({ timeout });
+  } catch (error) {
+    reportError({ action: 'To Be Visible', locatorName: name, error });
+    throw error;
+  }
+}
