@@ -851,15 +851,17 @@ Test sirasinda ekranda olusan veya secilen dinamik bir degeri (orn. dropdown'dan
 
 `ScenarioStore`, `CustomWorld.store` olarak compose edilmistir. Cucumber her senaryo icin yeni bir World urettiginden her senaryo kendi bos store'u ile baslar; bir senaryoda saklanan deger digerine sizmaz (izolasyon otomatik).
 
-API:
+API (step'lerde bunlari kullan — rapora/console'a SAVE/USE satiri dusurur):
 
 ```ts
-this.store.save(name, value);     // isimle sakla (ayni isim tekrar yazilirsa uzerine yazar)
-this.store.get<T = string>(name); // isimle oku; kaydedilmemisse net hata firlatir
-this.store.has(name);             // saklanmis mi?
+this.saveValue(name, value);      // isimle sakla + rapora "SAVE 'name' = value"
+this.getValue<T = string>(name);  // isimle oku  + rapora "USE 'name' = value" (yoksa hata)
+this.store.has(name);             // saklanmis mi? (raporsuz boolean kontrol)
 ```
 
-Deger tipi `unknown` tutulur (string disi degerler de saklanabilsin diye); okurken beklenen tip `get<T>()` ile verilir, varsayilan `string`.
+`saveValue`/`getValue` saf `ScenarioStore`'u (`this.store.save/get`) cagirir, ustune `reportValue` ile olayi rapora yazar. Raporsuz dogrudan erisim gerekirse `this.store.*` hala mevcuttur ama step'lerde `saveValue`/`getValue` tercih edilir.
+
+Deger tipi `unknown` tutulur (string disi degerler de saklanabilsin diye); okurken beklenen tip `getValue<T>()` ile verilir, varsayilan `string`.
 
 Hazir generic motor (store'dan bagimsiz; deger alir/dondurur, store islemi step'te yapilir):
 
@@ -874,7 +876,7 @@ src/assertions/assertions.ts
   expectTextPresent(page, value, { exact })      -> metni degere ESIT/ICEREN eleman var mi dogrular (baska sayfada da)
 ```
 
-`exact: true` (varsayilan) "esit", `exact: false` "iceren" demektir. Bu fonksiyonlar hazirdir; eksik olan sadece bunlari `this.store` ile baglayan sayfa-bazli step'lerdir (asagidaki desen).
+`exact: true` (varsayilan) "esit", `exact: false` "iceren" demektir. Bu fonksiyonlar hazirdir; eksik olan sadece bunlari `this.saveValue`/`this.getValue` ile baglayan sayfa-bazli step'lerdir (asagidaki desen).
 
 Kullanim deseni:
 
@@ -882,15 +884,15 @@ Kullanim deseni:
 1. actions.ts'e secip SECILEN DEGERI DONDUREN reusable action yaz.
    - page-only imza (`page: Page`), store'u bilmez, sadece degeri return eder.
    - reportAction'li, locator Bolum 6 kurali ile MCP'de dogrulanmis.
-2. Step, action'in donen degerini `this.store.save(name, ...)` ile saklar.
+2. Step, action'in donen degerini `this.saveValue(name, ...)` ile saklar (rapora SAVE duser).
    - `name` step'e `{string}` parametresi olarak gelir.
-3. Sonraki step `this.store.get(name)` ile okuyup ilgili action'a verir.
+3. Sonraki step `this.getValue(name)` ile okuyup (rapora USE duser) ilgili action'a verir.
 ```
 
 Kurallar:
 
 - Saklama/okuma icin GENERIC step yazilir; sayfa-bazli "X kaydet" step'i acilmaz (navigation step mantigi gibi). Dropdown locatorı sayfaya ozeldir, saklama mekanizmasi ortaktir.
-- `ScenarioStore` saf tutulur; reporting bagimliligi icermez. Raporlama action/step katmaninda yapilir.
+- `ScenarioStore` saf tutulur; reporting bagimliligi icermez. SAVE/USE raporlamasi World'un `saveValue`/`getValue` sarmalayicilarinda (`reportValue`) yapilir.
 - Statik veya sabit deger store'a konmaz; o `src/data/data.ts`'e gider.
 - Henuz olmayan save/use step'leri "varmis gibi" yazilmaz; ilk gercek dropdown'li test geldiginde yukaridaki desen ile eklenir.
 
@@ -1110,7 +1112,7 @@ Codex yeni test uretirken asagidaki sirayi izlemelidir:
 6. Flow yoksa src/data/data.ts, src/actions/actions.ts, src/assertions/assertions.ts ve src/locators/locators.ts yapisini kontrol et.
 7. Sidebar navigasyon ihtiyaci varsa `features/step-definitions/navigation.steps.ts` icindeki genel step'i kullan: `"UstMenu > AltMenu > SayfaAdi" menü yolundan sayfaya gidilir`. Ayri navigasyon step yazma.
 7b. Diger ortak UI ihtiyaci varsa once `common` veya `navigation` gruplarini kullan.
-7c. Bir degeri kaydedip baska adimda kullanacaksan (12.1) hazir generic fonksiyonlari kullan (`readElementText`/`readElementAttribute`/`fillElement`/`clickByText`/`expectTextPresent`); degeri `this.store` ile sakla, `data.ts`'e veya feature'a hard-code etme.
+7c. Bir degeri kaydedip baska adimda kullanacaksan (12.1) hazir generic fonksiyonlari kullan (`readElementText`/`readElementAttribute`/`fillElement`/`clickByText`/`expectTextPresent`); degeri `this.saveValue`/`this.getValue` ile sakla/oku (rapora SAVE/USE duser), `data.ts`'e veya feature'a hard-code etme.
 8. Eksik reusable parca varsa once mevcut tek dosya yapisina kucuk ve temiz ekleme yap.
 9. Tek dosya buyume esigini asiyorsa, sadece ilgili katmani/domain'i domain bazli dosyaya ayir.
 10. Feature dosyasini `features/generated` altinda business seviyesinde olustur.

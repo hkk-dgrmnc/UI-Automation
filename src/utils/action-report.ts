@@ -34,6 +34,12 @@ type ReportErrorOptions = {
   error: unknown;
 };
 
+type ReportValueOptions = {
+  event: 'SAVE' | 'USE';
+  name: string;
+  value: unknown;
+};
+
 const actionReportContext = new AsyncLocalStorage<ActionReportContext>();
 
 export async function runWithActionReport<T>(
@@ -67,6 +73,11 @@ function logError(action: string, locatorName: string, message: string) {
   const label = `${C.bold}${C.red}  ERROR ${C.reset}`;
   console.log(`${INDENT}${label}  ${C.bold}${action}${C.reset}  ${C.gray}${locatorName}${C.reset}`);
   console.log(`${INDENT}         ${C.red}${C.dim}${message}${C.reset}`);
+}
+
+function logValue(event: 'SAVE' | 'USE', name: string, value: string) {
+  const label = `${C.bold}${C.yellow}  STORE ${C.reset}`;
+  console.log(`${INDENT}${label}  ${C.bold}${event}${C.reset}  ${C.gray}'${name}'${C.reset}  ${C.dim}= ${value}${C.reset}`);
 }
 
 export function reportAction(options: ReportActionOptions) {
@@ -118,4 +129,33 @@ export function reportError(options: ReportErrorOptions) {
 
   context.lines.push(`ERROR    ${options.action} failed   ${options.locatorName}`);
   context.lines.push(`         ${message}`);
+}
+
+function formatStoredValue(value: unknown): string {
+  if (typeof value === 'string') {
+    return value;
+  }
+  try {
+    return JSON.stringify(value);
+  } catch {
+    return String(value);
+  }
+}
+
+/**
+ * Bir degerin isimle saklanmasini (SAVE) veya tekrar kullanilmasini (USE) console
+ * ve Cucumber raporuna yazar. ScenarioStore'u saf tutmak icin store icinde degil,
+ * World'un saveValue/getValue sarmalayicilarinda cagrilir.
+ */
+export function reportValue(options: ReportValueOptions) {
+  const context = actionReportContext.getStore();
+  const display = formatStoredValue(options.value);
+
+  logValue(options.event, options.name, display);
+
+  if (!context) {
+    return;
+  }
+
+  context.lines.push(['STORE', options.event, `'${options.name}'`, `= ${display}`].join('   '));
 }
