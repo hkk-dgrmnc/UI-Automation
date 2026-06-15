@@ -25,8 +25,26 @@ const TEXTS = {
   automaticParameters: {
     listTitle: 'Otomatik Parametre Listesi',
     infoTitle: 'Otomatik Parametre Bilgileri',
+    operationCodeLabel: 'İşlem Kodu',
+    operationCodeOptions: [
+      '[001] KAPAMA',
+      '[002] VERGİSEL ŞUBE KAPAMA',
+      '[003] DÖKÜM',
+    ],
+    typeLabel: 'Tür',
+    typeOptions: ['MERKEZ', 'BAŞMÜDÜRLÜK', 'GENEL MÜDÜRLÜK'],
+    subTypeLabel: 'Tür 2',
+    subTypeOptions: ['KDV-1', 'KDV-2', 'DAMGA', 'BSMV', 'KAMBİYO', 'KONAKLAMA'],
+    kdvRateLabel: 'KDV Oranı',
+    operationDescriptionLabel: 'Fiş Açıklama',
   },
 } as const;
+
+// Dropdown'larda beklenen secenekler. Gercek ekranda dogrulandi; assertion'lar
+// bu listeleri tek kaynak olarak kullanir.
+export const OPERATION_CODE_OPTIONS = TEXTS.automaticParameters.operationCodeOptions;
+export const TYPE_OPTIONS = TEXTS.automaticParameters.typeOptions;
+export const SUB_TYPE_OPTIONS = TEXTS.automaticParameters.subTypeOptions;
 
 export const locators = (page: Page) => ({
   auth: {
@@ -37,6 +55,10 @@ export const locators = (page: Page) => ({
   },
   common: {
     createLink: page.locator(SELECTORS.common.createLink),
+    // Acik dropdown (MUI Autocomplete veya Select) tek bir role=listbox render eder.
+    // Ayni anda tek dropdown acik oldugu icin bu locator'lar tum dropdown'lar icin ortaktir.
+    listboxOptions: page.getByRole('listbox').getByRole('option'),
+    listboxOption: (name: string) => page.getByRole('listbox').getByRole('option', { name, exact: true }),
   },
   navigation: {
     sidebarMenuButton: (name: string) => page.getByRole('button').filter({
@@ -50,6 +72,12 @@ export const locators = (page: Page) => ({
   automaticParameters: {
     listTitle: page.getByText(TEXTS.automaticParameters.listTitle, { exact: true }),
     infoTitle: page.getByText(TEXTS.automaticParameters.infoTitle, { exact: true }),
+    operationCodeCombobox: page.getByRole('combobox', { name: TEXTS.automaticParameters.operationCodeLabel }),
+    typeCombobox: page.getByRole('combobox', { name: TEXTS.automaticParameters.typeLabel, exact: true }),
+    subTypeCombobox: page.getByRole('combobox', { name: TEXTS.automaticParameters.subTypeLabel }),
+    kdvRateCombobox: page.getByRole('combobox', { name: TEXTS.automaticParameters.kdvRateLabel }),
+    operationDescriptionInput: page.getByRole('textbox', { name: TEXTS.automaticParameters.operationDescriptionLabel, exact: true }),
+    operationDescriptionRequiredLabel: page.getByText(`${TEXTS.automaticParameters.operationDescriptionLabel} *`, { exact: true }).first(),
   },
 });
 
@@ -75,6 +103,11 @@ export const LOCATOR_REPORTS = {
   },
   common: {
     createLink: { name: 'common.createLink', value: SELECTORS.common.createLink },
+    listboxOptions: { name: 'common.listboxOptions', value: 'role=listbox >> role=option' },
+    listboxOption: (name: string) => ({
+      name: `common.listboxOption('${name}')`,
+      value: `role=listbox >> role=option name="${name}"`,
+    }),
   },
   navigation: {
     sidebarMenuButton: (name: string) => ({
@@ -93,5 +126,11 @@ export const LOCATOR_REPORTS = {
   automaticParameters: {
     listTitle: { name: 'automaticParameters.listTitle', value: `getByText('${TEXTS.automaticParameters.listTitle}', { exact: true })` },
     infoTitle: { name: 'automaticParameters.infoTitle', value: `getByText('${TEXTS.automaticParameters.infoTitle}', { exact: true })` },
+    operationCodeCombobox: { name: 'automaticParameters.operationCodeCombobox', value: `role=combobox name="${TEXTS.automaticParameters.operationCodeLabel}"` },
+    typeCombobox: { name: 'automaticParameters.typeCombobox', value: `role=combobox name="${TEXTS.automaticParameters.typeLabel}" (exact)` },
+    subTypeCombobox: { name: 'automaticParameters.subTypeCombobox', value: `role=combobox name="${TEXTS.automaticParameters.subTypeLabel}"` },
+    kdvRateCombobox: { name: 'automaticParameters.kdvRateCombobox', value: `role=combobox name="${TEXTS.automaticParameters.kdvRateLabel}"` },
+    operationDescriptionInput: { name: 'automaticParameters.operationDescriptionInput', value: `role=textbox name="${TEXTS.automaticParameters.operationDescriptionLabel}" (exact)` },
+    operationDescriptionRequiredLabel: { name: 'automaticParameters.operationDescriptionRequiredLabel', value: `getByText('${TEXTS.automaticParameters.operationDescriptionLabel} *', { exact: true })` },
   },
 } satisfies LocatorReportsShape;

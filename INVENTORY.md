@@ -22,6 +22,19 @@
 
 - `Then` Otomatik Parametre Tanımlama sayfasının açıldığı doğrulanır
 - `When` Yeni kayıt oluşturma ekranına geçiş yapılır
+- `When` İşlem Kodu dropdown'ı açılır
+- `Then` İşlem Kodu listesinin kod ve açıklama formatında listelendiği doğrulanır
+- `When` İşlem Kodu olarak {string} seçilir
+- `Then` Tür 2 alanının aktif, KDV Oranı alanının pasif olduğu doğrulanır
+- `Then` Tür 2 ve KDV Oranı alanlarının pasif olduğu doğrulanır
+- `Then` Tür 2 alanının pasif, KDV Oranı alanının aktif olduğu doğrulanır
+- `When` Fiş Açıklama alanına {string} yazılır
+- `Then` Fiş Açıklama alanının en fazla 15 karakter aldığı ve Türkçe karakteri koruduğu doğrulanır
+- `Then` Fiş Açıklama alanının zorunlu olduğu doğrulanır
+- `When` Tür dropdown\'ı açılır
+- `Then` Tür listesinde MERKEZ, BAŞMÜDÜRLÜK ve GENEL MÜDÜRLÜK seçeneklerinin listelendiği doğrulanır
+- `When` Tür 2 dropdown\'ı açılır
+- `Then` Tür 2 listesinde KDV-1, KDV-2, DAMGA, BSMV, KAMBİYO ve KONAKLAMA seçeneklerinin listelendiği doğrulanır
 
 ## Locators
 
@@ -36,10 +49,18 @@
 
 - `automaticParameters.listTitle` → getByText('Otomatik Parametre Listesi', { exact: true })
 - `automaticParameters.infoTitle` → getByText('Otomatik Parametre Bilgileri', { exact: true })
+- `automaticParameters.operationCodeCombobox` → role=combobox name="İşlem Kodu"
+- `automaticParameters.typeCombobox` → role=combobox name="Tür" (exact)
+- `automaticParameters.subTypeCombobox` → role=combobox name="Tür 2"
+- `automaticParameters.kdvRateCombobox` → role=combobox name="KDV Oranı"
+- `automaticParameters.operationDescriptionInput` → role=textbox name="Fiş Açıklama" (exact)
+- `automaticParameters.operationDescriptionRequiredLabel` → getByText('Fiş Açıklama *', { exact: true })
 
 ### common
 
 - `common.createLink` → a#action-create
+- `common.listboxOptions` → role=listbox >> role=option
+- `common.listboxOption` (fn) → role=listbox >> role=option name="<arg>"
 
 ### navigation
 
@@ -57,6 +78,11 @@ _src/actions/actions.ts_
 - `openSidebarMenuPath()`
 - `clickSidebarMenuLink()`
 - `clickCreateLink()`
+- `openOperationCodeDropdown()`
+- `selectOperationCode()`
+- `openTypeDropdown()`
+- `openSubTypeDropdown()`
+- `fillOperationDescription()`
 - `readElementText()`
 - `readElementAttribute()`
 - `fillElement()`

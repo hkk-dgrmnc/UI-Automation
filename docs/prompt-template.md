@@ -23,6 +23,12 @@ Aşağıda sadece en kritik ve en çok atlanan kuralları öne çıkarıyorum.
 - Bu turda yapılacak TC'ler: `[TC-XXX, TC-YYY, ...]`
 - Hariç TC'ler: Bu turda diğer tüm TC'ler hariç (`[açıkça say: TC-001 v1/v2, ...]`)
 - Bu sayfanın domain'i / step dosyası: `[domain veya mevcut *.steps.ts]`
+- Senaryo modu: `[tek-total-senaryo | her-tc-ayri-senaryo]`
+  - **tek-total-senaryo**: Bu manuel dosya TEK bir total case'tir; ben onu parça
+    parça yaptırıyorum. Her turdaki TC adımları **AYNI tek senaryonun sonuna**
+    eklenir, yeni Scenario açılmaz. (Örn. `YTKP-1009-test-cases-codex.md` bu moddadır.)
+  - **her-tc-ayri-senaryo**: Her TC kendi bağımsız Scenario'su olur; Scenario adı
+    TC ID ile başlar.
 
 ### REUSE (önce bunu yap)
 - Yeni step/locator/action/assertion/flow yazmadan önce INVENTORY.md'yi oku;
@@ -51,13 +57,30 @@ Aşağıda sadece en kritik ve en çok atlanan kuralları öne çıkarıyorum.
   - Bu test ID'ye ait yeni step'ler **mevcut `[domain veya *.steps.ts]`** dosyasına eklenir.
   - auth / navigation gibi ortak step'ler için ilgili mevcut dosya (`auth.steps.ts`,
     `navigation.steps.ts`) reuse edilir. Aynı işi yapan ikinci bir step dosyası açma.
-- Feature formatı:
-  - Her TC ayrı Scenario olur; Scenario adı TC ID ile başlar.
+- Feature formatı (DOLDUR'daki **Senaryo modu**'na göre):
+  - **tek-total-senaryo** ise: Bu turdaki TC adımlarını dosyadaki **mevcut tek
+    senaryonun sonuna ekle**; yeni Scenario AÇMA, senaryoyu yeniden adlandırma,
+    var olan adımları silme. Senaryo, total case'i parça parça büyüyen tek bir
+    akış olarak temsil eder. Aynı ön koşul (login/menü/form açma) zaten senaryonun
+    başında varsa tekrar ekleme; akışın kaldığı yerden devam et.
+  - **her-tc-ayri-senaryo** ise: Her TC ayrı Scenario olur; Scenario adı TC ID
+    ile başlar ve her senaryo kendi ön koşullarını içerir (bağımsız çalışır).
   - Adımlar `*` ile yazılır (Given/When/Then değil), business seviyesinde olur;
     locator/CSS/teknik detay içermez.
   - Tag'ler feature veya scenario üstünde yazılır.
 
-  Örnek:
+  Örnek (tek-total-senaryo — bu turun adımları mevcut senaryonun **sonuna** eklenir):
+  ```gherkin
+  @[tag]
+  Feature: [ANA_TEST_ID] [Sayfa/Ekran Adı]
+
+    Scenario: [ANA_TEST_ID] - [total senaryo adı]
+      * [önceki turlardan gelen adımlar...]
+      * [bu turda eklenen business adım]
+      * [bu turda eklenen beklenen sonuç]
+  ```
+
+  Örnek (her-tc-ayri-senaryo):
   ```gherkin
   @[tag]
   Feature: [ANA_TEST_ID] [Sayfa/Ekran Adı]
@@ -109,10 +132,16 @@ TC'ler" listesindeki TC'leri otomasyona çevir. Hariç tutulanlara dokunma.
 
 ## Notlar (şablonu bakım yapan için — AI'a gönderme)
 
-- **Senaryo isimlendirme:** Kural "Scenario adı TC ID ile başlar". Mevcut bazı
-  feature'larda TC-ID'siz senaryo olabilir (ör. `YTKP-1009 - ...` = birleştirilmiş
-  TC-001). Bunları yeniden adlandırmak ayrı/manuel bir karardır; AI'a "mevcut
-  senaryoyu yeniden adlandırma" dedik, böylece güvenli kalıyor.
+- **Senaryo modu (tek-total vs ayrı):** Bazı manuel dosyalar TEK bir total case'tir
+  ve parça parça yaptırılır (ör. `YTKP-1009-test-cases-codex.md`). Bu durumda DOLDUR'da
+  `Senaryo modu: tek-total-senaryo` seç; her turun TC'leri aynı senaryonun sonuna
+  eklenir, yeni Scenario açılmaz. Birbirinden bağımsız case dosyaları için
+  `her-tc-ayri-senaryo` kullan. AGENTS.md'deki "TC ID ile başlayan senaryo" kuralı
+  ayrı-senaryo modu içindir.
+- **Senaryo isimlendirme:** tek-total-senaryo modunda senaryo adı ANA_TEST_ID ile
+  başlar (ör. `YTKP-1009 - ...`), tek tek TC ID'leri değil. Mevcut senaryoyu yeniden
+  adlandırmak ayrı/manuel bir karardır; AI'a "mevcut senaryoyu yeniden adlandırma"
+  dedik, böylece güvenli kalıyor.
 - **Step dosyası konvansiyonu:** Proje şu an domain-bazlı (`auth.steps.ts`,
   `navigation.steps.ts`) ve test-id-bazlı (`ytkp1009.steps.ts`) isimleri karışık
   kullanıyor. DOLDUR'daki "step dosyası" alanını mevcut dosyayı işaret edecek
