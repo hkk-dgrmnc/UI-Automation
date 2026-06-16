@@ -32,19 +32,16 @@ const TEXTS = {
       '[003] DÖKÜM',
     ],
     typeLabel: 'Tür',
-    typeOptions: ['MERKEZ', 'BAŞMÜDÜRLÜK', 'GENEL MÜDÜRLÜK'],
     subTypeLabel: 'Tür 2',
-    subTypeOptions: ['KDV-1', 'KDV-2', 'DAMGA', 'BSMV', 'KAMBİYO', 'KONAKLAMA'],
     kdvRateLabel: 'KDV Oranı',
     operationDescriptionLabel: 'Fiş Açıklama',
   },
 } as const;
 
-// Dropdown'larda beklenen secenekler. Gercek ekranda dogrulandi; assertion'lar
-// bu listeleri tek kaynak olarak kullanir.
+// İşlem Kodu listesi format/count dogrulamasinda (kod + aciklama) tek kaynak olarak
+// kullanilir. Tür / Tür 2 gibi salt "su secenekler listede mi" dogrulamalarinda
+// beklenen liste feature Data Table'indan gelir; koda gomulmez (bkz. AGENTS.md 9.1).
 export const OPERATION_CODE_OPTIONS = TEXTS.automaticParameters.operationCodeOptions;
-export const TYPE_OPTIONS = TEXTS.automaticParameters.typeOptions;
-export const SUB_TYPE_OPTIONS = TEXTS.automaticParameters.subTypeOptions;
 
 export const locators = (page: Page) => ({
   auth: {

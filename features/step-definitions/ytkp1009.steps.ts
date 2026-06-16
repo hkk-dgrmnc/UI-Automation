@@ -1,6 +1,7 @@
 import { Then, When } from '@cucumber/cucumber';
 import {
   fillOperationDescription,
+  openKdvRateDropdown,
   openOperationCodeDropdown,
   openSubTypeDropdown,
   openTypeDropdown,
@@ -14,8 +15,6 @@ import {
   expectSubTypeAndKdvRateDisabled,
   expectSubTypeDisabledKdvRateEnabled,
   expectSubTypeEnabledKdvRateDisabled,
-  expectSubTypeOptionsVisible,
-  expectTypeOptionsVisible,
 } from '../../src/assertions/assertions';
 import { openAutomaticParametersCreatePage } from '../../src/flows/ytkp1009.flow';
 import { CustomWorld, getPage } from '../support/world';
@@ -68,14 +67,10 @@ When('Tür dropdown\'ı açılır', async function (this: CustomWorld) {
   await openTypeDropdown(getPage(this));
 });
 
-Then('Tür listesinde MERKEZ, BAŞMÜDÜRLÜK ve GENEL MÜDÜRLÜK seçeneklerinin listelendiği doğrulanır', async function (this: CustomWorld) {
-  await expectTypeOptionsVisible(getPage(this));
-});
-
 When('Tür 2 dropdown\'ı açılır', async function (this: CustomWorld) {
   await openSubTypeDropdown(getPage(this));
 });
 
-Then('Tür 2 listesinde KDV-1, KDV-2, DAMGA, BSMV, KAMBİYO ve KONAKLAMA seçeneklerinin listelendiği doğrulanır', async function (this: CustomWorld) {
-  await expectSubTypeOptionsVisible(getPage(this));
+When('KDV Oranı dropdown\'ı açılır', async function (this: CustomWorld) {
+  await openKdvRateDropdown(getPage(this));
 });

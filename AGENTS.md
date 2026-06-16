@@ -696,6 +696,46 @@ expect(await locator.auth.userProfileButton.isVisible()).toBe(true);
 
 ---
 
+## 9.1 Liste / Dropdown Secenek Dogrulama Standardi
+
+Bir dropdown / listbox icinde "su secenekler listelenmis mi" dogrulamasi icin sayfa-ozel assertion ve sayfa-ozel step YAZILMAZ. Bu, navigation step (`{string} menü yolundan sayfaya gidilir`) ve save/use step (12.1) ile ayni felsefededir: mekanizma ortak, beklenen veri parametre olarak gelir.
+
+Hedef: her yeni dropdown icin yeni `expectXOptionsVisible` + yeni step + yeni sabit uretmek yerine tek generic step ve tek generic assertion kullanmak.
+
+Beklenen secenekler nerede durur:
+
+- Beklenen secenek listesi feature dosyasinda **Data Table** olarak verilir. Bu bir **beklenen sonuc** (Expected Result) oldugu icin feature'da business-okunur durmasi dogrudur; girdi datasi degildir, bu yuzden 7. bolumdeki "feature'a data gomme" yasagina girmez.
+- Secenek listesi koda (locators `TEXTS`, ayri sabit vb.) gomulmez. Boylece feature metni ile dogrulanan deger ayni kaynaktir; drift olmaz.
+
+Kullanilacak generic yapi:
+
+```text
+Step       -> features/step-definitions/common.steps.ts
+              "{string} listesinde aşağıdaki seçenekler listelenir" + Data Table
+Assertion  -> src/assertions/assertions.ts -> expectListboxOptionsVisible(page, expectedTexts)
+Locator    -> src/locators/locators.ts -> common.listboxOption(name) / common.listboxOptions
+```
+
+Feature kullanimi:
+
+```gherkin
+* Tür dropdown'ı açılır
+* "Tür" listesinde aşağıdaki seçenekler listelenir
+  | MERKEZ |
+  | BAŞMÜDÜRLÜK |
+  | GENEL MÜDÜRLÜK |
+```
+
+Kurallar:
+
+- Once ilgili dropdown'i acan step cagrilir; ardindan generic dogrulama step'i kullanilir. Generic step o anda acik olan listbox'i hedefler.
+- `"{string}"` listenin adidir (Tür, Tür 2, ...); rapor okunabilirligi icindir, locator'i daraltmak icin degil.
+- Bu generic step "verilen secenekler gorunur" dogrulamasi yapar (count/"tam olarak bunlar" degil). "Tam N adet ve format" gibi daha guclu dogrulama gerekiyorsa (orn. İşlem Kodu kod+aciklama formati) ayri, amaca ozel assertion yazilir; generic step bununla degistirilmez.
+- Yeni dropdown geldiginde kod yazilmaz; sadece feature'a yeni Data Table eklenir.
+- Reuse araması (`rg` / `INVENTORY.md`) bu step ve assertion'i once bulmali; ayni isi yapan ikinci bir varyant uretilmemelidir.
+
+---
+
 ## 10. Flow Yazim Kurallari
 
 Flow dosyalari `src/flows` altinda tutulmalidir.
@@ -1113,6 +1153,7 @@ Codex yeni test uretirken asagidaki sirayi izlemelidir:
 7. Sidebar navigasyon ihtiyaci varsa `features/step-definitions/navigation.steps.ts` icindeki genel step'i kullan: `"UstMenu > AltMenu > SayfaAdi" menü yolundan sayfaya gidilir`. Ayri navigasyon step yazma.
 7b. Diger ortak UI ihtiyaci varsa once `common` veya `navigation` gruplarini kullan.
 7c. Bir degeri kaydedip baska adimda kullanacaksan (12.1) hazir generic fonksiyonlari kullan (`readElementText`/`readElementAttribute`/`fillElement`/`clickByText`/`expectTextPresent`); degeri `this.saveValue`/`this.getValue` ile sakla/oku (rapora SAVE/USE duser), `data.ts`'e veya feature'a hard-code etme.
+7d. Bir dropdown/listbox secenek listesini dogrulayacaksan (9.1) generic step'i kullan: `"{Liste Adi}" listesinde aşağıdaki seçenekler listelenir` + Data Table. Sayfa-ozel `expectXOptionsVisible` veya sayfa-ozel step yazma; beklenen listeyi koda gomme.
 8. Eksik reusable parca varsa once mevcut tek dosya yapisina kucuk ve temiz ekleme yap.
 9. Tek dosya buyume esigini asiyorsa, sadece ilgili katmani/domain'i domain bazli dosyaya ayir.
 10. Feature dosyasini `features/generated` altinda business seviyesinde olustur.
@@ -1136,6 +1177,7 @@ Codex sunlari yapmamalidir:
 - Var olan step/locator/action/assertion varken ayni is icin yenisini uretme.
 - Ortak UI elemanini sayfa sayfa yeniden tanimlama.
 - Sidebar navigasyon icin sayfa bazli ozel step yazma; genel `{string} menü yolundan sayfaya gidilir` step'ini kullan.
+- Dropdown/listbox secenek dogrulamasi icin sayfa-ozel `expectXOptionsVisible` veya sayfa-ozel step yazma; generic `{string} listesinde aşağıdaki seçenekler listelenir` step'i + Data Table kullan (9.1). Beklenen listeyi koda gomme.
 - waitForTimeout kullanma.
 - Hayali data, hayali locator veya hayali assertion yazma.
 - TODO, placeholder step, bos assertion veya gecici locator birakma.
@@ -1272,6 +1314,8 @@ Yeni bir test veya kod uretildikten sonra asagidaki kontrol listesi uygulanmalid
 [ ] Yeni locator eklendiyse `LOCATOR_REPORTS` icine de rapor metadatasi eklendi mi?
 [ ] `getPage` fonksiyonu her step definition dosyasinda ayri tanimlanmamis, `../support/world`'dan import edilmis mi?
 [ ] Sidebar navigasyon icin sayfa bazli ozel step yazilmamis, `"{string} menü yolundan sayfaya gidilir"` step'i kullanilmis mi?
+[ ] Dropdown/listbox secenek dogrulamasi icin sayfa-ozel assertion/step yazilmamis, generic `"{string} listesinde aşağıdaki seçenekler listelenir"` step'i + Data Table kullanilmis mi (9.1)?
+[ ] Beklenen secenek listesi koda gomulmemis, feature Data Table'inda mi?
 [ ] Ortak UI elemani `common`, ortak navigasyon elemani `navigation` grubunda mi?
 [ ] Sayfaya ozel locator yanlislikla common gruba alinmamis mi?
 [ ] Locator mevcut mimariye gore dogru locator dosyasinda mi?

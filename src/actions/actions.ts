@@ -175,6 +175,16 @@ export async function openSubTypeDropdown(page: Page) {
   );
 }
 
+export async function openKdvRateDropdown(page: Page) {
+  const locator = locators(page);
+
+  await dismissOpenMenu(page);
+  await clickWithReport(
+    locator.automaticParameters.kdvRateCombobox,
+    LOCATOR_REPORTS.automaticParameters.kdvRateCombobox,
+  );
+}
+
 export async function fillOperationDescription(page: Page, value: string) {
   const locator = locators(page);
 

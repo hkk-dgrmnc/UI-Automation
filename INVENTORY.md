@@ -14,6 +14,10 @@
 - `When` {string} kullanıcısı bilgileri ile giriş yapılır
 - `Then` Kullanıcının login oldugu dogrulanır
 
+### features/step-definitions/common.steps.ts
+
+- `Then` {string} listesinde aşağıdaki seçenekler listelenir
+
 ### features/step-definitions/navigation.steps.ts
 
 - `When` {string} menü yolundan sayfaya gidilir
@@ -32,9 +36,8 @@
 - `Then` Fiş Açıklama alanının en fazla 15 karakter aldığı ve Türkçe karakteri koruduğu doğrulanır
 - `Then` Fiş Açıklama alanının zorunlu olduğu doğrulanır
 - `When` Tür dropdown\'ı açılır
-- `Then` Tür listesinde MERKEZ, BAŞMÜDÜRLÜK ve GENEL MÜDÜRLÜK seçeneklerinin listelendiği doğrulanır
 - `When` Tür 2 dropdown\'ı açılır
-- `Then` Tür 2 listesinde KDV-1, KDV-2, DAMGA, BSMV, KAMBİYO ve KONAKLAMA seçeneklerinin listelendiği doğrulanır
+- `When` KDV Oranı dropdown\'ı açılır
 
 ## Locators
 
@@ -82,6 +85,7 @@ _src/actions/actions.ts_
 - `selectOperationCode()`
 - `openTypeDropdown()`
 - `openSubTypeDropdown()`
+- `openKdvRateDropdown()`
 - `fillOperationDescription()`
 - `readElementText()`
 - `readElementAttribute()`

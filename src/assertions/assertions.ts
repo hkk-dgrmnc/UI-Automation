@@ -3,8 +3,6 @@ import { LocatorReport, reportAssertion, reportError } from '../utils/action-rep
 import {
   LOCATOR_REPORTS,
   OPERATION_CODE_OPTIONS,
-  SUB_TYPE_OPTIONS,
-  TYPE_OPTIONS,
   locators,
 } from '../locators/locators';
 
@@ -227,20 +225,14 @@ export async function expectOperationCodeListFormatted(page: Page) {
 
 // Acik dropdown listesinde beklenen secenek metinlerinin gorunur oldugunu dogrular.
 // Her seferinde tek dropdown acik oldugu icin metinler tekil eslesir.
-async function expectListboxOptionsVisible(page: Page, expectedTexts: readonly string[]) {
+// Generic: beklenen secenekler step'ten (feature Data Table) gelir; sayfa-ozel
+// secenek listesi koda gomulmez (bkz. AGENTS.md 9.1).
+export async function expectListboxOptionsVisible(page: Page, expectedTexts: readonly string[]) {
   const locator = locators(page);
 
   for (const text of expectedTexts) {
     await expectVisible(locator.common.listboxOption(text), LOCATOR_REPORTS.common.listboxOption(text));
   }
-}
-
-export async function expectTypeOptionsVisible(page: Page) {
-  await expectListboxOptionsVisible(page, TYPE_OPTIONS);
-}
-
-export async function expectSubTypeOptionsVisible(page: Page) {
-  await expectListboxOptionsVisible(page, SUB_TYPE_OPTIONS);
 }
 
 export async function expectOperationDescriptionMaxLengthAndTurkish(page: Page) {
