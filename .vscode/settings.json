@@ -29,6 +29,11 @@
   ],
   "cucumberRunner.runInTerminal": true,
   "cucumberRunner.cwd": "",
-  "cucumberRunner.commandTemplate": "npx cucumber-js '{featurePath}:{line}'",
+  // Tek template hem Feature hem Scenario lens'i icin calisir.
+  // Eklenti her placeholder'in YALNIZ ilk gecisini degistirir, bu yuzden
+  // {line} ve {featurePath} birer kez gecer. Feature-level run'da {line} BOS
+  // gelir -> tum feature; Scenario run'da {line}=satir no -> o senaryo (file:line).
+  // Path tek tirnak icinde oldugundan Git Bash backslash'i bozmaz.
+  "cucumberRunner.commandTemplate": "L='{line}'; npx cucumber-js '{featurePath}'${L:+:$L}",
   "terminal.integrated.defaultProfile.windows": "Git Bash"
 }
