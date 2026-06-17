@@ -326,6 +326,16 @@ Bir sayfaya sidebar menu uzerinden erisim icin sayfa bazli ozel step yazilmamali
 
 Format: `"UstMenu > AltMenu > ... > SayfaAdi"` — soldan saga her seviye ` > ` ile ayrilir, son eleman tiklanan link adidir.
 
+Step DERINLIKTEN BAGIMSIZDIR: seviye sayisi sabit degildir (1..N). String ` > ` ile bolunur; SON eleman tiklanan link, geri kalan TUM elemanlar sirayla acilacak ust menulerdir. Acma dongusu parent sayisi kadar doner (kodda sabit "4 seviye" varsayimi yoktur). Yani ayni step farkli derinliklerde calisir:
+
+```gherkin
+* "Para Transferi > Başka Hesaba > Başka Banka" menü yolundan sayfaya gidilir
+* "Raporlama > Keşfet" menü yolundan sayfaya gidilir
+* "Ana Sayfa" menü yolundan sayfaya gidilir
+```
+
+Onemli: Cucumber ifadesi `{string} menü yolundan sayfaya gidilir` oldugundan kapanis tirnagi ile `menü` arasinda BIR BOSLUK olmalidir (`"...Banka" menü`, `"...Banka"menü` degil); bosluk yoksa step eslesmez.
+
 Bu step tum uygulamada gecerlidir; yeni sayfa icin ayri navigation step yazilmaz, sadece menü yolu string olarak verilir.
 
 Step sozlugu kurallari:
@@ -618,6 +628,7 @@ Kurallar:
 - Reusable action icinde raporlanabilir click/fill yapiliyorsa `reportAction` ile Action, Locator Name, Locator Value ve gerekiyorsa Value bilgisi Cucumber raporuna eklenmelidir.
 - Reusable action wrapper yazilirken Playwright cagrisi (click, fill vb.) try-catch icine alinmalidir; hata durumunda `reportError` ile Action adi ve Locator Name console ve Cucumber raporuna yazilmali, hata yeniden fırlatilmalidir (`throw error`).
 - Sifre, token, gizli cevap gibi hassas degerler rapora acik yazilmamalidir; maskelenmelidir.
+- Raporlama/loglama bu projede her reusable wrapper'in VARSAYILAN davranisidir. Bu yuzden fonksiyon ismine `WithReport`, `WithLog`, `Reported` gibi son ek EKLENMEZ. Isim fonksiyonun ne yaptigini soyler, raporladigini degil: `click`, `fill`, `selectOption` (`clickWithReport`, `fillWithReport` degil). Ayni mantik assertion wrapper'lari icin de gecerlidir: `expectVisible`, `expectCount` (`expectVisibleWithReport` degil).
 
 Ortak reusable action isimleri bu mantikta tutulabilir:
 
@@ -712,8 +723,8 @@ Kullanilacak generic yapi:
 ```text
 Step       -> features/step-definitions/common.steps.ts
               "{string} listesinde aşağıdaki seçenekler listelenir" + Data Table
-Assertion  -> src/assertions/assertions.ts -> expectListboxOptionsVisible(page, expectedTexts)
-Locator    -> src/locators/locators.ts -> common.listboxOption(name) / common.listboxOptions
+Assertion  -> src/assertions/assertions.ts -> expectListboxOptionsVisible(page, listName, expectedTexts)
+Locator    -> src/locators/locators.ts -> common.optionInListbox(listboxId, name)
 ```
 
 Feature kullanimi:
@@ -728,8 +739,8 @@ Feature kullanimi:
 
 Kurallar:
 
-- Once ilgili dropdown'i acan step cagrilir; ardindan generic dogrulama step'i kullanilir. Generic step o anda acik olan listbox'i hedefler.
-- `"{string}"` listenin adidir (Tür, Tür 2, ...); rapor okunabilirligi icindir, locator'i daraltmak icin degil.
+- Once ilgili dropdown'i acan step cagrilir; ardindan generic dogrulama step'i kullanilir.
+- `"{string}"` listenin adidir (Tür, Tür 2, ...) ve listeyi DARALTMAK icin kullanilir. Assertion acik listbox'lar arasindan adi listName olani secer: MUI'de acik listbox'in `aria-labelledby`'i ilgili alanin label'ina isaret eder (orn. Tür listesi -> "Tür" label'i; gercek sayfada dogrulandi). Secenekler SADECE o listbox icinde aranir. Boylece "Tür" dendiginde fiziksel olarak Tür listesine bakilir; ekranda baska bir liste acik kalsa bile dogru olan ada gore secilir, yanlis listeden eslesme olmaz. Label metni "Tür *" gibi zorunlu yildizi icerebilir; normalize edilip (yildiz cikarilip trim) tam esleslenir, boylece "Tür" istenince "Tür 2" secilmez.
 - Bu generic step "verilen secenekler gorunur" dogrulamasi yapar (count/"tam olarak bunlar" degil). "Tam N adet ve format" gibi daha guclu dogrulama gerekiyorsa (orn. İşlem Kodu kod+aciklama formati) ayri, amaca ozel assertion yazilir; generic step bununla degistirilmez.
 - Yeni dropdown geldiginde kod yazilmaz; sadece feature'a yeni Data Table eklenir.
 - Reuse araması (`rg` / `INVENTORY.md`) bu step ve assertion'i once bulmali; ayni isi yapan ikinci bir varyant uretilmemelidir.

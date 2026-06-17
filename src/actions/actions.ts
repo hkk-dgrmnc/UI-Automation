@@ -2,7 +2,9 @@ import { Locator, Page } from '@playwright/test';
 import { LocatorReport, reportAction, reportError } from '../utils/action-report';
 import { LOCATOR_REPORTS, locators } from '../locators/locators';
 
-async function fillWithReport(
+// Raporlama bu projede her reusable wrapper'in varsayilan davranisidir; isim
+// "ne yaptigini" soyler, "raporladigini" degil. Bu yuzden suffix yok: fill/click.
+async function fill(
   locator: Locator,
   locatorReport: LocatorReport,
   value: string,
@@ -23,7 +25,7 @@ async function fillWithReport(
   }
 }
 
-async function clickWithReport(locator: Locator, locatorReport: LocatorReport) {
+async function click(locator: Locator, locatorReport: LocatorReport) {
   reportAction({
     action: 'Click',
     locatorName: locatorReport.name,
@@ -40,7 +42,7 @@ async function clickWithReport(locator: Locator, locatorReport: LocatorReport) {
 export async function fillLoginUsername(page: Page, username: string) {
   const locator = locators(page);
 
-  await fillWithReport(
+  await fill(
     locator.auth.usernameInput,
     LOCATOR_REPORTS.auth.usernameInput,
     username,
@@ -50,7 +52,7 @@ export async function fillLoginUsername(page: Page, username: string) {
 export async function fillLoginPassword(page: Page, password: string) {
   const locator = locators(page);
 
-  await fillWithReport(
+  await fill(
     locator.auth.passwordInput,
     LOCATOR_REPORTS.auth.passwordInput,
     password,
@@ -61,7 +63,7 @@ export async function fillLoginPassword(page: Page, password: string) {
 export async function clickLoginButton(page: Page) {
   const locator = locators(page);
 
-  await clickWithReport(
+  await click(
     locator.auth.loginButton,
     LOCATOR_REPORTS.auth.loginButton,
   );
@@ -77,7 +79,7 @@ async function openMenuIfChildHidden(
   menuButtonReport: LocatorReport,
 ) {
   if (!await isVisible(childLocator)) {
-    await clickWithReport(menuButton.filter({ visible: true }).first(), menuButtonReport);
+    await click(menuButton.filter({ visible: true }).first(), menuButtonReport);
   }
 }
 
@@ -106,7 +108,7 @@ export async function openSidebarMenuPath(
 export async function clickSidebarMenuLink(page: Page, name: string) {
   const locator = locators(page);
 
-  await clickWithReport(
+  await click(
     locator.navigation.sidebarMenuLink(name).filter({ visible: true }).first(),
     LOCATOR_REPORTS.navigation.sidebarMenuLink(name),
   );
@@ -115,7 +117,7 @@ export async function clickSidebarMenuLink(page: Page, name: string) {
 export async function clickCreateLink(page: Page) {
   const locator = locators(page);
 
-  await clickWithReport(
+  await click(
     locator.common.createLink,
     LOCATOR_REPORTS.common.createLink,
   );
@@ -124,7 +126,7 @@ export async function clickCreateLink(page: Page) {
 export async function openOperationCodeDropdown(page: Page) {
   const locator = locators(page);
 
-  await clickWithReport(
+  await click(
     locator.automaticParameters.operationCodeCombobox,
     LOCATOR_REPORTS.automaticParameters.operationCodeCombobox,
   );
@@ -146,10 +148,10 @@ export async function selectOperationCode(page: Page, optionText: string) {
   // Dropdown zaten acik degilse ac (combobox tiklamasi toggle'dir; acikken tekrar
   // tiklarsak kapanir).
   if ((await combobox.getAttribute('aria-expanded')) !== 'true') {
-    await clickWithReport(combobox, LOCATOR_REPORTS.automaticParameters.operationCodeCombobox);
+    await click(combobox, LOCATOR_REPORTS.automaticParameters.operationCodeCombobox);
   }
 
-  await clickWithReport(
+  await click(
     locator.common.listboxOption(optionText),
     LOCATOR_REPORTS.common.listboxOption(optionText),
   );
@@ -159,7 +161,7 @@ export async function openTypeDropdown(page: Page) {
   const locator = locators(page);
 
   await dismissOpenMenu(page);
-  await clickWithReport(
+  await click(
     locator.automaticParameters.typeCombobox,
     LOCATOR_REPORTS.automaticParameters.typeCombobox,
   );
@@ -169,7 +171,7 @@ export async function openSubTypeDropdown(page: Page) {
   const locator = locators(page);
 
   await dismissOpenMenu(page);
-  await clickWithReport(
+  await click(
     locator.automaticParameters.subTypeCombobox,
     LOCATOR_REPORTS.automaticParameters.subTypeCombobox,
   );
@@ -179,7 +181,7 @@ export async function openKdvRateDropdown(page: Page) {
   const locator = locators(page);
 
   await dismissOpenMenu(page);
-  await clickWithReport(
+  await click(
     locator.automaticParameters.kdvRateCombobox,
     LOCATOR_REPORTS.automaticParameters.kdvRateCombobox,
   );
@@ -256,7 +258,7 @@ export async function fillElement(
   value: string,
   maskValue = false,
 ) {
-  await fillWithReport(locator, locatorReport, value, maskValue);
+  await fill(locator, locatorReport, value, maskValue);
 }
 
 /** Metni verilen degere ESIT (exact) ya da ICEREN ilk gorunur elemana tiklar. */
@@ -275,5 +277,5 @@ export async function clickByText(
     value: `text ${exact ? 'equals' : 'contains'} "${value}"`,
   };
 
-  await clickWithReport(target, report);
+  await click(target, report);
 }

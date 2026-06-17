@@ -64,6 +64,7 @@
 - `common.createLink` → a#action-create
 - `common.listboxOptions` → role=listbox >> role=option
 - `common.listboxOption` (fn) → role=listbox >> role=option name="<arg>"
+- `common.optionInListbox` (fn) → #<arg> >> role=option name="undefined" (exact)
 
 ### navigation
 

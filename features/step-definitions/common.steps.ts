@@ -5,12 +5,12 @@ import { CustomWorld, getPage } from '../support/world';
 // Generic liste dogrulama: acik bir dropdown'da beklenen seceneklerin listelendigini
 // dogrular. Beklenen secenekler feature Data Table'indan gelir; sayfa-ozel secenek
 // listesi koda gomulmez. Tum dropdown'larda (Tür, Tür 2, ...) tekrar kullanilir.
-// "{string}" listenin adidir; rapor okunabilirligi icin step metninde tutulur,
-// locator zaten o anda acik olan listbox'i hedefler.
+// "{string}" listenin adidir ve listeyi DARALTMAK icin kullanilir: combobox bu adla
+// bulunur, aria-controls'u ile sadece o anki ACIK listbox'i hedefler (AGENTS.md 9.1).
 Then(
   '{string} listesinde aşağıdaki seçenekler listelenir',
-  async function (this: CustomWorld, _listName: string, table: DataTable) {
+  async function (this: CustomWorld, listName: string, table: DataTable) {
     const expectedOptions = table.raw().map((row) => row[0]);
-    await expectListboxOptionsVisible(getPage(this), expectedOptions);
+    await expectListboxOptionsVisible(getPage(this), listName, expectedOptions);
   },
 );

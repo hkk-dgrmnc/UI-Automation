@@ -223,15 +223,55 @@ export async function expectOperationCodeListFormatted(page: Page) {
   }
 }
 
-// Acik dropdown listesinde beklenen secenek metinlerinin gorunur oldugunu dogrular.
-// Her seferinde tek dropdown acik oldugu icin metinler tekil eslesir.
-// Generic: beklenen secenekler step'ten (feature Data Table) gelir; sayfa-ozel
-// secenek listesi koda gomulmez (bkz. AGENTS.md 9.1).
-export async function expectListboxOptionsVisible(page: Page, expectedTexts: readonly string[]) {
+// Acik listboxlar arasindan adi listName olani secip id'sini dondurur. MUI'de acik
+// listbox'in aria-labelledby'i ilgili alanin label'ina isaret eder (orn. Tür listesi
+// -> "Tür" label'i). Gercek sayfada dogrulandi. Boylece ekranda birden fazla liste
+// acik olsa bile dogru olan ada gore secilir; yanlis listeden eslesme olmaz.
+async function resolveOpenListboxId(page: Page, listName: string): Promise<string> {
+  const listboxes = page.getByRole('listbox');
+
+  // En az bir acik liste olusana kadar bekle (retriable); aksi halde getAttribute
+  // erken calisip listeyi bulamaz.
+  await listboxes.first().waitFor({ state: 'visible' });
+
+  const count = await listboxes.count();
+  for (let index = 0; index < count; index += 1) {
+    const listbox = listboxes.nth(index);
+    const labelledBy = (await listbox.getAttribute('aria-labelledby'))?.split(' ')[0];
+    if (!labelledBy) continue;
+
+    // Label metni "Tür *" gibi zorunlu yildizi icerebilir; normalize edip karsilastir.
+    const labelText = (await page.locator(`[id="${labelledBy}"]`).innerText())
+      .replace('*', '')
+      .trim();
+    if (labelText !== listName) continue;
+
+    const id = await listbox.getAttribute('id');
+    if (id) return id;
+  }
+
+  throw new Error(`"${listName}" adlı açık bir liste (listbox) bulunamadı.`);
+}
+
+// Generic dropdown secenek dogrulamasi (AGENTS.md 9.1). Beklenen secenekler step'ten
+// (feature Data Table) gelir; sayfa-ozel secenek listesi koda gomulmez.
+// listName ("Tür" / "Tür 2" / "KDV Oranı" ...) ile ACIK dropdown'in KENDI listbox'i
+// hedeflenir (resolveOpenListboxId) ve secenekler SADECE o listbox icinde aranir.
+// Boylece "Tür" dendiginde fiziksel olarak Tür listesine bakilir; baska bir liste
+// acik kalsa bile yanlis listeden eslesme olmaz.
+export async function expectListboxOptionsVisible(
+  page: Page,
+  listName: string,
+  expectedTexts: readonly string[],
+) {
   const locator = locators(page);
+  const listboxId = await resolveOpenListboxId(page, listName);
 
   for (const text of expectedTexts) {
-    await expectVisible(locator.common.listboxOption(text), LOCATOR_REPORTS.common.listboxOption(text));
+    await expectVisible(
+      locator.common.optionInListbox(listboxId, text),
+      LOCATOR_REPORTS.common.optionInListbox(listboxId, text),
+    );
   }
 }
 

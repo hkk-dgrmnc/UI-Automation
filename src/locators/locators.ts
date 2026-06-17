@@ -52,10 +52,16 @@ export const locators = (page: Page) => ({
   },
   common: {
     createLink: page.locator(SELECTORS.common.createLink),
-    // Acik dropdown (MUI Autocomplete veya Select) tek bir role=listbox render eder.
-    // Ayni anda tek dropdown acik oldugu icin bu locator'lar tum dropdown'lar icin ortaktir.
+    // İşlem Kodu format/count dogrulamasi (expectOperationCodeListFormatted) tek acik
+    // listbox uzerinden calisir; o anda tek dropdown acik oldugu icin yeterlidir.
     listboxOptions: page.getByRole('listbox').getByRole('option'),
     listboxOption: (name: string) => page.getByRole('listbox').getByRole('option', { name, exact: true }),
+    // Generic dropdown dogrulamasi (AGENTS.md 9.1): belirli bir ACIK listbox'in (id ile)
+    // icindeki secenegi hedefler. id, o anda acik ve adi listName olan listbox'tan
+    // runtime'da cozulur (assertions.ts -> resolveOpenListboxId). Boylece "Tür" dendiginde
+    // sadece Tür listesine bakilir; ekranda baska liste acik kalsa bile karismaz.
+    optionInListbox: (listboxId: string, name: string) =>
+      page.locator(`[id="${listboxId}"]`).getByRole('option', { name, exact: true }),
   },
   navigation: {
     sidebarMenuButton: (name: string) => page.getByRole('button').filter({
@@ -104,6 +110,10 @@ export const LOCATOR_REPORTS = {
     listboxOption: (name: string) => ({
       name: `common.listboxOption('${name}')`,
       value: `role=listbox >> role=option name="${name}"`,
+    }),
+    optionInListbox: (listboxId: string, name: string) => ({
+      name: `common.optionInListbox('${name}')`,
+      value: `#${listboxId} >> role=option name="${name}" (exact)`,
     }),
   },
   navigation: {
