@@ -34,6 +34,10 @@ const FN_SAMPLE_ARG = '<arg>';
 const errors: string[] = [];
 const addError = (message: string) => errors.push(message);
 
+function normalizeNewlines(value: string): string {
+  return value.replace(/\r\n/g, '\n').replace(/\r/g, '\n');
+}
+
 // --- Locator'lari duzlestir -------------------------------------------------
 
 type FlatLocator = { path: string; name: string; value: string; isFn: boolean };
@@ -278,7 +282,7 @@ function main() {
     } catch {
       current = '';
     }
-    if (current !== inventory) {
+    if (normalizeNewlines(current) !== normalizeNewlines(inventory)) {
       addError('INVENTORY.md guncel degil. `npm run inventory` calistir ve commit et.');
     }
   } else {

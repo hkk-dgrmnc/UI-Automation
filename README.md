@@ -123,6 +123,17 @@ npm run check
 
 `npm run check`, `typecheck` ve `inventory:check` komutlarını birlikte çalıştırır. Yeni step, locator, action veya flow eklendikten sonra `npm run inventory` çalıştırılmalı ve güncellenen [INVENTORY.md](./INVENTORY.md) dosyası commit'e dahil edilmelidir.
 
+## Zorunlu Bitirme Ritüeli
+
+Yeni test veya locator değişikliği tamamlanmış sayılmadan önce şu kontroller yapılmalıdır:
+
+1. Yeni veya değişen locator gerçek uygulamada Playwright MCP ile doğrulanır.
+2. Yeni step, locator, action veya flow eklendiyse `npm run inventory` çalıştırılır.
+3. `npm run check` temiz geçer. Windows PowerShell `npm.ps1` execution policy nedeniyle engellerse `npm.cmd run check` kullanılır.
+4. İlgili scenario/feature veya tüm suite çalıştırılır ve sonuç raporu kontrol edilir.
+
+Bu kontrollerden biri yapılamıyorsa test kodda yarım bırakılmaz; engel net şekilde raporlanır.
+
 ## Inventory ve Reuse
 
 [INVENTORY.md](./INVENTORY.md), mevcut step, locator, action ve flow sözlüğünü listeler. Yeni test yazmadan önce önce bu dosyada, gerekirse `rg` ile kod içinde reuse aranmalıdır.

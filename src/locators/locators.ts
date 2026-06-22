@@ -64,10 +64,10 @@ export const locators = (page: Page) => ({
       page.locator(`[id="${listboxId}"]`).getByRole('option', { name, exact: true }),
   },
   navigation: {
-    sidebarMenuButton: (name: string) => page.getByRole('button').filter({
+    sidebarMenuButton: (name: string) => page.locator('nav').getByRole('button').filter({
       has: page.getByText(name, { exact: true }),
     }),
-    sidebarMenuLink: (name: string) => page.getByRole('link', { name }),
+    sidebarMenuLink: (name: string) => page.locator('nav').getByRole('link', { name }),
     selectedSidebarMenuLink: (name: string) => page.locator(SELECTORS.navigation.selectedSidebarMenuLink).filter({
       hasText: name,
     }),
@@ -119,11 +119,11 @@ export const LOCATOR_REPORTS = {
   navigation: {
     sidebarMenuButton: (name: string) => ({
       name: `navigation.sidebarMenuButton('${name}')`,
-      value: `role=button has exact text "${name}"`,
+      value: `nav >> role=button has exact text "${name}"`,
     }),
     sidebarMenuLink: (name: string) => ({
       name: `navigation.sidebarMenuLink('${name}')`,
-      value: `role=link name="${name}"`,
+      value: `nav >> role=link name="${name}"`,
     }),
     selectedSidebarMenuLink: (name: string) => ({
       name: `navigation.selectedSidebarMenuLink('${name}')`,

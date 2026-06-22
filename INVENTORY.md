@@ -68,8 +68,8 @@
 
 ### navigation
 
-- `navigation.sidebarMenuButton` (fn) → role=button has exact text "<arg>"
-- `navigation.sidebarMenuLink` (fn) → role=link name="<arg>"
+- `navigation.sidebarMenuButton` (fn) → nav >> role=button has exact text "<arg>"
+- `navigation.sidebarMenuLink` (fn) → nav >> role=link name="<arg>"
 - `navigation.selectedSidebarMenuLink` (fn) → a[aria-current="page"] has text "<arg>"
 
 ## Actions

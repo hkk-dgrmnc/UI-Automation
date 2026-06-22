@@ -2,6 +2,10 @@ import { Locator, Page } from '@playwright/test';
 import { LocatorReport, reportAction, reportError } from '../utils/action-report';
 import { LOCATOR_REPORTS, locators } from '../locators/locators';
 
+type ClickOptions = {
+  timeout?: number;
+};
+
 // Raporlama bu projede her reusable wrapper'in varsayilan davranisidir; isim
 // "ne yaptigini" soyler, "raporladigini" degil. Bu yuzden suffix yok: fill/click.
 async function fill(
@@ -25,14 +29,18 @@ async function fill(
   }
 }
 
-async function click(locator: Locator, locatorReport: LocatorReport) {
+async function click(
+  locator: Locator,
+  locatorReport: LocatorReport,
+  options: ClickOptions = {},
+) {
   reportAction({
     action: 'Click',
     locatorName: locatorReport.name,
     locatorValue: locatorReport.value,
   });
   try {
-    await locator.click();
+    await locator.click(options);
   } catch (error) {
     reportError({ action: 'Click', locatorName: locatorReport.name, error });
     throw error;
@@ -73,14 +81,59 @@ async function isVisible(locator: Locator) {
   return (await locator.filter({ visible: true }).count()) > 0;
 }
 
+function isMenuOpenRetryableError(error: unknown) {
+  return error instanceof Error && (
+    error.message.includes('not attached to the DOM') ||
+    error.message.includes('Timeout')
+  );
+}
+
 async function openMenuIfChildHidden(
   menuButton: Locator,
   childLocator: Locator,
   menuButtonReport: LocatorReport,
 ) {
-  if (!await isVisible(childLocator)) {
-    await click(menuButton.filter({ visible: true }).first(), menuButtonReport);
+  if (await isVisible(childLocator)) {
+    return;
   }
+
+  let lastError: unknown;
+
+  for (let attempt = 0; attempt < 3; attempt += 1) {
+    try {
+      const visibleMenuButton = menuButton.filter({ visible: true }).first();
+      await visibleMenuButton.waitFor({ state: 'visible', timeout: 10_000 });
+      await visibleMenuButton.scrollIntoViewIfNeeded();
+
+      const expandButton = visibleMenuButton.locator('button[aria-expanded]').first();
+      if (await expandButton.count() > 0) {
+        const isExpanded = await expandButton.getAttribute('aria-expanded');
+        if (isExpanded !== 'true') {
+          await click(expandButton, menuButtonReport, { timeout: 10_000 });
+        }
+      } else {
+        await click(visibleMenuButton, menuButtonReport, { timeout: 10_000 });
+      }
+
+      await childLocator.filter({ visible: true }).first().waitFor({
+        state: 'visible',
+        timeout: 10_000,
+      });
+      return;
+    } catch (error) {
+      lastError = error;
+
+      if (await isVisible(childLocator)) {
+        return;
+      }
+
+      if (!isMenuOpenRetryableError(error)) {
+        throw error;
+      }
+    }
+  }
+
+  throw lastError;
 }
 
 export async function openSidebarMenuPath(

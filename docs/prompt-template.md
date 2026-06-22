@@ -104,8 +104,12 @@ Aşağıda sadece en kritik ve en çok atlanan kuralları öne çıkarıyorum.
   try-catch içinde + `reportError` + `throw`.
 
 ### BİTİRİNCE
+- Aşağıdaki maddeler tamamlanmadan iş bitmiş sayılmaz; herhangi biri yapılamıyorsa
+  nedeni final cevapta net raporlanır.
+- Yeni veya değişen locator'ı Playwright MCP ile gerçek uygulamada doğrula.
 - Testi çalıştır; hata varsa minimum değişiklikle düzelt.
-- `npm run check` çalıştır (typecheck + duplicate/reuse gate).
+- `npm run check` çalıştır (typecheck + duplicate/reuse gate). Windows PowerShell
+  `npm.ps1` execution policy nedeniyle engellerse `npm.cmd run check` kullan.
 - Yeni locator/step eklediysen `npm run inventory` ile INVENTORY.md'yi güncelle ve
   değişikliklere dahil et.
 - **Otomatik push etme.** Değişiklikleri commit/push için insan onayını bekle;
