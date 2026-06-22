@@ -38,7 +38,7 @@ Bu turda otomasyona alinacak TC'ler:
 Haric tutulacak TC'ler:
 Senaryo islemi: [mevcut senaryoya devam et | mevcut feature icinde yeni scenario ac | yeni feature ac | repo yapisindan karar ver]
 Kullanici:
-Ek not:
+Ek not: yok
 ```
 
 ### Calisma Sirasi
@@ -60,8 +60,11 @@ Ek not:
 6. Login gerekiyorsa mevcut auth step/flow'unu kullan; yeni login akisi yazma.
 7. Sidebar menu gecisi gerekiyorsa mevcut genel navigation step'ini kullan:
    `"{string} menü yolundan sayfaya gidilir"`.
-8. Dropdown/listbox secenek dogrulamasi gerekiyorsa mevcut generic step'i kullan:
+8. Dropdown/listbox islemlerinde once string parametreli mevcut common/generic
+   step, action veya assertion'lari kullan. Secenek gorunurlugu icin:
    `"{string} listesinde aşağıdaki seçenekler listelenir"` + Data Table.
+   Mevcut common/generic yapi ihtiyaci guvenli karsilamiyorsa ve gercek ekran
+   dogrulamasi gerektiriyorsa en kucuk ozel domain action/assertion ekle.
 9. Yeni locator gerekiyorsa Playwright MCP ile gercek uygulamada dogrula.
 10. Dogrulanmayan locator, tahmini selector, TODO, placeholder step veya bos assertion
    koda birakma.
