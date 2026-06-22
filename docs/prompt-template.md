@@ -1,154 +1,115 @@
-# Otomasyon Üretim Prompt Şablonu (Tek Ağız)
+# Otomasyon Uretim Prompt Sablonu
 
-Bu dosya, AI'a (Codex/Claude) manuel test case'i Cucumber + Playwright TypeScript
-otomasyonuna çevirttiğimiz **tek standart prompt**'tur. Amaç: farklı kişi / branch /
-makine fark etmeksizin herkesin aynı dilde çıktı üretmesi.
+Bu dosya, manuel test case'leri Cucumber + Playwright + TypeScript otomasyonuna
+cevirmek icin kullanilacak tek standart prompt'tur.
 
-Kullanım:
-1. Aşağıdaki **DOLDUR** bloğunu o turdaki teste göre doldur (tek değiştireceğin yer burası).
-2. `DOLDUR` satırından dosyanın sonuna kadar olan her şeyi olduğu gibi AI'a yapıştır.
-3. Statik kuralları (REUSE, ÇIKTI, LOCATOR DOĞRULAMA, ...) **değiştirme** — tek ağız bunlarla korunur.
+Kullanim:
 
----
+1. Sadece `DOLDUR` alanini ilgili test icin guncelle.
+2. AI'a `docs/prompt-template.md dosyasindaki promptu uygula` demen yeterlidir.
+3. Kurallari prompt icinde cogaltma; ana kaynak her zaman `AGENTS.md` ve
+   mevcut reuse sozlugu `INVENTORY.md` dosyalaridir.
 
-## Prompt (buradan aşağısını kopyala)
+Dolduran kisi icin not:
 
-Bu projede Cucumber + Playwright TypeScript kullanılıyor. Tüm mimari ve kodlama
-kuralları AGENTS.md'de tanımlı; onları tekrar etmiyorum, AGENTS.md'ye göre ilerle.
-Aşağıda sadece en kritik ve en çok atlanan kuralları öne çıkarıyorum.
+- `DOLDUR` alaninda bos satir birakma.
+- Bilinmeyen alanlara `yok` yaz.
+- Senaryo kararindan emin degilsen `Senaryo islemi` alanina
+  `repo yapisindan karar ver` yaz.
 
-### DOLDUR (sadece bu bloğu her turda değiştir)
-- Manuel test dosyası: `[MANUEL_DOSYA].md`
-- Ana test ID: `[ANA_TEST_ID]`
-- Bu turda yapılacak TC'ler: `[TC-XXX, TC-YYY, ...]`
-- Hariç TC'ler: Bu turda diğer tüm TC'ler hariç (`[açıkça say: TC-001 v1/v2, ...]`)
-- Bu sayfanın domain'i / step dosyası: `[domain veya mevcut *.steps.ts]`
-- Senaryo modu: `[tek-total-senaryo | her-tc-ayri-senaryo]`
-  - **tek-total-senaryo**: Bu manuel dosya TEK bir total case'tir; ben onu parça
-    parça yaptırıyorum. Her turdaki TC adımları **AYNI tek senaryonun sonuna**
-    eklenir, yeni Scenario açılmaz. (Örn. `YTKP-1009-test-cases-codex.md` bu moddadır.)
-  - **her-tc-ayri-senaryo**: Her TC kendi bağımsız Scenario'su olur; Scenario adı
-    TC ID ile başlar.
-
-### REUSE (önce bunu yap)
-- Yeni step/locator/action/assertion/flow yazmadan önce INVENTORY.md'yi oku;
-  aradığın iş zaten varsa onu kullan, yenisini üretme.
-- INVENTORY.md'de net değilse `rg` ile derinleş.
-- Sidebar/menü erişimi için `navigation` grubunu ve genel
-  "{string} menü yolundan sayfaya gidilir" step'ini kullan; sayfa bazlı
-  navigasyon step'i yazma.
-- Test sırasında seçilen/üretilen bir değeri sonraki adımda kullanacaksan
-  `CustomWorld.store` (ScenarioStore) ile isimle sakla; `data.ts`'e veya
-  feature'a hard-code etme. Generic save/use step + değer döndüren action
-  deseni AGENTS.md 12.1'de.
-
-### ÖN KOŞUL (reuse zorunlu — yeniden yazma)
-- Login gerekiyorsa mevcut auth flow/step'ini kullan; yeni login akışı yazma.
-- Test, bir formun/ekranın **açık olmasını** gerektiriyorsa (ör. dropdown'lar ancak
-  "Oluştur/create" formu açıkken görünür), o ekrana ulaşmayı mevcut navigation +
-  sayfa açma step'leriyle ön koşul olarak kur. Bu ön koşul adımlarını yeniden yazma,
-  mevcut step/flow'ları reuse et.
-
-### ÇIKTI
-- Feature dosyası: `features/generated/[ANA_TEST_ID].feature`
-  - Bu dosya **zaten varsa**: yeni TC'leri mevcut dosyaya Scenario olarak **ekle**.
-    Dosyayı sıfırdan yazma, var olan senaryoları silme veya yeniden adlandırma.
-- Step definition:
-  - Bu test ID'ye ait yeni step'ler **mevcut `[domain veya *.steps.ts]`** dosyasına eklenir.
-  - auth / navigation gibi ortak step'ler için ilgili mevcut dosya (`auth.steps.ts`,
-    `navigation.steps.ts`) reuse edilir. Aynı işi yapan ikinci bir step dosyası açma.
-- Feature formatı (DOLDUR'daki **Senaryo modu**'na göre):
-  - **tek-total-senaryo** ise: Bu turdaki TC adımlarını dosyadaki **mevcut tek
-    senaryonun sonuna ekle**; yeni Scenario AÇMA, senaryoyu yeniden adlandırma,
-    var olan adımları silme. Senaryo, total case'i parça parça büyüyen tek bir
-    akış olarak temsil eder. Aynı ön koşul (login/menü/form açma) zaten senaryonun
-    başında varsa tekrar ekleme; akışın kaldığı yerden devam et.
-  - **her-tc-ayri-senaryo** ise: Her TC ayrı Scenario olur; Scenario adı TC ID
-    ile başlar ve her senaryo kendi ön koşullarını içerir (bağımsız çalışır).
-  - Adımlar `*` ile yazılır (Given/When/Then değil), business seviyesinde olur;
-    locator/CSS/teknik detay içermez.
-  - Tag'ler feature veya scenario üstünde yazılır.
-
-  Örnek (tek-total-senaryo — bu turun adımları mevcut senaryonun **sonuna** eklenir):
-  ```gherkin
-  @[tag]
-  Feature: [ANA_TEST_ID] [Sayfa/Ekran Adı]
-
-    Scenario: [ANA_TEST_ID] - [total senaryo adı]
-      * [önceki turlardan gelen adımlar...]
-      * [bu turda eklenen business adım]
-      * [bu turda eklenen beklenen sonuç]
-  ```
-
-  Örnek (her-tc-ayri-senaryo):
-  ```gherkin
-  @[tag]
-  Feature: [ANA_TEST_ID] [Sayfa/Ekran Adı]
-
-    Scenario: [TC_ID] - [senaryo adı]
-      * [business adım]
-      * [beklenen sonuç]
-  ```
-
-### LOCATOR DOĞRULAMA (AGENTS.md §6 — atlama)
-- Yeni locator yazmadan önce Playwright MCP server (`playwright`) ile gerçek sayfada
-  aç ve doğrula. Tahmin edilen selector doğrulanmadan koda yazılmaz.
-- Locator seçim önceliği: getByTestId > getByRole > getByLabel > getByPlaceholder >
-  getByText > CSS > XPath. `waitForTimeout` kullanma.
-- Yeni locator eklediysen `LOCATOR_REPORTS` + `SELECTORS`/`TEXTS` tek kaynak kuralına uy.
-
-### RAPORLAMA (yeni reusable action/assertion yazarsan — AGENTS.md §8-9)
-- Yeni reusable action: `reportAction` + Playwright çağrısı try-catch içinde +
-  hata durumunda `reportError` + `throw`. Hassas değerler (şifre vb.) maskelenir.
-- Yeni reusable assertion: `reportAssertion` expect'ten **önce** + `expect(...)`
-  try-catch içinde + `reportError` + `throw`.
-
-### BİTİRİNCE
-- Aşağıdaki maddeler tamamlanmadan iş bitmiş sayılmaz; herhangi biri yapılamıyorsa
-  nedeni final cevapta net raporlanır.
-- Yeni veya değişen locator'ı Playwright MCP ile gerçek uygulamada doğrula.
-- Testi çalıştır; hata varsa minimum değişiklikle düzelt.
-- `npm run check` çalıştır (typecheck + duplicate/reuse gate). Windows PowerShell
-  `npm.ps1` execution policy nedeniyle engellerse `npm.cmd run check` kullan.
-- Yeni locator/step eklediysen `npm run inventory` ile INVENTORY.md'yi güncelle ve
-  değişikliklere dahil et.
-- **Otomatik push etme.** Değişiklikleri commit/push için insan onayını bekle;
-  sadece çalışan + doğrulanmış kodu bırak. (Bu sınır ekip tercihiyle değişebilir.)
-
-### ENGEL DURUMU (AGENTS.md §5.3)
-- Zorunlu locator gerçek sayfada doğrulanamıyor, expected result belirsiz veya akış
-  mantıksızsa: testi kodda bırakma. Bu turda oluşturduğun feature/step/flow/action/
-  assertion/locator değişikliklerini geri al (kullanıcının veya önceki branch'in
-  işine dokunma) ve şu formatta raporla:
-
-  ```text
-  Bu test kodda bırakılmadı.
-  Sebep: [doğrulanamayan locator / eksik yetki / beklenen sonuç belirsiz / ekran açılmıyor]
-  Denendi: [login sonrası izlenen ekran yolu veya aksiyon]
-  Gereken düzeltme: [doğru locator / yetki / test data / ekran yolu / beklenen sonuç]
-  Geri alınanlar: [bu turda oluşturulan dosya veya değişiklik özeti]
-  ```
-
-DOLDUR bloğunda belirttiğim manuel test dosyasından, sadece "Bu turda yapılacak
-TC'ler" listesindeki TC'leri otomasyona çevir. Hariç tutulanlara dokunma.
+AI icin not: Bu ust kisim kullanim aciklamasidir. Uygulanacak asil prompt
+`## Prompt` basligindan baslar.
 
 ---
 
-## Notlar (şablonu bakım yapan için — AI'a gönderme)
+## Prompt
 
-- **Senaryo modu (tek-total vs ayrı):** Bazı manuel dosyalar TEK bir total case'tir
-  ve parça parça yaptırılır (ör. `YTKP-1009-test-cases-codex.md`). Bu durumda DOLDUR'da
-  `Senaryo modu: tek-total-senaryo` seç; her turun TC'leri aynı senaryonun sonuna
-  eklenir, yeni Scenario açılmaz. Birbirinden bağımsız case dosyaları için
-  `her-tc-ayri-senaryo` kullan. AGENTS.md'deki "TC ID ile başlayan senaryo" kuralı
-  ayrı-senaryo modu içindir.
-- **Senaryo isimlendirme:** tek-total-senaryo modunda senaryo adı ANA_TEST_ID ile
-  başlar (ör. `YTKP-1009 - ...`), tek tek TC ID'leri değil. Mevcut senaryoyu yeniden
-  adlandırmak ayrı/manuel bir karardır; AI'a "mevcut senaryoyu yeniden adlandırma"
-  dedik, böylece güvenli kalıyor.
-- **Step dosyası konvansiyonu:** Proje şu an domain-bazlı (`auth.steps.ts`,
-  `navigation.steps.ts`) ve test-id-bazlı (`ytkp1009.steps.ts`) isimleri karışık
-  kullanıyor. DOLDUR'daki "step dosyası" alanını mevcut dosyayı işaret edecek
-  şekilde doldur ki AI ikinci bir dosya açmasın.
-- **Commit sınırı:** Varsayılan "otomatik push etme". Ekip CI/branch akışına göre
-  bu satırı değiştirebilir.
+Bu repo Cucumber + Playwright + TypeScript UI otomasyon projesidir.
+
+Ana kural kaynagi `AGENTS.md` dosyasidir. Once `AGENTS.md` ve `INVENTORY.md`
+dosyalarini oku. Mevcut step, locator, action, assertion veya flow varsa
+yenisini yazma; mevcut reusable yapilari kullan.
+
+### DOLDUR
+
+```text
+Manuel test dosyasi:
+Bu turda otomasyona alinacak TC'ler:
+Haric tutulacak TC'ler:
+Senaryo islemi: [mevcut senaryoya devam et | mevcut feature icinde yeni scenario ac | yeni feature ac | repo yapisindan karar ver]
+Kullanici:
+Ek not:
+```
+
+### Calisma Sirasi
+
+1. Manuel test case'i oku; action, data ve expected result alanlarini netlestir.
+2. `INVENTORY.md` icinde mevcut step, locator, action, assertion ve flow reuse'u ara.
+3. Gerekirse `rg` ile `src` ve `features` altinda derin arama yap.
+4. Ana test ID, feature dosyasi, step dosyasi/domain ve baslangic ekrani manuel
+   test dosyasi ile mevcut repo yapisindan cikarilmalidir.
+5. `Senaryo islemi` alanina gore hareket et:
+   - `mevcut senaryoya devam et`: mevcut feature ve mevcut scenario korunur,
+     yeni TC adimlari mevcut senaryonun sonuna eklenir.
+   - `mevcut feature icinde yeni scenario ac`: ilgili mevcut feature korunur,
+     ayni feature icinde yeni scenario olusturulur.
+   - `yeni feature ac`: `features/generated` altinda yeni feature dosyasi
+     olusturulur; gerekli scenario bu dosyada yazilir.
+   - `repo yapisindan karar ver`: mevcut feature/senaryo yapisi ve manuel test
+     akisi incelenir; emin olunamiyorsa tahminle kod yazmadan blokaj raporlanir.
+6. Login gerekiyorsa mevcut auth step/flow'unu kullan; yeni login akisi yazma.
+7. Sidebar menu gecisi gerekiyorsa mevcut genel navigation step'ini kullan:
+   `"{string} menü yolundan sayfaya gidilir"`.
+8. Dropdown/listbox secenek dogrulamasi gerekiyorsa mevcut generic step'i kullan:
+   `"{string} listesinde aşağıdaki seçenekler listelenir"` + Data Table.
+9. Yeni locator gerekiyorsa Playwright MCP ile gercek uygulamada dogrula.
+10. Dogrulanmayan locator, tahmini selector, TODO, placeholder step veya bos assertion
+   koda birakma.
+11. Feature dosyasi `features/generated` altinda business dilinde olsun; step
+   keyword olarak sadece `*` kullan.
+12. Step definition teknik detay veya locator icermesin; mumkunse flow cagir.
+13. Yeni action/assertion gerekiyorsa dogru domain dosyasina ekle; common primitive'leri
+    tekrar yazma.
+14. Yeni locator eklenirse `locators` ve `LOCATOR_REPORTS` birlikte guncellensin.
+15. Yeni step, locator, action veya flow eklendiyse `npm run inventory` calistir.
+16. Sonunda `npm.cmd run check` calistir.
+17. Ilgili scenario veya feature'i calistir; hata varsa minimum degisiklikle duzelt.
+
+### Cikti Beklentisi
+
+- Kod `AGENTS.md` mimarisine uygun olmali.
+- Klasik Page Object Model veya ekran bazli `Page` class'i olusturulmamali.
+- Duplicate step, locator, action veya assertion uretilmemeli.
+- Yeni locator gercek uygulamada dogrulanmis olmali.
+- Hassas veri feature'a veya koda yazilmamali.
+- `INVENTORY.md` gerekiyorsa guncellenmis olmali.
+- `npm.cmd run check` temiz gecmeli.
+- Ilgili test sonucu final cevapta raporlanmali.
+
+### Blokaj Kurali
+
+Locator, yetki, test data, ekran erisimi veya expected result dogrulanamiyorsa
+bu turda yaptigin test degisikliklerini geri al. Kullaniciya veya onceki branch'e
+ait degisikliklere dokunma. Kodda yarim is birakma.
+
+Final cevabi su formatta ver:
+
+```text
+Bu test kodda birakilmadi.
+Sebep:
+Denendi:
+Gereken duzeltme:
+Geri alinanlar:
+```
+
+### Final Cevap Formati
+
+Is tamamlandiysa final cevapta kisaca sunlari yaz:
+
+```text
+Tamamlandi:
+Degisen dosyalar:
+Calistirilan kontroller:
+Test sonucu:
+Notlar:
+```

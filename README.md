@@ -167,10 +167,26 @@ Inventory kontrolü şu durumları yakalar:
 
 Belirsiz locator, yetki, veri veya beklenen sonuç varsa koda TODO, geçici selector veya boş step bırakılmaz. Bu durumda ekleme geri alınır ve engel net şekilde raporlanır.
 
+## AI ile Test Üretimi
+
+Ekip, manuel test case'leri AI ile otomasyona çevirirken tek standart prompt dosyasını kullanır:
+
+```text
+docs/prompt-template.md
+```
+
+Kullanım:
+
+```text
+docs/prompt-template.md dosyasındaki promptu uygula.
+```
+
+Prompt dosyasında sadece `DOLDUR` alanı ilgili test turuna göre güncellenir. Senaryonun mevcut akışa mı ekleneceği, mevcut feature içinde yeni scenario mu açılacağı veya yeni feature mı oluşturulacağı `Senaryo islemi` alanıyla belirtilir. Karar net değilse `repo yapisindan karar ver` yazılır; AI mevcut repo yapısını inceler, emin olamazsa tahminle kod yazmaz ve blokaj raporlar.
+
 ## Mevcut Senaryolar
 
 - `features/generated/TC_001_login.feature`: Geçerli kullanıcı ile login kontrolü
-- `features/generated/YTKP-1009.feature`: Otomatik Parametre Tanımlama ekranına erişim ve oluşturma ekranı yönlendirme kontrolü
+- `features/generated/YTKP-1009.feature`: Otomatik Parametre Tanımlama ekranına erişim, oluşturma ekranı yönlendirmesi, İşlem Kodu dropdown formatı, İşlem Kodu seçimine göre alan aktif/pasif kontrolleri, Fiş Açıklama validasyonları ve Tür / Tür 2 / KDV Oranı seçenek doğrulamaları
 
 ## Mimari Notlar
 

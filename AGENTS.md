@@ -1213,59 +1213,27 @@ Codex sunlari yapmamalidir:
 
 ---
 
-## 19. Codex'e Verilecek Ana Prompt
+## 19. Ortak Prompt Kullanim Standardi
 
-Bu projede yeni test uretirken asagidaki prompt kullanilabilir:
+Bu projede yeni test uretirken tek standart prompt dosyasi kullanilmalidir:
 
 ```text
-Bu projede Cucumber + Playwright TypeScript kullaniliyor.
-
-Lutfen AGENTS.md dosyasindaki mimari ve kurallara gore ilerle.
-
-Ozet mimari:
-- Data: src/data/data.ts
-- Locator: src/locators/locators.ts
-- Action: src/actions/ (domain bazli: common/auth/navigation/... .actions.ts)
-- Assertion: src/assertions/ (domain bazli: common/auth/... .assertions.ts)
-- Flow: src/flows
-- Cucumber Feature: features/generated
-- Cucumber Step Definition: features/step-definitions
-- Cucumber Support: features/support
-- Config: src/config
-
-Klasik Page Object Model kullanilmayacak.
-Her sayfa icin ayri Page class olusturulmayacak.
-Gauge runner kullanilmayacak.
-Cucumber ve Gherkin kullanilacak.
-Gauge concept veya `.cpt` kullanilmayacak.
-Data ve locator katmanlari tek dosya; action ve assertion katmanlari buyume esigini astigi icin domain bazli dosyalara bolunmustur (bkz. 5.1 Guncel durum).
-Kalan tek dosyali katmanlar da esigi asarsa POM'a donmeden domain bazli katman dosyalarina ayrilacak.
-
-Yeni test uretirken:
-1. Once `rg` ile mevcut step/flow/data/action/assertion/locator aramasi yap.
-2. Var olan reusable yapilari kullan.
-3. Ayni anlama gelen yeni step metni uretme; mevcut step metnini kullan.
-4. Ortak UI elemaniysa `common`, ortak navigasyonsa `navigation` grubunu kullan.
-5. Eksikse dogru katmana kucuk ve temiz ekleme yap.
-6. Tek dosya buyume esigini asiyorsa sadece ilgili katmani/domain'i ayir.
-7. Locator seciminde oncelik:
-   getByTestId > getByRole > getByLabel > getByPlaceholder > getByText > CSS > XPath
-8. Hayali locator yazma.
-9. waitForTimeout kullanma.
-10. Assertion icin Playwright expect kullan.
-11. Feature dosyalarini features/generated altinda business seviyesinde olustur.
-12. Scenario isimleri TC ID ile baslasin.
-13. Feature adimlarinda `Given/When/Then` yerine `*` kullan.
-14. Step definition dosyalarini features/step-definitions altinda `Given/When/Then` ile olustur ve mumkunse flow fonksiyonlarini cagir.
-15. Gereksiz mikro step uretme; business seviyesindeki step'leri reusable flow'lara bagla.
-16. Yeni reusable click/fill action yazilirse Cucumber raporuna Action, Locator Name, Locator Value ve gerekiyorsa Value bilgisi dusmelidir; hassas degerler maskelenmelidir. Playwright cagrisi try-catch icine alinmali, hata durumunda `reportError` ile console ve rapora yazilmali, hata yeniden fırlatilmalidir.
-17. Yeni reusable assertion yazilirse Cucumber raporuna Assertion, Locator Name, Locator Value ve Expected bilgisi expect'ten once dusmelidir; fail durumunda hangi elementin fail verdigi raporda gorunmelidir. `expect(...)` cagrisi try-catch icine alinmali, hata durumunda `reportError` ile console ve rapora yazilmali, hata yeniden fırlatilmalidir.
-18. Testi calistir ve hata varsa minimum degisiklikle duzelt.
-19. Eksik locator, belirsiz expected result veya anlamsiz akis varsa TODO birakma; bu promptta yaptigin degisiklikleri geri al ve neyin duzeltilmesi gerektigini raporla.
-
-Simdi asagidaki manuel test case'i Playwright otomasyon testine cevir:
-[TEST CASE BURAYA]
+docs/prompt-template.md
 ```
+
+Kullanim:
+
+```text
+docs/prompt-template.md dosyasindaki promptu uygula.
+```
+
+Kurallar:
+
+- `docs/prompt-template.md` icindeki `DOLDUR` alani ilgili test turu icin doldurulmalidir.
+- Bos alan birakilmamalidir; bilinmeyen alanlara `yok` yazilmalidir.
+- Senaryo kararindan emin olunmuyorsa `Senaryo islemi` alanina `repo yapisindan karar ver` yazilmalidir.
+- Prompt icinde bu dokumandaki kurallar tekrar cogaltilmamalidir; ana kural kaynagi her zaman `AGENTS.md`, reuse sozlugu ise `INVENTORY.md` dosyasidir.
+- Eski uzun prompt kopyalari kullanilmamalidir. Prompt standardi degisecekse `docs/prompt-template.md` guncellenmelidir.
 
 ---
 
