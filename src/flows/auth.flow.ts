@@ -3,8 +3,8 @@ import {
   clickLoginButton,
   fillLoginPassword,
   fillLoginUsername,
-} from '../actions/actions';
-import { expectLoginPageVisible, expectLoginSuccess } from '../assertions/assertions';
+} from '../actions/auth.actions';
+import { expectLoginPageVisible, expectLoginSuccess } from '../assertions/auth.assertions';
 import { env } from '../config/env';
 import { TestUser } from '../data/data';
 

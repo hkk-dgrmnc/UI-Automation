@@ -6,7 +6,7 @@ import {
   openSubTypeDropdown,
   openTypeDropdown,
   selectOperationCode,
-} from '../../src/actions/actions';
+} from '../../src/actions/automaticParameters.actions';
 import {
   expectAutomaticParametersRouteOpened,
   expectOperationCodeListFormatted,
@@ -15,7 +15,7 @@ import {
   expectSubTypeAndKdvRateDisabled,
   expectSubTypeDisabledKdvRateEnabled,
   expectSubTypeEnabledKdvRateDisabled,
-} from '../../src/assertions/assertions';
+} from '../../src/assertions/automaticParameters.assertions';
 import { openAutomaticParametersCreatePage } from '../../src/flows/ytkp1009.flow';
 import { CustomWorld, getPage } from '../support/world';
 

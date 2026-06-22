@@ -25,7 +25,7 @@ import type { LocatorReport } from '../src/utils/action-report';
 
 const ROOT = join(__dirname, '..');
 const STEP_DIR = join(ROOT, 'features', 'step-definitions');
-const ACTIONS_FILE = join(ROOT, 'src', 'actions', 'actions.ts');
+const ACTIONS_DIR = join(ROOT, 'src', 'actions');
 const FLOWS_DIR = join(ROOT, 'src', 'flows');
 const INVENTORY_FILE = join(ROOT, 'INVENTORY.md');
 
@@ -50,7 +50,12 @@ function flattenLocatorReports(): FlatLocator[] {
       const path = `${group}.${key}`;
 
       if (typeof entry === 'function') {
-        const report = (entry as (arg: string) => LocatorReport)(FN_SAMPLE_ARG);
+        // Bir locator-report fonksiyonu birden fazla parametre alabilir
+        // (orn. optionInListbox(listboxId, name)). Her parametreye ornek arg
+        // verilir; aksi halde eksik parametreler raporda "undefined" gorunur.
+        const fn = entry as (...args: string[]) => LocatorReport;
+        const sampleArgs = Array.from({ length: Math.max(fn.length, 1) }, () => FN_SAMPLE_ARG);
+        const report = fn(...sampleArgs);
         out.push({ path, name: report.name, value: report.value, isFn: true });
       } else {
         const report = entry as LocatorReport;
@@ -167,8 +172,10 @@ function collectExportedFns(file: string): string[] {
   return [...content.matchAll(EXPORT_FN_RE)].map(m => m[1]);
 }
 
-function collectFlows(): { file: string; fns: string[] }[] {
-  return listTsFiles(FLOWS_DIR)
+// Bir dizindeki her .ts dosyasinin export'lanan fonksiyonlarini dosya bazli toplar.
+// Hem actions (common/auth/navigation/... domain dosyalari) hem flows icin kullanilir.
+function collectModuleExports(dir: string): { file: string; fns: string[] }[] {
+  return listTsFiles(dir)
     .map(file => ({
       file: file.slice(ROOT.length + 1).replace(/\\/g, '/'),
       fns: collectExportedFns(file),
@@ -181,7 +188,7 @@ function collectFlows(): { file: string; fns: string[] }[] {
 function buildInventory(
   locators: FlatLocator[],
   steps: StepEntry[],
-  actions: string[],
+  actions: { file: string; fns: string[] }[],
   flows: { file: string; fns: string[] }[],
 ): string {
   const lines: string[] = [];
@@ -235,14 +242,17 @@ function buildInventory(
 
   lines.push('## Actions');
   lines.push('');
-  lines.push('_src/actions/actions.ts_');
-  lines.push('');
   if (actions.length === 0) {
     lines.push('_(yok)_');
+    lines.push('');
   } else {
-    for (const fn of actions) lines.push(`- \`${fn}()\``);
+    for (const mod of actions) {
+      lines.push(`### ${mod.file}`);
+      lines.push('');
+      for (const fn of mod.fns) lines.push(`- \`${fn}()\``);
+      lines.push('');
+    }
   }
-  lines.push('');
 
   lines.push('## Flows');
   lines.push('');
@@ -267,8 +277,8 @@ function main() {
 
   const locators = flattenLocatorReports();
   const steps = collectSteps();
-  const actions = collectExportedFns(ACTIONS_FILE);
-  const flows = collectFlows();
+  const actions = collectModuleExports(ACTIONS_DIR);
+  const flows = collectModuleExports(FLOWS_DIR);
 
   checkLocators(locators);
   checkSteps(steps);

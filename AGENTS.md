@@ -42,8 +42,8 @@ Bu projede temel katmanlar asagidaki gibidir:
 ```text
 Data      -> src/data/data.ts
 Locator   -> src/locators/locators.ts
-Action    -> src/actions/actions.ts
-Assertion -> src/assertions/assertions.ts
+Action    -> src/actions/  (domain bazli: common/auth/navigation/... .actions.ts)
+Assertion -> src/assertions/  (domain bazli: common/auth/... .assertions.ts)
 Flow      -> src/flows
 Cucumber  -> features
 Step Def  -> features/step-definitions
@@ -61,11 +61,13 @@ src/data/data.ts
 src/locators/locators.ts
   Tum reusable element locator tanimlarini tek dosyada tutar.
 
-src/actions/actions.ts
-  Tum tekil ve reusable kullanici aksiyonlarini tek dosyada tutar.
+src/actions/  (common.actions.ts, auth.actions.ts, navigation.actions.ts, ...)
+  Tekil ve reusable kullanici aksiyonlarini domain bazli dosyalarda tutar.
+  Paylasilan primitive'ler (click/fill) ve generic motor common.actions.ts'tedir.
 
-src/assertions/assertions.ts
-  Tum reusable dogrulama metotlarini tek dosyada tutar.
+src/assertions/  (common.assertions.ts, auth.assertions.ts, ...)
+  Reusable dogrulama metotlarini domain bazli dosyalarda tutar.
+  Paylasilan primitive'ler (expectVisible/expectCount ...) ve generic dogrulamalar common.assertions.ts'tedir.
 
 src/flows
   Birden fazla action ve assertion iceren business akislarini tutar.
@@ -114,11 +116,16 @@ playwright-automation/
     ├── locators/
     │   └── locators.ts
     │
-    ├── actions/
-    │   └── actions.ts
+    ├── actions/                    # Domain bazli (esik asildi, bolundu)
+    │   ├── common.actions.ts       # Paylasilan click/fill + generic motor
+    │   ├── auth.actions.ts
+    │   ├── navigation.actions.ts
+    │   └── automaticParameters.actions.ts
     │
-    ├── assertions/
-    │   └── assertions.ts
+    ├── assertions/                 # Domain bazli (esik asildi, bolundu)
+    │   ├── common.assertions.ts    # Paylasilan expect* + generic dropdown/text
+    │   ├── auth.assertions.ts
+    │   └── automaticParameters.assertions.ts
     │
     ├── flows/
     │   └── auth.flow.ts
@@ -154,8 +161,8 @@ Ornek kullanim mantigi:
 features/generated/TC_001_login.feature
   -> features/step-definitions/auth.steps.ts
     -> flows/auth.flow.ts
-    -> actions/actions.ts
-    -> assertions/assertions.ts
+    -> actions/auth.actions.ts
+    -> assertions/auth.assertions.ts
     -> locators/locators.ts
     -> data/data.ts
 ```
@@ -205,7 +212,7 @@ src/actions/actions.ts
 src/assertions/assertions.ts
 ```
 
-Ileride dosyalar cok buyurse veya bakim zorlasirsa, bu tek dosyalar domain bazli ayrilmalidir.
+Ileride dosyalar cok buyurse veya bakim zorlasirsa, bu tek dosyalar domain bazli ayrilmalidir. Bu ayrim `actions` ve `assertions` katmanlari icin ZATEN yapilmistir (bkz. 5.1 "Guncel durum"); `data` ve `locators` hala tek dosyadir.
 
 ---
 
@@ -263,6 +270,14 @@ Gecis kurallari:
 - Import'lar minimum degisiklikle guncellenmelidir.
 - Ayrim sonrasi ayni fonksiyon iki yerde birakilmamalidir.
 - Buyume esigi yoksa tek dosya yapisi korunmalidir.
+
+Guncel durum (bu repo):
+
+- `actions` ve `assertions` katmanlari buyume esigini (200-300 satir) astigi icin domain bazli dosyalara BOLUNMUSTUR. Gecerli yapi:
+  - `src/actions/`: `common.actions.ts` (paylasilan `click`/`fill` + generic motor: `readElementText`/`readElementAttribute`/`fillElement`/`clickByText` + `clickCreateLink`), `auth.actions.ts`, `navigation.actions.ts`, `automaticParameters.actions.ts`
+  - `src/assertions/`: `common.assertions.ts` (paylasilan `expectVisible`/`expectCount`/... primitive'leri + generic `expectListboxOptionsVisible`/`expectTextPresent`), `auth.assertions.ts`, `automaticParameters.assertions.ts`
+- `src/data/data.ts` ve `src/locators/locators.ts` hala TEK dosyadir (esik asilmadi); buyuyunce ayni strateji ile bolunur.
+- Yeni action/assertion eklerken: dogru domain dosyasina ekle; paylasilan bir primitive gerekiyorsa `common.actions`/`common.assertions`'tan import et; uygun domain dosyasi yoksa yeni bir `<domain>.actions.ts` / `<domain>.assertions.ts` ac. Tek bir `actions.ts` / `assertions.ts` dosyasina GERI DONME.
 
 ---
 
@@ -585,14 +600,14 @@ Kurallar:
 
 ## 8. Action Yazim Kurallari
 
-Action metotlari `src/actions/actions.ts` icinde tutulmalidir.
+Action metotlari `src/actions/` altinda domain bazli dosyalarda tutulmalidir (`common.actions.ts`, `auth.actions.ts`, `navigation.actions.ts`, ...). Paylasilan primitive'ler (`click`/`fill`) ve generic motor `common.actions.ts`'tedir; yeni domain dosyasi bunlari oradan import eder. (Bkz. 5.1 Guncel durum.)
 
 Action, tekil ve reusable kullanici islemini temsil eder.
 
 Ornek:
 
 ```ts
-// src/actions/actions.ts
+// src/actions/auth.actions.ts
 import { Page } from '@playwright/test';
 import { locators } from '../locators/locators';
 
@@ -650,14 +665,14 @@ export async function click(locator: Locator) {
 
 ## 9. Assertion Yazim Kurallari
 
-Assertion metotlari `src/assertions/assertions.ts` icinde tutulmalidir.
+Assertion metotlari `src/assertions/` altinda domain bazli dosyalarda tutulmalidir (`common.assertions.ts`, `auth.assertions.ts`, ...). Paylasilan primitive'ler (`expectVisible`/`expectCount` ...) `common.assertions.ts`'tedir; yeni domain dosyasi bunlari oradan import eder. (Bkz. 5.1 Guncel durum.)
 
 Assertion, reusable dogrulama metodunu temsil eder.
 
 Ornek:
 
 ```ts
-// src/assertions/assertions.ts
+// src/assertions/auth.assertions.ts
 import { Page, expect } from '@playwright/test';
 import { locators } from '../locators/locators';
 
@@ -723,7 +738,7 @@ Kullanilacak generic yapi:
 ```text
 Step       -> features/step-definitions/common.steps.ts
               "{string} listesinde aşağıdaki seçenekler listelenir" + Data Table
-Assertion  -> src/assertions/assertions.ts -> expectListboxOptionsVisible(page, listName, expectedTexts)
+Assertion  -> src/assertions/common.assertions.ts -> expectListboxOptionsVisible(page, listName, expectedTexts)
 Locator    -> src/locators/locators.ts -> common.optionInListbox(listboxId, name)
 ```
 
@@ -762,8 +777,8 @@ import {
   clickLoginButton,
   fillLoginPassword,
   fillLoginUsername,
-} from '../actions/actions';
-import { expectLoginPageVisible, expectLoginSuccess } from '../assertions/assertions';
+} from '../actions/auth.actions';
+import { expectLoginPageVisible, expectLoginSuccess } from '../assertions/auth.assertions';
 import { env } from '../config/env';
 import { TestUser } from '../data/data';
 
@@ -917,13 +932,13 @@ Deger tipi `unknown` tutulur (string disi degerler de saklanabilsin diye); okurk
 Hazir generic motor (store'dan bagimsiz; deger alir/dondurur, store islemi step'te yapilir):
 
 ```text
-src/actions/actions.ts
+src/actions/common.actions.ts
   readElementText(locator, report)               -> elementin text'ini okur ve dondurur
   readElementAttribute(locator, report, attr)    -> elementin attribute degerini okur ve dondurur
   fillElement(locator, report, value)            -> verilen degeri input'a yazar
   clickByText(page, value, { exact })            -> metni degere ESIT/ICEREN ilk elemana tiklar
 
-src/assertions/assertions.ts
+src/assertions/common.assertions.ts
   expectTextPresent(page, value, { exact })      -> metni degere ESIT/ICEREN eleman var mi dogrular (baska sayfada da)
 ```
 
@@ -971,8 +986,8 @@ import {
   clickLoginButton,
   fillLoginPassword,
   fillLoginUsername,
-} from '../../src/actions/actions';
-import { expectLoginSuccess } from '../../src/assertions/assertions';
+} from '../../src/actions/auth.actions';
+import { expectLoginSuccess } from '../../src/assertions/auth.assertions';
 import { env } from '../../src/config/env';
 import { CustomWorld } from './world';
 
@@ -1160,13 +1175,13 @@ Codex yeni test uretirken asagidaki sirayi izlemelidir:
 3. Mevcut step/locator/action/assertion/flow icin `rg` ile reuse aramasi yap.
 4. Ilgili mevcut flow var mi kontrol et.
 5. Ilgili flow varsa onu kullan.
-6. Flow yoksa src/data/data.ts, src/actions/actions.ts, src/assertions/assertions.ts ve src/locators/locators.ts yapisini kontrol et.
+6. Flow yoksa src/data/data.ts, src/actions/ (domain dosyalari), src/assertions/ (domain dosyalari) ve src/locators/locators.ts yapisini kontrol et.
 7. Sidebar navigasyon ihtiyaci varsa `features/step-definitions/navigation.steps.ts` icindeki genel step'i kullan: `"UstMenu > AltMenu > SayfaAdi" menü yolundan sayfaya gidilir`. Ayri navigasyon step yazma.
 7b. Diger ortak UI ihtiyaci varsa once `common` veya `navigation` gruplarini kullan.
 7c. Bir degeri kaydedip baska adimda kullanacaksan (12.1) hazir generic fonksiyonlari kullan (`readElementText`/`readElementAttribute`/`fillElement`/`clickByText`/`expectTextPresent`); degeri `this.saveValue`/`this.getValue` ile sakla/oku (rapora SAVE/USE duser), `data.ts`'e veya feature'a hard-code etme.
 7d. Bir dropdown/listbox secenek listesini dogrulayacaksan (9.1) generic step'i kullan: `"{Liste Adi}" listesinde aşağıdaki seçenekler listelenir` + Data Table. Sayfa-ozel `expectXOptionsVisible` veya sayfa-ozel step yazma; beklenen listeyi koda gomme.
-8. Eksik reusable parca varsa once mevcut tek dosya yapisina kucuk ve temiz ekleme yap.
-9. Tek dosya buyume esigini asiyorsa, sadece ilgili katmani/domain'i domain bazli dosyaya ayir.
+8. Eksik reusable parca varsa dogru yere kucuk ve temiz ekleme yap: actions/assertions icin ilgili domain dosyasina (yoksa yeni domain dosyasi ac, paylasilan primitive'leri common'dan import et); data/locators icin tek dosyaya.
+9. Tek dosya kalan bir katman (data/locators) buyume esigini asiyorsa, sadece o katmani domain bazli dosyalara ayir (POM'a donme).
 10. Feature dosyasini `features/generated` altinda business seviyesinde olustur.
 11. Eksik Gherkin step karsiliklarini `features/step-definitions` icinde olustur.
 12. Step definition icinden mumkunse `src/flows` fonksiyonlarini cagir.
@@ -1210,8 +1225,8 @@ Lutfen AGENTS.md dosyasindaki mimari ve kurallara gore ilerle.
 Ozet mimari:
 - Data: src/data/data.ts
 - Locator: src/locators/locators.ts
-- Action: src/actions/actions.ts
-- Assertion: src/assertions/assertions.ts
+- Action: src/actions/ (domain bazli: common/auth/navigation/... .actions.ts)
+- Assertion: src/assertions/ (domain bazli: common/auth/... .assertions.ts)
 - Flow: src/flows
 - Cucumber Feature: features/generated
 - Cucumber Step Definition: features/step-definitions
@@ -1223,8 +1238,8 @@ Her sayfa icin ayri Page class olusturulmayacak.
 Gauge runner kullanilmayacak.
 Cucumber ve Gherkin kullanilacak.
 Gauge concept veya `.cpt` kullanilmayacak.
-Baslangicta data/locator/action/assertion katmanlari tek dosya olacak.
-Dosyalar buyume esigini asarsa POM'a donmeden domain bazli katman dosyalarina ayrilacak.
+Data ve locator katmanlari tek dosya; action ve assertion katmanlari buyume esigini astigi icin domain bazli dosyalara bolunmustur (bkz. 5.1 Guncel durum).
+Kalan tek dosyali katmanlar da esigi asarsa POM'a donmeden domain bazli katman dosyalarina ayrilacak.
 
 Yeni test uretirken:
 1. Once `rg` ile mevcut step/flow/data/action/assertion/locator aramasi yap.
@@ -1360,11 +1375,11 @@ Kullanilacak:
 - Playwright browser automation
 - TypeScript
 - Data / Locator / Action / Assertion / Flow ayrimi
-- Tek data dosyasi: src/data/data.ts
-- Tek locator dosyasi: src/locators/locators.ts
-- Tek action dosyasi: src/actions/actions.ts
-- Tek assertion dosyasi: src/assertions/assertions.ts
-- Buyume esigi asildiginda domain bazli katman dosyalarina gecis
+- Tek data dosyasi: src/data/data.ts (esik asilmadi)
+- Tek locator dosyasi: src/locators/locators.ts (esik asilmadi)
+- Domain bazli action dosyalari: src/actions/common|auth|navigation|automaticParameters.actions.ts (esik asildi, bolundu)
+- Domain bazli assertion dosyalari: src/assertions/common|auth|automaticParameters.assertions.ts (esik asildi, bolundu)
+- Kalan tek dosyali katmanlar (data/locators) esigi asildiginda domain bazli dosyalara gecer
 - Feature dosyalari: features/generated
 - Step definitions: features/step-definitions
 - Cucumber World/Hooks: features/support

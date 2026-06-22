@@ -1,5 +1,5 @@
 import { When } from '@cucumber/cucumber';
-import { clickSidebarMenuLink, openSidebarMenuPath } from '../../src/actions/actions';
+import { clickSidebarMenuLink, openSidebarMenuPath } from '../../src/actions/navigation.actions';
 import { CustomWorld, getPage } from '../support/world';
 
 When('{string} menü yolundan sayfaya gidilir', async function (this: CustomWorld, menuPath: string) {

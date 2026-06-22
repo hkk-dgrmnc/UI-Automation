@@ -1,16 +1,16 @@
 import { Locator, Page, expect } from '@playwright/test';
 import { LocatorReport, reportAssertion, reportError } from '../utils/action-report';
-import {
-  LOCATOR_REPORTS,
-  OPERATION_CODE_OPTIONS,
-  locators,
-} from '../locators/locators';
+import { LOCATOR_REPORTS, locators } from '../locators/locators';
 
-type AssertionOptions = {
+export type AssertionOptions = {
   timeout?: number;
 };
 
-async function expectUrl(
+// Asagidaki primitive assertion wrapper'lari tum domain assertion dosyalari
+// tarafindan kullanilir; yeni domain assertion dosyasi bunlari buradan import
+// eder (kendi kopyasini yazmaz). Rapor expect'ten ONCE yazilir; boylece fail
+// durumunda da hangi locator ve beklenen sonuc oldugu raporda gorunur.
+export async function expectUrl(
   page: Page,
   expectedUrl: RegExp,
   options?: AssertionOptions,
@@ -29,7 +29,7 @@ async function expectUrl(
   }
 }
 
-async function expectVisible(
+export async function expectVisible(
   locator: Locator,
   locatorReport: LocatorReport,
   options?: AssertionOptions,
@@ -48,7 +48,7 @@ async function expectVisible(
   }
 }
 
-async function expectNotVisible(locator: Locator, locatorReport: LocatorReport) {
+export async function expectNotVisible(locator: Locator, locatorReport: LocatorReport) {
   reportAssertion({
     assertion: 'Not To Be Visible',
     locatorName: locatorReport.name,
@@ -63,7 +63,7 @@ async function expectNotVisible(locator: Locator, locatorReport: LocatorReport) 
   }
 }
 
-async function expectCount(
+export async function expectCount(
   locator: Locator,
   locatorReport: LocatorReport,
   count: number,
@@ -82,7 +82,7 @@ async function expectCount(
   }
 }
 
-async function expectNotAttribute(
+export async function expectNotAttribute(
   locator: Locator,
   locatorReport: LocatorReport,
   attributeName: string,
@@ -102,7 +102,7 @@ async function expectNotAttribute(
   }
 }
 
-async function expectHasValue(
+export async function expectHasValue(
   locator: Locator,
   locatorReport: LocatorReport,
   expected: string | RegExp,
@@ -122,7 +122,7 @@ async function expectHasValue(
   }
 }
 
-async function expectEnabled(locator: Locator, locatorReport: LocatorReport) {
+export async function expectEnabled(locator: Locator, locatorReport: LocatorReport) {
   reportAssertion({
     assertion: 'To Be Enabled',
     locatorName: locatorReport.name,
@@ -137,7 +137,7 @@ async function expectEnabled(locator: Locator, locatorReport: LocatorReport) {
   }
 }
 
-async function expectDisabled(locator: Locator, locatorReport: LocatorReport) {
+export async function expectDisabled(locator: Locator, locatorReport: LocatorReport) {
   reportAssertion({
     assertion: 'To Be Disabled',
     locatorName: locatorReport.name,
@@ -149,77 +149,6 @@ async function expectDisabled(locator: Locator, locatorReport: LocatorReport) {
   } catch (error) {
     reportError({ action: 'To Be Disabled', locatorName: locatorReport.name, error });
     throw error;
-  }
-}
-
-export async function expectLoginPageVisible(page: Page) {
-  const locator = locators(page);
-
-  await expectVisible(locator.auth.usernameInput, LOCATOR_REPORTS.auth.usernameInput);
-  await expectVisible(locator.auth.passwordInput, LOCATOR_REPORTS.auth.passwordInput);
-  await expectVisible(locator.auth.loginButton, LOCATOR_REPORTS.auth.loginButton);
-}
-
-export async function expectLoginSuccess(page: Page) {
-  const locator = locators(page);
-
-  await expectUrl(page, /shell-app-ui\/#\/journal-audits/);
-  await expectNotVisible(locator.auth.usernameInput, LOCATOR_REPORTS.auth.usernameInput);
-  await expectVisible(locator.auth.userProfileButton, LOCATOR_REPORTS.auth.userProfileButton, { timeout: 45_000 });
-}
-
-export async function expectAutomaticParametersRouteOpened(page: Page) {
-  const locator = locators(page);
-
-  await expectUrl(page, /shell-app-ui\/#\/automatic-parameters/, { timeout: 30_000 });
-  await expectVisible(
-    locator.navigation.selectedSidebarMenuLink('Otomatik Parametre Tanımlama'),
-    LOCATOR_REPORTS.navigation.selectedSidebarMenuLink('Otomatik Parametre Tanımlama'),
-  );
-  await expectVisible(
-    locator.automaticParameters.listTitle,
-    LOCATOR_REPORTS.automaticParameters.listTitle,
-    { timeout: 30_000 },
-  );
-}
-
-export async function expectAutomaticParametersCreateLinkAvailable(page: Page) {
-  const locator = locators(page);
-
-  await expectCount(locator.common.createLink, LOCATOR_REPORTS.common.createLink, 1);
-  await expectNotAttribute(
-    locator.common.createLink,
-    LOCATOR_REPORTS.common.createLink,
-    'aria-disabled',
-    'true',
-  );
-}
-
-export async function expectAutomaticParametersCreatePageOpened(page: Page) {
-  const locator = locators(page);
-
-  await expectUrl(page, /shell-app-ui\/#\/automatic-parameters\/create/, { timeout: 30_000 });
-  await expectVisible(
-    locator.automaticParameters.infoTitle,
-    LOCATOR_REPORTS.automaticParameters.infoTitle,
-    { timeout: 30_000 },
-  );
-}
-
-export async function expectOperationCodeListFormatted(page: Page) {
-  const locator = locators(page);
-
-  await expectCount(
-    locator.common.listboxOptions,
-    LOCATOR_REPORTS.common.listboxOptions,
-    OPERATION_CODE_OPTIONS.length,
-  );
-
-  for (const optionText of OPERATION_CODE_OPTIONS) {
-    await expectVisible(
-      locator.common.listboxOption(optionText),
-      LOCATOR_REPORTS.common.listboxOption(optionText),
-    );
   }
 }
 
@@ -275,54 +204,9 @@ export async function expectListboxOptionsVisible(
   }
 }
 
-export async function expectOperationDescriptionMaxLengthAndTurkish(page: Page) {
-  const locator = locators(page);
-  const report = LOCATOR_REPORTS.automaticParameters.operationDescriptionInput;
-  const input = locator.automaticParameters.operationDescriptionInput;
-
-  // 15 karakterden uzun bir deger girilince alan tam 15 karaktere kirpilir (max sinir).
-  await expectHasValue(input, report, /^.{15}$/, 'tam 15 karakter (max 15)');
-  // Girilen Türkçe karakterler korunur (ı/ş gibi).
-  await expectHasValue(input, report, /[ışğüçöİŞĞÜÇÖ]/, 'Türkçe karakter korunur');
-}
-
-export async function expectOperationDescriptionRequired(page: Page) {
-  const locator = locators(page);
-
-  await expectVisible(
-    locator.automaticParameters.operationDescriptionRequiredLabel,
-    LOCATOR_REPORTS.automaticParameters.operationDescriptionRequiredLabel,
-  );
-}
-
-// İşlem Kodu secimine gore Tür 2 / KDV Oranı alanlarinin aktif/pasif durumu.
-// Gercek ekranda dogrulandi: [001] -> Tür 2 aktif, KDV pasif; [002] -> ikisi de
-// pasif; [003] -> Tür 2 pasif, KDV aktif.
-
-export async function expectSubTypeEnabledKdvRateDisabled(page: Page) {
-  const locator = locators(page);
-
-  await expectEnabled(locator.automaticParameters.subTypeCombobox, LOCATOR_REPORTS.automaticParameters.subTypeCombobox);
-  await expectDisabled(locator.automaticParameters.kdvRateCombobox, LOCATOR_REPORTS.automaticParameters.kdvRateCombobox);
-}
-
-export async function expectSubTypeAndKdvRateDisabled(page: Page) {
-  const locator = locators(page);
-
-  await expectDisabled(locator.automaticParameters.subTypeCombobox, LOCATOR_REPORTS.automaticParameters.subTypeCombobox);
-  await expectDisabled(locator.automaticParameters.kdvRateCombobox, LOCATOR_REPORTS.automaticParameters.kdvRateCombobox);
-}
-
-export async function expectSubTypeDisabledKdvRateEnabled(page: Page) {
-  const locator = locators(page);
-
-  await expectDisabled(locator.automaticParameters.subTypeCombobox, LOCATOR_REPORTS.automaticParameters.subTypeCombobox);
-  await expectEnabled(locator.automaticParameters.kdvRateCombobox, LOCATOR_REPORTS.automaticParameters.kdvRateCombobox);
-}
-
 // --- Dinamik deger: metne gore varlik dogrulama -----------------------------
 // Store'dan bagimsizdir: deger alir. Kayitli degerle kullanim step katmaninda
-// `this.store.get(name)` ile yapilir (AGENTS.md 12.1). Baska sayfada da calisir.
+// `this.getValue(name)` ile yapilir (AGENTS.md 12.1). Baska sayfada da calisir.
 
 /**
  * Sayfada metni verilen degere ESIT (exact) ya da ICEREN en az bir gorunur

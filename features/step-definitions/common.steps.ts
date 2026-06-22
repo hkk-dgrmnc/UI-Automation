@@ -1,5 +1,5 @@
 import { DataTable, Then } from '@cucumber/cucumber';
-import { expectListboxOptionsVisible } from '../../src/assertions/assertions';
+import { expectListboxOptionsVisible } from '../../src/assertions/common.assertions';
 import { CustomWorld, getPage } from '../support/world';
 
 // Generic liste dogrulama: acik bir dropdown'da beklenen seceneklerin listelendigini

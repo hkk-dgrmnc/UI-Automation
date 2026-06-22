@@ -64,7 +64,7 @@
 - `common.createLink` → a#action-create
 - `common.listboxOptions` → role=listbox >> role=option
 - `common.listboxOption` (fn) → role=listbox >> role=option name="<arg>"
-- `common.optionInListbox` (fn) → #<arg> >> role=option name="undefined" (exact)
+- `common.optionInListbox` (fn) → #<arg> >> role=option name="<arg>" (exact)
 
 ### navigation
 
@@ -74,24 +74,35 @@
 
 ## Actions
 
-_src/actions/actions.ts_
+### src/actions/auth.actions.ts
 
 - `fillLoginUsername()`
 - `fillLoginPassword()`
 - `clickLoginButton()`
-- `openSidebarMenuPath()`
-- `clickSidebarMenuLink()`
-- `clickCreateLink()`
+
+### src/actions/automaticParameters.actions.ts
+
 - `openOperationCodeDropdown()`
 - `selectOperationCode()`
 - `openTypeDropdown()`
 - `openSubTypeDropdown()`
 - `openKdvRateDropdown()`
 - `fillOperationDescription()`
+
+### src/actions/common.actions.ts
+
+- `fill()`
+- `click()`
+- `clickCreateLink()`
 - `readElementText()`
 - `readElementAttribute()`
 - `fillElement()`
 - `clickByText()`
+
+### src/actions/navigation.actions.ts
+
+- `openSidebarMenuPath()`
+- `clickSidebarMenuLink()`
 
 ## Flows
 

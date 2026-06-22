@@ -1,9 +1,9 @@
 import { Page } from '@playwright/test';
-import { clickCreateLink } from '../actions/actions';
+import { clickCreateLink } from '../actions/common.actions';
 import {
   expectAutomaticParametersCreateLinkAvailable,
   expectAutomaticParametersCreatePageOpened,
-} from '../assertions/assertions';
+} from '../assertions/automaticParameters.assertions';
 
 export async function openAutomaticParametersCreatePage(page: Page) {
   await expectAutomaticParametersCreateLinkAvailable(page);
