@@ -127,7 +127,7 @@ Katman sorumlulukları:
 
 | Katman | Konum | Sorumluluk |
 | --- | --- | --- |
-| Feature | `features/generated/` | Manuel test case'lerden üretilen, iş dilinde okunan senaryolar |
+| Feature | `features/cases/smoke/`, `features/cases/regression/` | Smoke ve regression test case'lerinden üretilen, iş dilinde okunan senaryolar |
 | Step Definition | `features/step-definitions/` | Gherkin adımını TypeScript akışına bağlar |
 | Flow | `src/flows/` | Birden fazla action/assertion içeren business akışları |
 | Action | `src/actions/` | Kullanıcı aksiyonlarını reusable fonksiyonlarla yönetir |
@@ -154,7 +154,9 @@ playwright-automation/
 |   +-- confluence-last-version-v1.md
 |
 +-- features/
-|   +-- generated/
+|   +-- cases/
+|   |   +-- smoke/
+|   |   +-- regression/
 |   +-- step-definitions/
 |   +-- support/
 |
@@ -488,7 +490,7 @@ Flow kuralları:
 Örnek:
 
 ```text
-features/generated/<TC_ID>_<domain>.feature
+features/cases/<smoke|regression>/<TC_ID>_<domain>.feature
   -> features/step-definitions/<domain>.steps.ts
     -> src/flows/<domain>.flow.ts
       -> src/actions/<domain>.actions.ts
@@ -512,11 +514,11 @@ Step metni kuralları:
 
 - Türkçe, kısa ve business seviyesinde olmalıdır.
 - Aynı anlama gelen farklı step metinleri üretilmemelidir.
-- Yeni step yazmadan önce `features/step-definitions` ve `features/generated` aranmalıdır.
+- Yeni step yazmadan önce `features/step-definitions` ve `features/cases` aranmalıdır.
 
 ## Feature Dosyası Standardı
 
-Feature dosyaları `features/generated` altında oluşturulur.
+Feature dosyaları test tipine göre `features/cases/smoke` veya `features/cases/regression` altında oluşturulur.
 
 Örnek:
 
@@ -653,7 +655,7 @@ Codex veya benzeri AI araçları yeni test üretirken aşağıdaki sırayı izle
 6. Dropdown/listbox seçenek doğrulaması gerekiyorsa generic step + Data Table kullanılır.
 7. Yeni locator gerekiyorsa Playwright MCP ile gerçek sayfada doğrulanır.
 8. Eksik reusable parça varsa doğru katmana küçük ekleme yapılır.
-9. Feature dosyası `features/generated` altında business seviyesinde oluşturulur.
+9. Feature dosyası test tipine göre `features/cases/smoke` veya `features/cases/regression` altında business seviyesinde oluşturulur.
 10. Step definition mümkünse flow çağırır.
 11. `npm run inventory` çalıştırılır.
 12. `npm run check` çalıştırılır.
@@ -843,7 +845,7 @@ Bir otomasyon değişikliği tamamlanmış sayılmak için aşağıdaki şartlar
 
 | Kontrol | Beklenti |
 | --- | --- |
-| Feature | `features/generated` altında, business dilinde ve `*` adımlarıyla yazılmış |
+| Feature | `features/cases/smoke` veya `features/cases/regression` altında, business dilinde ve `*` adımlarıyla yazılmış |
 | Scenario | Manuel test case ID ile başlıyor |
 | Step | Duplicate olmayan, Türkçe ve reusable step metni kullanılmış |
 | Locator | Gerçek uygulamada doğrulanmış ve `LOCATOR_REPORTS` ile eklenmiş |
@@ -862,7 +864,7 @@ Bir otomasyon değişikliği tamamlanmış sayılmak için aşağıdaki şartlar
 PR veya test üretimi sonrası şu sorular kontrol edilmelidir:
 
 1. Test adı TC ID ile başlıyor mu?
-2. Feature dosyası `features/generated` altında mı?
+2. Feature dosyası test tipine göre `features/cases/smoke` veya `features/cases/regression` altında mı?
 3. Feature dosyasında teknik locator veya Playwright detayı var mı?
 4. Step keyword olarak sadece `*` kullanılmış mı?
 5. Aynı anlama gelen duplicate step üretilmiş mi?

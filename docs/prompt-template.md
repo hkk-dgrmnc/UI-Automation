@@ -53,8 +53,9 @@ Ek not: yok
      yeni TC adimlari mevcut senaryonun sonuna eklenir.
    - `mevcut feature icinde yeni scenario ac`: ilgili mevcut feature korunur,
      ayni feature icinde yeni scenario olusturulur.
-   - `yeni feature ac`: `features/generated` altinda yeni feature dosyasi
-     olusturulur; gerekli scenario bu dosyada yazilir.
+   - `yeni feature ac`: test tipine gore `features/cases/smoke` veya
+     `features/cases/regression` altinda yeni feature dosyasi olusturulur;
+     gerekli scenario bu dosyada yazilir.
    - `repo yapisindan karar ver`: mevcut feature/senaryo yapisi ve manuel test
      akisi incelenir; emin olunamiyorsa tahminle kod yazmadan blokaj raporlanir.
 6. Login gerekiyorsa mevcut auth step/flow'unu kullan; yeni login akisi yazma.
@@ -75,8 +76,9 @@ Ek not: yok
 10. Yeni locator gerekiyorsa Playwright MCP ile gercek uygulamada dogrula.
 11. Dogrulanmayan locator, tahmini selector, TODO, placeholder step veya bos assertion
    koda birakma.
-12. Feature dosyasi `features/generated` altinda business dilinde olsun; step
-   keyword olarak sadece `*` kullan.
+12. Feature dosyasi test tipine gore `features/cases/smoke` veya
+   `features/cases/regression` altinda business dilinde olsun; step keyword
+   olarak sadece `*` kullan.
 13. Step definition teknik detay veya locator icermesin; mumkunse flow cagir.
 14. Yeni action/assertion gerekiyorsa dogru domain dosyasina ekle; common primitive'leri
     tekrar yazma.

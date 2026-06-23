@@ -12,9 +12,17 @@ const sharedConfig = {
 module.exports = {
   // Paths yok: VS Code cucumberRunner bu profili kullanır, CLI'dan gelen path tek kaynak olur
   default: sharedConfig,
-  generated: {
+  cases: {
     ...sharedConfig,
-    paths: ['features/generated/**/*.feature'],
+    paths: ['features/cases/**/*.feature'],
+  },
+  smoke: {
+    ...sharedConfig,
+    paths: ['features/cases/smoke/**/*.feature'],
+  },
+  regression: {
+    ...sharedConfig,
+    paths: ['features/cases/regression/**/*.feature'],
   },
   all: {
     ...sharedConfig,

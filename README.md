@@ -17,7 +17,9 @@ Bu repoda klasik Page Object Model kullanılmaz. Test mimarisi data, locator, ac
 
 ```text
 features/
-  generated/             # Cucumber feature dosyaları
+  cases/                 # Cucumber feature dosyaları
+    smoke/               # Kritik smoke case'leri
+    regression/          # Regression case'leri
   step-definitions/      # Gherkin step karşılıkları
   support/               # World, hook, formatter ve raporlama desteği
 
@@ -70,6 +72,8 @@ Kullanıcı bilgileri `USER<N>_USERNAME` / `USER<N>_PASSWORD` bloklarıyla okunu
 
 ```powershell
 npm test
+npm run test:smoke
+npm run test:regression
 ```
 
 Tarayıcı bazlı çalıştırma:
@@ -159,7 +163,7 @@ Inventory kontrolü şu durumları yakalar:
 2. [INVENTORY.md](./INVENTORY.md) içinde mevcut step, locator, action ve flow reuse'u ara.
 3. Gerekirse `rg` ile derin arama yap.
 4. Locator'ı gerçek uygulamada doğrula.
-5. Feature dosyasını `features/generated` altına ekle veya güncelle.
+5. Feature dosyasını test tipine göre `features/cases/smoke` veya `features/cases/regression` altına ekle veya güncelle.
 6. Step definition içinde locator veya Playwright detayı yazma; mümkünse flow çağır.
 7. Gerekli action, assertion, locator ve data eklemelerini mevcut katmanlara yap.
 8. Yeni locator eklendiyse `LOCATOR_REPORTS` metadatasını da ekle.
@@ -185,8 +189,8 @@ Prompt dosyasında sadece `DOLDUR` alanı ilgili test turuna göre güncellenir.
 
 ## Mevcut Senaryolar
 
-- `features/generated/TC_001_login.feature`: Geçerli kullanıcı ile login kontrolü
-- `features/generated/YTKP-1009.feature`: Otomatik Parametre Tanımlama ekranına erişim, oluşturma ekranı yönlendirmesi, İşlem Kodu dropdown formatı, İşlem Kodu seçimine göre alan aktif/pasif kontrolleri, Fiş Açıklama validasyonları ve Tür / Tür 2 / KDV Oranı seçenek doğrulamaları
+- `features/cases/smoke/TC_001_login.feature`: Geçerli kullanıcı ile login kontrolü
+- `features/cases/regression/YTKP-1009.feature`: Otomatik Parametre Tanımlama ekranına erişim, oluşturma ekranı yönlendirmesi, İşlem Kodu dropdown formatı, İşlem Kodu seçimine göre alan aktif/pasif kontrolleri, Fiş Açıklama validasyonları ve Tür / Tür 2 / KDV Oranı seçenek doğrulamaları
 
 ## Mimari Notlar
 

@@ -49,7 +49,7 @@ Cucumber  -> features
 Step Def  -> features/step-definitions
 Support   -> features/support
 Config    -> src/config
-Feature   -> features/generated
+Feature   -> features/cases/smoke veya features/cases/regression
 ```
 
 Katmanlarin sorumluluklari:
@@ -72,8 +72,11 @@ src/assertions/  (common.assertions.ts, auth.assertions.ts, ...)
 src/flows
   Birden fazla action ve assertion iceren business akislarini tutar.
 
-features/generated
-  Manuel test case'lerden uretilen Cucumber feature dosyalarini tutar.
+features/cases/smoke
+  Kritik smoke Cucumber feature dosyalarini tutar.
+
+features/cases/regression
+  Regression Cucumber feature dosyalarini tutar.
 
 features/step-definitions
   `*` ile yazilan Gherkin adimlarinin TypeScript `Given/When/Then` karsiliklarini tutar.
@@ -99,8 +102,11 @@ playwright-automation/
 ├── tsconfig.json
 |
 ├── features/
-│   ├── generated/
-│   │   └── TC_001_login.feature
+│   ├── cases/
+│   │   ├── smoke/
+│   │   │   └── TC_001_login.feature
+│   │   └── regression/
+│   │       └── YTKP-1009.feature
 │   │
 │   ├── step-definitions/
 │   │   └── auth.steps.ts
@@ -158,7 +164,7 @@ Feature
 Ornek kullanim mantigi:
 
 ```text
-features/generated/TC_001_login.feature
+features/cases/smoke/TC_001_login.feature
   -> features/step-definitions/auth.steps.ts
     -> flows/auth.flow.ts
     -> actions/auth.actions.ts
@@ -356,7 +362,7 @@ Bu step tum uygulamada gecerlidir; yeni sayfa icin ayri navigation step yazilmaz
 Step sozlugu kurallari:
 
 - Ayni anlama gelen farkli step metinleri uretilmemelidir.
-- Once `features/step-definitions` ve `features/generated` icinde ayni anlamda step aranmalidir.
+- Once `features/step-definitions` ve `features/cases` icinde ayni anlamda step aranmalidir.
 - Varsa mevcut step metni aynen kullanilmalidir.
 - Yoksa yeni step Turkce, kisa, business seviyesinde ve tekrar kullanilabilir yazilmalidir.
 - `Oluştur butonuna tıklanır`, `Create butonuna basılır`, `Kullanıcı oluşturur` gibi ayni isi yapan farkli step'ler birlikte bulunmamalidir.
@@ -1080,12 +1086,12 @@ Kurallar:
 
 ## 15. Feature Dosyasi Yazim Kurallari
 
-Feature dosyalari `features/generated` altinda olusturulmalidir.
+Feature dosyalari test tipine gore `features/cases/smoke` veya `features/cases/regression` altinda olusturulmalidir.
 
 Ornek:
 
 ```gherkin
-# features/generated/TC_001_login.feature
+# features/cases/smoke/TC_001_login.feature
 @smoke @auth
 Feature: Authentication login
 
@@ -1189,7 +1195,7 @@ Codex yeni test uretirken asagidaki sirayi izlemelidir:
 7d. Bir dropdown/listbox secenek listesini dogrulayacaksan (9.1) generic step'i kullan: `"{Liste Adi}" listesinde aşağıdaki seçenekler listelenir` + Data Table. Sayfa-ozel `expectXOptionsVisible` veya sayfa-ozel step yazma; beklenen listeyi koda gomme.
 8. Eksik reusable parca varsa dogru yere kucuk ve temiz ekleme yap: actions/assertions icin ilgili domain dosyasina (yoksa yeni domain dosyasi ac, paylasilan primitive'leri common'dan import et); data/locators icin tek dosyaya.
 9. Tek dosya kalan bir katman (data/locators) buyume esigini asiyorsa, sadece o katmani domain bazli dosyalara ayir (POM'a donme).
-10. Feature dosyasini `features/generated` altinda business seviyesinde olustur.
+10. Feature dosyasini test tipine gore `features/cases/smoke` veya `features/cases/regression` altinda business seviyesinde olustur.
 11. Eksik Gherkin step karsiliklarini `features/step-definitions` icinde olustur.
 12. Step definition icinden mumkunse `src/flows` fonksiyonlarini cagir.
 13. Testi calistir.
@@ -1298,7 +1304,7 @@ Yeni bir test veya kod uretildikten sonra asagidaki kontrol listesi uygulanmalid
 ```text
 [ ] Test adi TC ID ile basliyor mu?
 [ ] Test gerekli tag'leri iceriyor mu?
-[ ] Feature dosyasi `features/generated` altinda mi?
+[ ] Feature dosyasi test tipine gore `features/cases/smoke` veya `features/cases/regression` altinda mi?
 [ ] Scenario adi TC ID ile basliyor mu?
 [ ] Gherkin step'leri business dilinde mi?
 [ ] Feature dosyasinda step keyword olarak sadece `*` kullanilmis mi?
@@ -1355,7 +1361,7 @@ Kullanilacak:
 - Domain bazli action dosyalari: src/actions/common|auth|navigation|automaticParameters.actions.ts (esik asildi, bolundu)
 - Domain bazli assertion dosyalari: src/assertions/common|auth|automaticParameters.assertions.ts (esik asildi, bolundu)
 - Kalan tek dosyali katmanlar (data/locators) esigi asildiginda domain bazli dosyalara gecer
-- Feature dosyalari: features/generated
+- Feature dosyalari: features/cases/smoke ve features/cases/regression
 - Step definitions: features/step-definitions
 - Cucumber World/Hooks: features/support
 - Config
