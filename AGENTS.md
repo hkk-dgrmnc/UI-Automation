@@ -958,6 +958,13 @@ Kullanim deseni:
 Kurallar:
 
 - Saklama/okuma icin GENERIC step yazilir; sayfa-bazli "X kaydet" step'i acilmaz (navigation step mantigi gibi). Dropdown locatorı sayfaya ozeldir, saklama mekanizmasi ortaktir.
+- Dinamik dropdown secimi ve sonraki adimda kullanma ihtiyacinda step metni kaynak alan/listenin adini ve hedef kullanim baglamini parametre olarak tasimalidir. Boylece ayni mekanizma farkli dropdown, tablo, liste veya arama alanlarinda tekrar kullanilabilir.
+- Yeni step uretirken tercih edilen kalip:
+  ```gherkin
+  * "{Dropdown Adi}" dropdown'ından rastgele bir seçenek seçilir ve "{degerAnahtari}" olarak kaydedilir
+  * "{degerAnahtari}" olarak kaydedilen değer "{Hedef Tablo/Liste/Alan}" ile kayıt aranır
+  ```
+- Bu kalipta ilk `{string}` secimin yapildigi UI alanini, ikinci `{string}` ScenarioStore anahtarini, ucuncu `{string}` ise kaydedilen degerin kullanilacagi hedef baglami ifade eder. Action/store fonksiyonlari bu metinleri hard-code etmez; locator dogrulamasi ve hedef baglam eslemesi ilgili domain katmaninda yapilir.
 - `ScenarioStore` saf tutulur; reporting bagimliligi icermez. SAVE/USE raporlamasi World'un `saveValue`/`getValue` sarmalayicilarinda (`reportValue`) yapilir.
 - Statik veya sabit deger store'a konmaz; o `src/data/data.ts`'e gider.
 - Henuz olmayan save/use step'leri "varmis gibi" yazilmaz; ilk gercek dropdown'li test geldiginde yukaridaki desen ile eklenir.
@@ -965,8 +972,8 @@ Kurallar:
 Ornek (gelecekteki kullanim):
 
 ```gherkin
-* Para birimi dropdown'ından rastgele bir seçenek seçilir ve "option-1" olarak kaydedilir
-* "option-1" olarak kaydedilen değer ile kayıt aranır
+* "Para birimi" dropdown'ından rastgele bir seçenek seçilir ve "option-1" olarak kaydedilir
+* "option-1" olarak kaydedilen değer "Para tablosu" ile kayıt aranır
 ```
 
 ---
@@ -1178,7 +1185,7 @@ Codex yeni test uretirken asagidaki sirayi izlemelidir:
 6. Flow yoksa src/data/data.ts, src/actions/ (domain dosyalari), src/assertions/ (domain dosyalari) ve src/locators/locators.ts yapisini kontrol et.
 7. Sidebar navigasyon ihtiyaci varsa `features/step-definitions/navigation.steps.ts` icindeki genel step'i kullan: `"UstMenu > AltMenu > SayfaAdi" menü yolundan sayfaya gidilir`. Ayri navigasyon step yazma.
 7b. Diger ortak UI ihtiyaci varsa once `common` veya `navigation` gruplarini kullan.
-7c. Bir degeri kaydedip baska adimda kullanacaksan (12.1) hazir generic fonksiyonlari kullan (`readElementText`/`readElementAttribute`/`fillElement`/`clickByText`/`expectTextPresent`); degeri `this.saveValue`/`this.getValue` ile sakla/oku (rapora SAVE/USE duser), `data.ts`'e veya feature'a hard-code etme.
+7c. Bir degeri kaydedip baska adimda kullanacaksan (12.1) hazir generic fonksiyonlari kullan (`readElementText`/`readElementAttribute`/`fillElement`/`clickByText`/`expectTextPresent`); degeri `this.saveValue`/`this.getValue` ile sakla/oku (rapora SAVE/USE duser), `data.ts`'e veya feature'a hard-code etme. Dinamik dropdown secimi + arama gibi akislar icin kaynak alan ve hedef baglam parametreli kalibi tercih et: `"{Dropdown Adi}" dropdown'ından rastgele bir seçenek seçilir ve "{degerAnahtari}" olarak kaydedilir` -> `"{degerAnahtari}" olarak kaydedilen değer "{Hedef Tablo/Liste/Alan}" ile kayıt aranır`.
 7d. Bir dropdown/listbox secenek listesini dogrulayacaksan (9.1) generic step'i kullan: `"{Liste Adi}" listesinde aşağıdaki seçenekler listelenir` + Data Table. Sayfa-ozel `expectXOptionsVisible` veya sayfa-ozel step yazma; beklenen listeyi koda gomme.
 8. Eksik reusable parca varsa dogru yere kucuk ve temiz ekleme yap: actions/assertions icin ilgili domain dosyasina (yoksa yeni domain dosyasi ac, paylasilan primitive'leri common'dan import et); data/locators icin tek dosyaya.
 9. Tek dosya kalan bir katman (data/locators) buyume esigini asiyorsa, sadece o katmani domain bazli dosyalara ayir (POM'a donme).

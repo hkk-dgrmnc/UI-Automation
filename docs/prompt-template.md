@@ -65,18 +65,25 @@ Ek not: yok
    `"{string} listesinde aşağıdaki seçenekler listelenir"` + Data Table.
    Mevcut common/generic yapi ihtiyaci guvenli karsilamiyorsa ve gercek ekran
    dogrulamasi gerektiriyorsa en kucuk ozel domain action/assertion ekle.
-9. Yeni locator gerekiyorsa Playwright MCP ile gercek uygulamada dogrula.
-10. Dogrulanmayan locator, tahmini selector, TODO, placeholder step veya bos assertion
+9. Dropdown'dan secilen veya ekrandan okunan dinamik bir deger sonraki adimda
+   kullanilacaksa `ScenarioStore` standardini uygula. Kaynak UI alani ve hedef
+   kullanim baglami step metninde parametre olarak gorunmeli:
+   `"{Dropdown Adi}" dropdown'ından rastgele bir seçenek seçilir ve "{degerAnahtari}" olarak kaydedilir`
+   ve `"{degerAnahtari}" olarak kaydedilen değer "{Hedef Tablo/Liste/Alan}" ile kayıt aranır`.
+   Degeri `this.saveValue` / `this.getValue` ile sakla/oku; `data.ts`'e veya
+   feature'a hard-code etme.
+10. Yeni locator gerekiyorsa Playwright MCP ile gercek uygulamada dogrula.
+11. Dogrulanmayan locator, tahmini selector, TODO, placeholder step veya bos assertion
    koda birakma.
-11. Feature dosyasi `features/generated` altinda business dilinde olsun; step
+12. Feature dosyasi `features/generated` altinda business dilinde olsun; step
    keyword olarak sadece `*` kullan.
-12. Step definition teknik detay veya locator icermesin; mumkunse flow cagir.
-13. Yeni action/assertion gerekiyorsa dogru domain dosyasina ekle; common primitive'leri
+13. Step definition teknik detay veya locator icermesin; mumkunse flow cagir.
+14. Yeni action/assertion gerekiyorsa dogru domain dosyasina ekle; common primitive'leri
     tekrar yazma.
-14. Yeni locator eklenirse `locators` ve `LOCATOR_REPORTS` birlikte guncellensin.
-15. Yeni step, locator, action veya flow eklendiyse `npm run inventory` calistir.
-16. Sonunda `npm.cmd run check` calistir.
-17. Ilgili scenario veya feature'i calistir; hata varsa minimum degisiklikle duzelt.
+15. Yeni locator eklenirse `locators` ve `LOCATOR_REPORTS` birlikte guncellensin.
+16. Yeni step, locator, action veya flow eklendiyse `npm run inventory` calistir.
+17. Sonunda `npm.cmd run check` calistir.
+18. Ilgili scenario veya feature'i calistir; hata varsa minimum degisiklikle duzelt.
 
 ### Cikti Beklentisi
 
