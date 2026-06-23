@@ -902,23 +902,22 @@ PR veya test üretimi sonrası şu sorular kontrol edilmelidir:
 | Playwright MCP ile locator doğrulama | Tahmini selector riskini azaltır |
 | TODO/placeholder yasağı | Kod tabanının çalışan ve güvenilir kalmasını sağlar |
 
-## Mevcut Kapsam
+## Otomasyon Kapsamı
 
-| Feature | Kapsam |
+Bu bölüm belirli test case veya feature dosyalarının listesini değil, bu proje standardı ile otomasyona alınabilecek UI test alanlarının genel çerçevesini tanımlar.
+
+| Kapsam Alanı | Açıklama |
 | --- | --- |
-| `TC_001_login.feature` | Geçerli kullanıcı ile login ve login sonrası doğrulama |
-| `YTKP-1009.feature` | Otomatik Parametre Tanımlama ekranı ve ilgili kontroller |
+| Kimlik doğrulama ve oturum | Login, logout, oturum yönlendirme ve yetki kontrolleri |
+| Menü ve navigasyon | Sidebar/topbar geçişleri, seçili menü, breadcrumb ve sayfa yönlendirme kontrolleri |
+| Liste ve arama ekranları | Liste başlığı, kolonlar, filtreleme, arama, kayıt sayısı ve sonuç görünürlüğü |
+| Form ve kayıt işlemleri | Oluşturma, düzenleme, kaydetme, vazgeçme, zorunlu alan ve validasyon davranışları |
+| Dropdown ve listbox kontrolleri | Seçenek görünürlüğü, seçim davranışı ve Data Table ile beklenen seçenek doğrulaması |
+| Alan durumları | Görünür/gizli, aktif/pasif, readonly, zorunlu alan ve label kontrolleri |
+| İş kuralı doğrulamaları | Kullanıcı seçimi veya işlem tipine göre ekran davranışı, mesaj, yönlendirme ve expected result kontrolleri |
+| Raporlanabilirlik | Reusable action/assertion adımlarında locator, değer ve beklenen sonucun raporda izlenebilmesi |
 
-YTKP-1009 kapsamındaki örnek kontroller:
-
-- Sidebar menü yoluyla ekrana erişim.
-- Seçili menü linki ve liste başlığı doğrulaması.
-- Oluştur linkinin görünür ve aktif olması.
-- Oluşturma ekranında bilgi başlığı ve URL doğrulaması.
-- İşlem Kodu dropdown liste formatı ve count kontrolü.
-- İşlem Kodu seçimine göre alanların aktif/pasif durumu.
-- Fiş Açıklama maksimum uzunluk, Türkçe karakter ve zorunlu label kontrolü.
-- Tür, Tür 2 ve KDV Oranı dropdown seçeneklerinin Data Table ile doğrulanması.
+Yeni testler bu genel kapsam içinden seçilir; her test için manuel expected result netleştirilir, mevcut reuse sözlüğü kontrol edilir ve gerekli locator'lar gerçek uygulamada doğrulanır.
 
 ## Bakım Süreci
 
