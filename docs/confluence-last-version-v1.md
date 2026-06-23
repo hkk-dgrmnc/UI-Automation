@@ -1,19 +1,21 @@
-# UI Automation Projesi - Confluence Dokümanı v1
+# UI Automation - Playwright + Cucumber Test Otomasyon Standardı
 
 ## Sayfa Bilgisi
 
 | Alan | Değer |
 | --- | --- |
-| Doküman adı | UI Automation Projesi |
-| Versiyon | v1 |
-| Durum | Aktif kullanım / bakımda |
+| Doküman adı | UI Automation - Playwright + Cucumber Test Otomasyon Standardı |
+| Durum | Aktif kullanımda |
+| Versiyon | v1.0 |
+| Son güncelleme | 23 Haziran 2026 |
 | Sahip | QA Automation Ekibi |
-| Hedef kitle | QA ekipleri, geliştiriciler, teknik liderler, proje paydaşları |
-| Son güncelleme | 22 Haziran 2026 |
-| Gözden geçirme periyodu | Her büyük mimari değişiklikte veya ayda bir |
+| Hedef kitle | QA ekipleri, geliştiriciler, teknik liderler, AI destekli test üretimi yapan ekip üyeleri |
 | Ana kaynak | `AGENTS.md` |
+| Yardımcı kaynaklar | `README.md`, `INVENTORY.md`, `docs/prompt-template.md` |
 
-> Not: Bu dosya Confluence'a taşınırken repo içi göreli bağlantılar, kurumun repo veya Confluence linkleriyle güncellenmelidir.
+Bu sayfa, UI Automation projesinin mimari yaklaşımını, test üretim standardını, tekrar kullanım kurallarını ve kalite kapılarını Confluence üzerinde ortak referans haline getirmek için hazırlanmıştır.
+
+> Not: Bu Confluence sayfası ekip içi özet ve çalışma standardıdır. Detaylı ve bağlayıcı teknik kurallar için ana kaynak repodaki `AGENTS.md` dosyasıdır.
 
 ## İlgili Kaynaklar
 
@@ -25,63 +27,93 @@
 | [docs/prompt-template.md](./prompt-template.md) | Manuel test senaryolarını otomasyona çevirme prompt şablonu |
 | [YTKP-1009-test-cases-codex.md](../YTKP-1009-test-cases-codex.md) | Örnek manuel test senaryosu dokümanı |
 
-## Genel Bakış ve Yapılan Çalışmanın Özeti
+## Confluence Yerleşim Önerisi
 
-Bu doküman, UI Automation projesinde kurulan Cucumber + Playwright + TypeScript otomasyon altyapısını, mimari kararları, yeniden kullanım standartlarını ve kalite kontrollerini ekipler arası görünür hale getirmek için hazırlanmıştır.
+Önerilen sayfa hiyerarşisi:
 
-Çalışma kapsamında manuel test senaryolarının otomasyona dönüştürülmesini standartlaştıran bir yapı kurulmuştur. Testler; feature, step definition, flow, action, assertion, locator ve data katmanlarına ayrılmış, klasik Page Object Model yerine sade ve katmanlı bir mimari tercih edilmiştir.
+```text
+QA Knowledge Base
+  -> Test Automation
+    -> UI Automation - Playwright + Cucumber Test Otomasyon Standardı
+    -> UI Automation - Prompt Template
+    -> UI Automation - Inventory / Reuse Sözlüğü
+```
 
-Ayrıca locator ve step tekrarlarını azaltmak, AI destekli test üretimini kontrollü hale getirmek ve raporlanabilirliği artırmak için `INVENTORY.md`, `npm run check` ve `AGENTS.md` kuralları devreye alınmıştır. Bu sayfa; QA ekipleri, geliştiriciler, teknik liderler ve proje paydaşları için projenin ne yaptığını, neden gerekli olduğunu, nasıl kullanılacağını ve hangi kalite standartlarıyla sürdürüldüğünü özetleyen referans dokümandır.
+Önerilen etiketler:
 
-## Amaç
+```text
+ui-automation
+playwright
+cucumber
+typescript
+qa-automation
+codex
+test-standard
+```
 
-Bu projenin amaçları şunlardır:
+## Özet
 
-- Manuel test senaryolarını iş dilinde okunan Gherkin senaryolarına dönüştürmek.
-- UI otomasyon testlerini stabil, bakımı kolay ve tekrar kullanılabilir hale getirmek.
-- Locator, step, action, assertion ve flow tekrarını kontrol altında tutmak.
-- Her aksiyon ve doğrulamayı Cucumber raporunda izlenebilir yapmak.
-- AI destekli test üretimini kontrollü, denetlenebilir ve geri alınabilir hale getirmek.
-- Proje büyüdükçe POM'a dönmeden domain bazlı katmanlaşmayla sürdürülebilir kalmak.
+Bu proje, manuel UI test case'lerini Cucumber + Playwright + TypeScript ile okunabilir, tekrar kullanılabilir ve bakımı kolay otomasyon testlerine dönüştürmek için kurulmuştur.
+
+Temel hedefler:
+
+- Manuel test adımlarını iş dilinde okunan Gherkin senaryolarına çevirmek.
+- Locator, step, action, assertion ve flow tekrarını azaltmak.
+- AI destekli test üretimini kontrollü ve denetlenebilir hale getirmek.
+- Test raporlarını teknik ve teknik olmayan okuyucular için anlaşılır yapmak.
+- Proje büyürken klasik Page Object Model'e dönmeden katmanları domain bazlı yönetmek.
 
 ## Kapsam
 
-Bu doküman ve proje aşağıdaki alanları kapsar:
+Bu standart aşağıdaki alanları kapsar:
 
-- Web UI test otomasyonu.
-- Cucumber feature dosyaları ve Gherkin step sözlüğü.
-- Playwright ile browser otomasyonu.
-- TypeScript tabanlı action, assertion, flow ve locator katmanları.
-- Ortam bilgisi ve kullanıcı verisinin `.env` üzerinden yönetimi.
-- Cucumber HTML/JSON raporları.
-- Locator ve step tekrarını denetleyen inventory mekanizması.
-- AI destekli test üretim kuralları.
-- CI kalite kapısı ve test koşusu standardı.
+| Alan | Kapsam |
+| --- | --- |
+| UI test otomasyonu | Web arayüzünün Playwright ile otomasyonu |
+| Senaryo dili | Cucumber + Gherkin feature dosyaları |
+| Kodlama dili | TypeScript |
+| Test verisi | `.env` ve `src/data/data.ts` üzerinden yönetim |
+| Locator yönetimi | Tek kaynak: `src/locators/locators.ts` |
+| Aksiyon ve doğrulama | Domain bazlı action/assertion katmanları |
+| Akış yönetimi | `src/flows` içindeki business flow fonksiyonları |
+| Raporlama | Cucumber HTML/JSON raporu ve reusable action/assertion logları |
+| Kalite kontrolleri | TypeScript check, inventory check, duplicate step/locator kontrolü |
+| AI kullanımı | Codex/Claude gibi araçlarla kurallı test üretimi |
 
-## Kapsam Dışı
-
-Aşağıdaki konular bu projenin mevcut kapsamında değildir:
+Kapsam dışı alanlar:
 
 - API test otomasyonu.
 - Performans, yük, güvenlik veya erişilebilirlik testleri.
-- Gauge runner, Gauge concept dosyaları veya `.cpt` yapısı.
-- Klasik Page Object Model ve ekran bazlı `Page` sınıfları.
-- Production ortamına ait kullanıcı bilgileri veya hassas verilerin repoda tutulması.
-- Test verisinin uygulama tarafında otomatik oluşturulması.
+- Gauge runner veya Gauge concept dosyaları.
+- Klasik Page Object Model ve ekran bazlı `Page` class yapısı.
+- Hassas kullanıcı bilgilerinin repoda tutulması.
 
-## Çözülen Problem
+## Teknoloji Yığını
 
-| Problem | Projedeki Yaklaşım | Kazanım |
-| --- | --- | --- |
-| Aynı iş için farklı step veya locator isimleri üretilmesi | `INVENTORY.md` ve duplicate kontrolleri | Ortak otomasyon dili korunur |
-| Tahmini veya kırılgan selector kullanımı | Locator'lar gerçek uygulamada Playwright MCP ile doğrulanır | UI değişikliklerinde hata kaynağı daha net bulunur |
-| Test raporlarının teknik olmayan kişiler için anlamsız kalması | Her reusable action ve assertion rapora locator adı, locator değeri ve beklenen sonucu yazar | Hata analizi hızlanır |
-| AI tarafından yarım veya tahmini kod üretilmesi | `AGENTS.md` kuralları, engelde geri alma ve TODO bırakmama standardı | Kod tabanı çalışan ve güvenilir kalır |
-| Proje büyüdükçe POM veya dağınık dosya yapısına kayma riski | Katman bazlı mimari ve domain bazlı büyüme stratejisi | Bakım maliyeti kontrol altında kalır |
+| Alan | Teknoloji |
+| --- | --- |
+| Dil | TypeScript |
+| Browser otomasyonu | Playwright |
+| Test runner | Cucumber |
+| Senaryo dili | Gherkin |
+| Step framework | `@cucumber/cucumber` |
+| Environment yönetimi | `dotenv` |
+| Raporlama | Cucumber HTML/JSON + özel action/assertion raporlama |
+| AI destekli locator doğrulama | Playwright MCP |
+| Kalite kontrol | `npm run check`, `npm run inventory` |
+
+Kullanılmayacak yapılar:
+
+- Gauge runner.
+- Klasik Page Object Model.
+- Her sayfa için ayrı `LoginPage`, `HomePage`, `BasketPage` gibi class dosyaları.
+- Gereksiz abstraction.
+- `waitForTimeout`.
+- Hayali veya doğrulanmamış locator.
 
 ## Mimari Yaklaşım
 
-Ana akış tek yönlüdür:
+Proje klasik Page Object Model kullanmaz. Bunun yerine test otomasyonu aşağıdaki katmanlara ayrılır:
 
 ```text
 Feature
@@ -99,102 +131,185 @@ Katman sorumlulukları:
 | Katman | Konum | Sorumluluk |
 | --- | --- | --- |
 | Feature | `features/generated/` | Manuel test case'lerden üretilen, iş dilinde okunan senaryolar |
-| Step Definition | `features/step-definitions/` | Gherkin adımını TypeScript akışıyla bağlar |
-| Flow | `src/flows/` | Birden fazla action ve assertion içeren business akışlarını tutar |
-| Action | `src/actions/` | Kullanıcı aksiyonlarını domain bazlı reusable fonksiyonlarla yönetir |
-| Assertion | `src/assertions/` | Playwright web-first assertion'larını reusable hale getirir |
-| Locator | `src/locators/locators.ts` | Element locator'larını ve rapor üst verisini tek kaynakta tutar |
+| Step Definition | `features/step-definitions/` | Gherkin adımını TypeScript akışına bağlar |
+| Flow | `src/flows/` | Birden fazla action/assertion içeren business akışları |
+| Action | `src/actions/` | Kullanıcı aksiyonlarını reusable fonksiyonlarla yönetir |
+| Assertion | `src/assertions/` | Playwright web-first assertion'ları reusable hale getirir |
+| Locator | `src/locators/locators.ts` | Element locator'ları ve rapor metadata bilgisini tek kaynakta tutar |
 | Data | `src/data/data.ts` | Statik test verisi ve `.env` kullanıcı okuma fonksiyonlarını tutar |
-| Support | `features/support/` | World, hook, browser lifecycle, store ve raporlama bağlantısını yönetir |
-| Config | `src/config/` | Ortam ve environment ayarlarını yönetir |
+| Support | `features/support/` | World, hooks, browser lifecycle, ScenarioStore ve raporlama bağlantıları |
+| Config | `src/config/` | Ortam ve environment ayarları |
+
+## Klasör Yapısı
+
+```text
+playwright-automation/
+|
++-- AGENTS.md
++-- README.md
++-- INVENTORY.md
++-- cucumber.js
++-- package.json
++-- tsconfig.json
+|
++-- docs/
+|   +-- prompt-template.md
+|   +-- confluence-ui-automation-standard.md
+|
++-- features/
+|   +-- generated/
+|   +-- step-definitions/
+|   +-- support/
+|
++-- src/
+|   +-- actions/
+|   +-- assertions/
+|   +-- config/
+|   +-- data/
+|   +-- flows/
+|   +-- locators/
+|   +-- utils/
+|
++-- scripts/
+```
+
+Mevcut durumda:
+
+| Katman | Durum |
+| --- | --- |
+| `src/actions/` | Domain bazlı ayrılmıştır: `common`, `auth`, `navigation`, `automaticParameters` |
+| `src/assertions/` | Domain bazlı ayrılmıştır: `common`, `auth`, `automaticParameters` |
+| `src/data/data.ts` | Tek dosya olarak korunur |
+| `src/locators/locators.ts` | Tek dosya olarak korunur |
 
 ## Neden Klasik POM Kullanılmıyor?
 
-Bu projede her ekran için `LoginPage`, `HomePage` veya `BasketPage` gibi sınıf dosyaları oluşturulmaz. Başlangıç hedefi, manuel test senaryolarını hızlı ve okunabilir şekilde otomasyona çevirmek; aynı zamanda kodu katmanlar üzerinden temiz tutmaktır.
+Bu projede her ekran için ayrı `Page` class dosyası oluşturulmaz. Başlangıç hedefi hızlı test üretimi, sade dosya yapısı ve ortak otomasyon sözlüğüdür.
 
-POM yerine şu yaklaşım kullanılır:
-
-- Locator'lar tek kaynakta tutulur.
-- Kullanıcı aksiyonları action katmanında yer alır.
-- Doğrulamalar assertion katmanında yer alır.
-- Birden fazla adımdan oluşan iş akışları flow katmanına taşınır.
-- Proje büyüdükçe POM'a dönülmez; gerekli katman ilgili domain'e göre bölünür.
-
-Bu karar, hem hızlı başlangıç hem de uzun vadeli bakım hedefini birlikte destekler.
-
-## Mevcut Klasör Yapısı
+Kullanılmayan örnek yaklaşım:
 
 ```text
-features/
-  generated/
-  step-definitions/
-  support/
-
-src/
-  actions/
-  assertions/
-  config/
-  data/
-  flows/
-  locators/
-  utils/
-
-docs/
-scripts/
+pages/
+  LoginPage.ts
+  HomePage.ts
+  ProductListPage.ts
+  BasketPage.ts
+  CheckoutPage.ts
 ```
 
-Mevcut durumda `actions` ve `assertions` katmanları büyüme eşiğini aştığı için domain bazlı dosyalara ayrılmıştır. `data` ve `locators` katmanları henüz tek dosya olarak yönetilmektedir.
+Tercih edilen yaklaşım:
+
+- Locator'lar tek kaynakta yönetilir.
+- Kullanıcı hareketleri action katmanında tutulur.
+- Doğrulamalar assertion katmanında tutulur.
+- Birden fazla adımdan oluşan iş akışları flow katmanına taşınır.
+- Proje büyüdükçe POM'a dönülmez; sadece ihtiyaç olan katman domain bazlı ayrılır.
 
 ## Büyüme Stratejisi
 
-Tek dosya modeli kalıcı bir hedef değildir. Bir katman yaklaşık 200-300 satırı aştığında veya aynı domain için tekrar eden çok sayıda parça oluştuğunda domain bazlı ayrım yapılır.
+Tek dosya modeli başlangıç için bilinçli bir tercihtir, kalıcı hedef değildir. Bir katman büyüme eşiğini geçtiğinde domain bazlı dosyalara ayrılır.
 
-Kurallar:
+Büyüme eşiği örnekleri:
+
+- Bir dosyanın yaklaşık 200-300 satırı geçmesi.
+- Aynı domain için 10 veya daha fazla locator, action, assertion veya data grubu oluşması.
+- Dosya içinde `auth`, `product`, `basket`, `checkout` gibi domain bloklarının belirgin şekilde büyümesi.
+- Aynı dosyada değişiklik yapmanın conflict veya yanlış düzenleme riski oluşturması.
+
+Ayrım kuralları:
 
 - Ayrım sadece ihtiyaç olan katmanda yapılır.
-- POM sınıfı oluşturulmaz.
+- POM class oluşturulmaz.
+- `pages/` klasörü açılmaz.
 - Mevcut test davranışı korunur.
-- Aynı fonksiyon iki yerde bırakılmaz.
 - Import değişiklikleri minimum tutulur.
-- Gereksiz refactor yapılmaz.
+- Aynı fonksiyon iki yerde bırakılmaz.
 
-Mevcut uygulama:
+## Ortak Otomasyon Dili ve Reuse
 
-| Katman | Mevcut Durum |
+Bu projede farklı kişiler veya farklı AI oturumları aynı otomasyon dilini kullanmalıdır. Bu nedenle yeni test yazmadan önce mevcut sözlük aranır.
+
+Öncelikli kaynak:
+
+```text
+INVENTORY.md
+```
+
+Derin arama örnekleri:
+
+```powershell
+rg "Oluştur|Kaydet|Sil|Ara|Temizle|Vazgeç|Onayla|Geri" src features
+rg "step metni veya beklenen ekran başlığı" features src
+rg "locator adı veya UI metni" src/locators src/actions src/assertions src/flows features/step-definitions
+```
+
+Reuse karar sırası:
+
+1. Aynı business step varsa mevcut step metni kullanılır.
+2. Aynı locator varsa mevcut locator kullanılır.
+3. Aynı action, assertion veya flow varsa mevcut fonksiyon kullanılır.
+4. Ortak UI elemanıysa `common` veya `navigation` grubuna eklenir.
+5. Sadece ilgili sayfaya aitse ilgili domain grubunda tutulur.
+6. Gerçekten yeni ihtiyaçsa doğru katmana küçük ve temiz ekleme yapılır.
+
+## Inventory ve Mekanik Kontroller
+
+`INVENTORY.md`, mevcut step, locator, action ve flow sözlüğünü tek yerde listeler. Yeni step veya locator eklendikten sonra güncellenmelidir.
+
+Komutlar:
+
+```powershell
+npm run inventory
+npm run check
+```
+
+`npm run check` aşağıdaki durumlarda hata verir:
+
+| Kontrol | Yakaladığı durum |
 | --- | --- |
-| `src/actions/` | Domain bazlı ayrıldı: `common`, `auth`, `navigation`, `automaticParameters` |
-| `src/assertions/` | Domain bazlı ayrıldı: `common`, `auth`, `automaticParameters` |
-| `src/data/data.ts` | Tek dosya olarak korunuyor |
-| `src/locators/locators.ts` | Tek dosya olarak korunuyor |
+| Duplicate selector | Aynı selector iki farklı locator isminde tanımlanmışsa |
+| Locator report name/path uyumu | `LOCATOR_REPORTS` içindeki `name`, kendi `grup.key` yolu ile uyuşmuyorsa |
+| Duplicate step | Normalize edildiğinde aynı metne düşen iki step tanımı varsa |
+| Inventory güncelliği | Locator veya step eklenip `INVENTORY.md` güncellenmemişse |
+| TypeScript hatası | `tsc --noEmit` başarısızsa |
 
-## Ortak Otomasyon Dili ve Yeniden Kullanım
+## Ortak UI ve Navigasyon Standardı
 
-Projenin ana prensibi, aynı işi yapan farklı step, locator, action veya assertion varyantları üretmemektir.
+Ortak kabul edilen elemanlar:
 
-Yeni test yazmadan önce kontrol sırası:
+- Birden fazla sayfada aynı selector, aynı rol veya aynı davranışla kullanılan elemanlar.
+- `Oluştur`, `Kaydet`, `Sil`, `Ara`, `Temizle`, `Vazgeç`, `Onayla`, `Geri` gibi global toolbar/form aksiyonları.
+- Sidebar menu açma, menu path takip etme, seçili menu linkini doğrulama gibi navigasyon davranışları.
 
-1. `INVENTORY.md` içinde aynı step, locator, action veya flow aranır.
-2. Gerekirse `rg` ile kod içinde derin arama yapılır.
-3. Aynı business step varsa aynen kullanılır.
-4. Aynı locator varsa mevcut locator kullanılır.
-5. Aynı action, assertion veya flow varsa tekrar yazılmaz.
-6. Ortak UI davranışı ise `common` veya `navigation` grubuna alınır.
-7. Sadece ilgili domain'e aitse ilgili domain dosyasına eklenir.
+Örnek locator standardı:
 
-Ortak mekanizmalar:
+```ts
+locators(page).common.createLink
+locators(page).navigation.sidebarMenuButton('MFYS')
+locators(page).navigation.sidebarMenuLink('Otomatik Parametre Tanımlama')
+locators(page).navigation.selectedSidebarMenuLink('Otomatik Parametre Tanımlama')
+locators(page).automaticParameters.listTitle
+```
 
-| İhtiyaç | Kullanılacak Standart |
-| --- | --- |
-| Sidebar menüden ekrana gitme | `"{string} menü yolundan sayfaya gidilir"` |
-| Dropdown seçeneklerini doğrulama | `"{string} listesinde aşağıdaki seçenekler listelenir"` + Data Table |
-| Login akışı | Mevcut auth flow ve auth step'leri |
-| Dinamik değer saklama | `CustomWorld.store` ve `saveValue/getValue` |
+Sidebar navigasyon için sayfa bazlı özel step yazılmaz. Genel step kullanılır:
 
-## Locator Yönetimi
+```gherkin
+* "MFYS > Genel Parametre Ayarları > Tanımlama İşlemleri > Otomatik Parametre Tanımlama" menü yolundan sayfaya gidilir
+```
 
-Locator'lar `src/locators/locators.ts` içinde tutulur. Her locator için rapor üst verisi `LOCATOR_REPORTS` içinde aynı grup ve anahtar yapısıyla bulunur.
+Format:
 
-Tercih sırası:
+```text
+"Üst Menü > Alt Menü > ... > Sayfa Adı"
+```
+
+Son eleman tıklanacak linktir, önceki tüm elemanlar sırayla açılacak parent menülerdir. Step derinlikten bağımsızdır.
+
+## Locator Yazım Standardı
+
+Locator tanımları `src/locators/locators.ts` içinde tutulur.
+
+Locator seçim önceliği:
 
 1. `getByTestId`
 2. `getByRole`
@@ -204,59 +319,458 @@ Tercih sırası:
 6. CSS locator
 7. XPath, sadece zorunluysa
 
-Temel kurallar:
+Kaçınılacak örnekler:
 
-- Hayali veya tahmini locator yazılmaz.
-- Yeni locator gerçek uygulamada Playwright MCP ile doğrulanır.
-- Selector ve UI metinleri `SELECTORS` / `TEXTS` sabitleriyle tek kaynakta tutulur.
-- Locator eklendiğinde `LOCATOR_REPORTS` da eklenir.
-- `npm run check`, locator rapor adları ve duplicate selector kontrollerini çalıştırır.
+```ts
+page.locator('div:nth-child(3) > button')
+page.locator('//div[4]/span[2]/button')
+page.locator('.css-1x2y3z')
+```
 
-## Veri ve Gizli Bilgi Yönetimi
+Tercih edilen örnekler:
 
-Kullanıcı bilgileri feature dosyalarına veya koda yazılmaz. Kullanıcı seçimi `"USER1"` gibi blok anahtarıyla yapılır.
-
-Örnek `.env` yapısı:
-
-```env
-BASE_URL="https://example.test/shell-app-ui/#/journal-audits"
-RUNNING_ENV=test
-BROWSER=chromium
-HEADED=false
-
-USER1_USERNAME=
-USER1_PASSWORD=
+```ts
+page.getByTestId('login-button')
+page.getByRole('button', { name: 'Giriş Yap' })
+page.getByLabel('E-posta')
+page.getByPlaceholder('Ürün ara')
+page.getByText('Sepete Ekle')
 ```
 
 Kurallar:
 
-- Gerçek kullanıcı adı ve şifre commit edilmez.
-- `.env` lokal dosyadır ve `.gitignore` kapsamına girer.
+- Hayali locator yazılmaz.
+- Locator gerçek sayfada doğrulanmadan koda alınmaz.
+- Yeni locator Playwright MCP ile gerçek uygulamada doğrulanır.
+- Aynı locator tekrar kullanılacaksa `src/locators/locators.ts` içine alınır.
+- Her locator için `LOCATOR_REPORTS` metadata bilgisi eklenir.
+- Selector ve UI metinleri `SELECTORS` / `TEXTS` sabitlerinde tek kaynak olarak tutulur.
+
+## Data ve Hassas Bilgi Yönetimi
+
+Test dataları `src/data/data.ts` içinde tutulur. Hassas bilgiler feature dosyasına veya koda yazılmaz.
+
+Kullanıcı bilgileri `.env` içinde numaralı kullanıcı blokları olarak tutulur:
+
+```env
+USER1_USERNAME=
+USER1_PASSWORD=
+```
+
+Feature veya step tarafında kullanıcı `"USER1"` gibi blok anahtarıyla seçilir. Gerçek kullanıcı adı ve şifre commit edilmez.
+
+Kurallar:
+
+- Gerçek kullanıcı adı ve şifre feature dosyasına yazılmaz.
+- Ortama göre değişen değerler environment variable üzerinden alınır.
 - Statik test verisi `src/data/data.ts` içinde tutulur.
-- Test sırasında oluşan runtime değerler `ScenarioStore` ile tutulur.
-- Hassas değerler raporlarda maskelenir.
+- Test sırasında yakalanan runtime değerler `data.ts` içine yazılmaz.
+- Runtime değerler `CustomWorld.store` yani `ScenarioStore` ile yönetilir.
 
-## AI Destekli Test Üretimi
+## Action Standardı
 
-Proje, Codex veya Claude gibi AI araçlarıyla test üretimine uygundur; ancak bu araçların serbest biçimde kod üretmesi hedeflenmez. AI aracı, `AGENTS.md` kurallarına bağlı çalışır.
+Action fonksiyonları `src/actions/` altında domain bazlı dosyalarda tutulur.
 
-AI için temel prensipler:
+Örnek dosyalar:
 
-- Önce mevcut sözlük ve reusable parçalar aranır.
-- Yeni locator yazmadan önce gerçek uygulamada doğrulama yapılır.
-- Büyük refactor, dependency ekleme veya mimari değişiklik için önce plan sunulur.
-- TODO, placeholder step veya geçici locator bırakılmaz.
-- Expected result belirsizse test koda bırakılmaz.
-- Engel varsa o turda yapılan test değişiklikleri geri alınır ve net engel raporu yazılır.
+```text
+src/actions/common.actions.ts
+src/actions/auth.actions.ts
+src/actions/navigation.actions.ts
+src/actions/automaticParameters.actions.ts
+```
 
-Engel raporu formatına örnek:
+Action kuralları:
+
+- Action sadece kullanıcı işlemi yapar.
+- Assertion içermez.
+- `click`, `fill`, `press`, `selectOption`, `hover` gibi kullanıcı aksiyonları action katmanında yer alabilir.
+- Ortak primitive'ler `common.actions.ts` içinde tutulur.
+- Reusable action raporlanabilir olmalıdır.
+- Hata durumunda `reportError` ile bilgi yazılır ve hata yeniden fırlatılır.
+- Şifre, token veya gizli değerler raporda maskelenir.
+- Fonksiyon isimlerine `WithReport`, `WithLog`, `Reported` gibi ekler eklenmez.
+
+Örnek isimlendirme:
+
+```ts
+openSidebarMenuPath(page, ['MFYS', 'Genel Parametre Ayarları'], 'Hedef Ekran')
+clickSidebarMenuLink(page, 'Hedef Ekran')
+clickCreateLink(page)
+```
+
+## Assertion Standardı
+
+Assertion fonksiyonları `src/assertions/` altında domain bazlı dosyalarda tutulur.
+
+Örnek dosyalar:
+
+```text
+src/assertions/common.assertions.ts
+src/assertions/auth.assertions.ts
+src/assertions/automaticParameters.assertions.ts
+```
+
+Assertion kuralları:
+
+- Playwright web-first assertion kullanılmalıdır.
+- `expect(locator).toBeVisible()` gibi retry mekanizmalı assertion'lar tercih edilir.
+- `expect(await locator.isVisible()).toBe(true)` kullanımından kaçınılır.
+- Assertion sadece doğrulama yapar.
+- Click/fill gibi action içermez.
+- Reusable assertion raporlanabilir olmalıdır.
+- Rapor, expect çağrısından önce yazılır.
+- Business expected result netse assertion buna göre yazılır.
+
+İyi örnekler:
+
+```ts
+await expect(page).toHaveURL(/shell-app-ui\/#\/journal-audits/);
+await expect(locator.auth.userProfileButton).toBeVisible();
+await expect(locator.auth.usernameInput).not.toBeVisible();
+```
+
+## Liste ve Dropdown Doğrulama Standardı
+
+Dropdown veya listbox seçenek doğrulaması için sayfa bazlı özel assertion ve özel step yazılmaz. Generic step ve generic assertion kullanılır.
+
+Kullanılacak yapı:
+
+```text
+Step       -> features/step-definitions/common.steps.ts
+Assertion  -> src/assertions/common.assertions.ts
+Locator    -> src/locators/locators.ts
+```
+
+Feature örneği:
+
+```gherkin
+* Tür dropdown'ı açılır
+* "Tür" listesinde aşağıdaki seçenekler listelenir
+  | MERKEZ |
+  | BAŞMÜDÜRLÜK |
+  | GENEL MÜDÜRLÜK |
+```
+
+Kurallar:
+
+- Beklenen seçenek listesi feature dosyasında Data Table olarak verilir.
+- Beklenen seçenek listesi koda gömülmez.
+- Generic step, verilen seçeneklerin ilgili listbox içinde göründüğünü doğrular.
+- "Tam N adet seçenek vardır" gibi daha güçlü ihtiyaçlar varsa amaca özel assertion yazılabilir.
+
+## Flow Standardı
+
+Flow dosyaları `src/flows` altında tutulur. Flow, birden fazla action ve assertion içeren business akışıdır.
+
+Flow kuralları:
+
+- Flow, business anlamlı akışları temsil eder.
+- Step definition mümkünse flow çağırır.
+- Flow içinde action ve assertion akışı okunabilir tutulur.
+- Locator detayı flow içine taşınmaz.
+- Gereksiz mikro flow oluşturulmaz.
+
+Örnek:
+
+```text
+features/generated/TC_001_login.feature
+  -> features/step-definitions/auth.steps.ts
+    -> src/flows/auth.flow.ts
+      -> src/actions/auth.actions.ts
+      -> src/assertions/auth.assertions.ts
+```
+
+## Cucumber Step Definition Standardı
+
+Step definition dosyaları `features/step-definitions` altında bulunur.
+
+Kurallar:
+
+- Feature dosyalarında step keyword olarak sadece `*` kullanılır.
+- Step definition dosyalarında anlamına göre `Given`, `When`, `Then` kullanılabilir.
+- `defineStep as Step` kullanılmaz.
+- Step definition teknik locator veya Playwright detayı içermez.
+- Step definition mümkünse flow çağırır.
+- `getPage(world)` helper'ı `features/support/world.ts` içinden import edilir, her dosyada tekrar tanımlanmaz.
+
+Step metni kuralları:
+
+- Türkçe, kısa ve business seviyesinde olmalıdır.
+- Aynı anlama gelen farklı step metinleri üretilmemelidir.
+- Yeni step yazmadan önce `features/step-definitions` ve `features/generated` aranmalıdır.
+
+## Feature Dosyası Standardı
+
+Feature dosyaları `features/generated` altında oluşturulur.
+
+Örnek:
+
+```gherkin
+@smoke @auth
+Feature: Authentication login
+
+  Scenario: TC_001 - Kullanıcı geçerli bilgilerle login olur
+    * Login ekranı açılır
+    * Kullanıcı bilgileri ile giriş yapılır
+    * Kullanıcının login olduğu doğrulanır
+```
+
+Kurallar:
+
+- Scenario adı manuel test case ID ile başlamalıdır.
+- Feature dosyasında locator, selector veya teknik Playwright detayı olmamalıdır.
+- Beklenen sonuçlar business anlamlı adımlarla ifade edilmelidir.
+- Test data mümkün olduğunca `src/data/data.ts` veya `.env` üzerinden gelmelidir.
+- Feature adımları rapor okunabilirliğini desteklemelidir.
+
+Örnek tag'ler:
+
+```text
+@smoke
+@regression
+@auth
+@product
+@basket
+@checkout
+```
+
+## Runtime Değer Saklama - ScenarioStore
+
+Test sırasında ekranda oluşan veya seçilen dinamik değerler `ScenarioStore` ile yönetilir.
+
+Örnek runtime değerler:
+
+- Dropdown'dan seçilen seçenek.
+- Üretilen kayıt ID'si.
+- Ekrandan okunan bir text veya attribute değeri.
+
+Bu değerler statik test datası değildir ve `src/data/data.ts` içine yazılmaz.
+
+API:
+
+```ts
+this.saveValue(name, value);
+this.getValue<T = string>(name);
+this.store.has(name);
+```
+
+Kurallar:
+
+- Her scenario kendi boş store'u ile başlar.
+- Bir senaryoda saklanan değer diğer senaryoya sızmaz.
+- Step'lerde `saveValue` ve `getValue` tercih edilir.
+- `saveValue` / `getValue` rapora SAVE / USE bilgisi yazar.
+- Statik değer store'a konmaz.
+
+Örnek kullanım:
+
+```gherkin
+* Para birimi dropdown'ından rastgele bir seçenek seçilir ve "option-1" olarak kaydedilir
+* "option-1" olarak kaydedilen değer ile kayıt aranır
+```
+
+## Cucumber Support ve Login Session
+
+`features/support` altında World, hooks, browser/page lifecycle ve reporting yapıları tutulur.
+
+Kurallar:
+
+- Browser, context ve page lifecycle Cucumber hook'ları ile yönetilir.
+- Login gerektiren çok sayıda test varsa storage state kullanılabilir.
+- Login testleri ayrı yazılmalıdır.
+- `.auth/user.json` gibi session dosyaları git'e commit edilmemelidir.
+- `.auth/` klasörü `.gitignore` içinde olmalıdır.
+
+## Config ve Environment
+
+Ortam bilgileri `src/config/env.ts` üzerinden yönetilir.
+
+Kurallar:
+
+- Uygulama URL'i `BASE_URL` environment variable üzerinden alınır.
+- URL test dosyalarına hard-coded yazılmaz.
+- Örnek env değerleri `.env.example` içinde tutulur.
+- Gerçek `.env` lokal dosyadır ve commit edilmez.
+- `dotenv/config` import'u entry point veya config seviyesinde tutulur.
+
+Örnek:
+
+```env
+BASE_URL=
+RUNNING_ENV=test
+BROWSER=chromium
+HEADED=false
+USER1_USERNAME=
+USER1_PASSWORD=
+```
+
+## Wait Kullanımı
+
+Sabit bekleme kullanılmaz.
+
+Kaçınılacak kullanım:
+
+```ts
+await page.waitForTimeout(3000);
+```
+
+Tercih edilen kullanım:
+
+```ts
+await expect(locator).toBeVisible();
+await expect(page).toHaveURL(/basket|sepet/);
+await locator.click();
+await locator.fill('test');
+```
+
+Kurallar:
+
+- Playwright auto-wait ve web-first assertion mekanizması kullanılmalıdır.
+- Gerekirse belirli state beklenmelidir.
+- Manuel bekleme sadece zorunlu ve gerekçeli durumlarda değerlendirilir.
+
+## AI Destekli Test Üretim Standardı
+
+Codex veya benzeri AI araçları yeni test üretirken aşağıdaki sırayı izlemelidir:
+
+1. Manuel test case okunur.
+2. Test case ID, title, steps ve expected result analiz edilir.
+3. `INVENTORY.md` ve `rg` ile reuse araması yapılır.
+4. Mevcut flow varsa kullanılır.
+5. Sidebar navigasyon gerekiyorsa genel navigation step'i kullanılır.
+6. Dropdown/listbox seçenek doğrulaması gerekiyorsa generic step + Data Table kullanılır.
+7. Yeni locator gerekiyorsa Playwright MCP ile gerçek sayfada doğrulanır.
+8. Eksik reusable parça varsa doğru katmana küçük ekleme yapılır.
+9. Feature dosyası `features/generated` altında business seviyesinde oluşturulur.
+10. Step definition mümkünse flow çağırır.
+11. `npm run inventory` çalıştırılır.
+12. `npm run check` çalıştırılır.
+13. İlgili scenario veya feature çalıştırılır.
+14. Hata varsa minimum değişiklikle düzeltilir.
+15. Doğrulanamayan locator, anlamsız assertion veya TODO bırakılmaz.
+
+AI araçları şunları yapmamalıdır:
+
+- Her test için yeni Page Object class oluşturmak.
+- Mevcut step/locator/action/assertion varken aynı iş için yenisini üretmek.
+- Sidebar navigasyon için sayfa bazlı özel step yazmak.
+- Dropdown seçenek doğrulaması için sayfa bazlı özel step/assertion yazmak.
+- `waitForTimeout` kullanmak.
+- Hayali data, locator veya assertion yazmak.
+- TODO, placeholder step veya boş assertion bırakmak.
+- Runtime değeri `data.ts` içine yazmak.
+
+## Engel ve Geri Alma Kuralı
+
+Yeni test veya ilgili ekleme aşağıdaki durumlarda koda bırakılmaz:
+
+- Zorunlu locator gerçek sitede doğrulanamıyorsa.
+- Expected Result için anlamlı assertion yazılamıyorsa.
+- Ekran yetki, data, environment veya uygulama hatası nedeniyle açılamıyorsa.
+- Manuel test aksiyonu uygulamada mantıklı karşılık bulmuyorsa.
+- Testi geçirmek için fake selector veya gereksiz hard-code gerekiyorsa.
+
+Engel durumunda:
+
+1. O turda yapılan yeni feature, step, flow, action, assertion, locator ve data değişiklikleri geri alınır.
+2. Kullanıcıya veya önceki branch çalışmasına ait değişiklikler geri alınmaz.
+3. Kodda TODO, placeholder step, boş assertion veya geçici locator bırakılmaz.
+4. Engel net şekilde raporlanır.
+
+Rapor formatı:
 
 ```text
 Bu test kodda bırakılmadı.
-Sebep: [doğrulanamayan locator / eksik yetki / beklenen sonuç belirsiz]
+Sebep: [doğrulanamayan locator / eksik yetki / beklenen sonuç belirsiz / ekran açılmıyor]
 Denendi: [login sonrası izlenen ekran yolu veya aksiyon]
-Gereken düzeltme: [doğru locator / yetki / test verisi / beklenen sonuç]
+Gereken düzeltme: [doğru locator / yetki / test data / ekran yolu / beklenen sonuç / uygulama fix'i]
 Geri alınanlar: [bu turda oluşturulan dosya veya değişiklik özeti]
+```
+
+## Ortak Prompt Kullanımı
+
+Yeni test üretiminde tek standart prompt dosyası kullanılmalıdır:
+
+```text
+docs/prompt-template.md
+```
+
+Kullanım:
+
+```text
+docs/prompt-template.md dosyasındaki promptu uygula.
+```
+
+Kurallar:
+
+- `DOLDUR` alanı ilgili test için doldurulur.
+- Boş alan bırakılmaz, bilinmeyen alanlara `yok` yazılır.
+- Senaryo kararından emin olunmuyorsa `Senaryo işlemi` alanına `repo yapısından karar ver` yazılır.
+- Kurallar prompt içine tekrar kopyalanmaz; ana kaynak `AGENTS.md`, reuse sözlüğü `INVENTORY.md` dosyasıdır.
+
+## Manuel Test Case Formatı
+
+Codex'e verilecek manuel test case mümkünse aşağıdaki formatta olmalıdır:
+
+```text
+Test Case ID:
+TC_001
+
+Başlık:
+Kullanıcı geçerli bilgilerle login olur
+
+URL:
+/
+
+Precondition:
+- Kullanıcı login sayfasına erişebilir.
+- Geçerli kullanıcı bilgisi vardır.
+
+Test Data:
+- user: USER1
+
+Steps:
+1. Login sayfasına git.
+2. Kullanıcı adı alanına geçerli kullanıcı adı gir.
+3. Şifre alanına geçerli şifre gir.
+4. Giriş Yap butonuna tıkla.
+
+Expected Result:
+- Kullanıcı başarılı şekilde login olur.
+- Hesap menüsü görünür.
+- URL ana sayfa veya hesap sayfasına yönlenir.
+
+Tags:
+@smoke @auth
+```
+
+Expected Result belirsiz bırakılmamalıdır. "İşlem başarılı olur" gibi genel ifadeler yerine, neyin doğrulanacağı açık yazılmalıdır.
+
+## Kalite Kapıları
+
+Lokal kalite komutları:
+
+```powershell
+npm run inventory
+npm run check
+```
+
+Test komutları:
+
+```powershell
+npm test
+npm run test:chromium
+npm run test:firefox
+npm run test:webkit
+npm run test:headed
+npm run test:debug
+```
+
+PowerShell execution policy `npm.ps1` çalışmasını engellerse:
+
+```powershell
+npm.cmd run check
 ```
 
 ## Raporlama ve İzlenebilirlik
@@ -286,30 +800,9 @@ ASSERT   To Be Visible Locator Name: automaticParameters.listTitle   -> visible
 | `cucumber-report.html` | İnsan tarafından okunabilir HTML rapor |
 | `cucumber-report.json` | Entegrasyon ve işleme için JSON rapor |
 
-## Kalite Kapıları
-
-Lokal kalite komutları:
-
-```powershell
-npm run inventory
-npm run check
-```
-
-`npm run check` aşağıdaki kontrolleri çalıştırır:
-
-| Kontrol | Komut / Mekanizma |
-| --- | --- |
-| TypeScript derleme kontrolü | `tsc --noEmit` |
-| Duplicate locator value kontrolü | `scripts/check-inventory.ts` |
-| Locator report name/path uyumu | `scripts/check-inventory.ts` |
-| Duplicate step metni kontrolü | `scripts/check-inventory.ts` |
-| `INVENTORY.md` güncellik kontrolü | `npm run inventory:check` |
-
-Yeni step, locator, action veya flow eklendiğinde `npm run inventory` çalıştırılır ve güncellenen `INVENTORY.md` değişikliğe dahil edilir.
-
 ## CI Standardı
 
-GitHub Actions iş akışı `.github/workflows/cucumber.yml` altındadır.
+GitHub Actions iş akışı `.github/workflows/cucumber.yml` altında tutulur.
 
 CI akışı:
 
@@ -332,164 +825,115 @@ CI için gerekli koşullar:
 
 Not: Bu env/secrets tanımlı değilse `npm run check` çalışabilir, fakat UI test koşusu login veya ortam erişimi nedeniyle başarısız olabilir.
 
-## Kurulum ve Çalıştırma
-
-Geliştirici makinesi için temel kurulum:
-
-```powershell
-npm install
-Copy-Item .env.example .env
-```
-
-Test çalıştırma:
-
-```powershell
-npm test
-npm run test:chromium
-npm run test:firefox
-npm run test:webkit
-npm run test:headed
-npm run test:debug
-```
-
-Kalite kontrol:
-
-```powershell
-npm run inventory
-npm run check
-```
-
-PowerShell execution policy `npm.ps1` çalışmasını engellerse:
-
-```powershell
-npm.cmd run check
-```
-
-## Yeni Test Ekleme Süreci
-
-1. Manuel test case okunur.
-2. Test ID, başlık, action, data ve expected result netleştirilir.
-3. `INVENTORY.md` üzerinden yeniden kullanım araması yapılır.
-4. Gerekirse `rg` ile step, locator, action, assertion ve flow aranır.
-5. Yeni locator gerekiyorsa Playwright MCP ile gerçek uygulamada doğrulanır.
-6. Feature dosyası `features/generated/` altında iş dilinde yazılır.
-7. Step definition teknik detay içermeden ilgili flow veya action'a bağlanır.
-8. Gerekli action, assertion, locator veya data eklemeleri doğru katmana yapılır.
-9. Yeni locator için `LOCATOR_REPORTS` güncellenir.
-10. `npm run inventory` çalıştırılır.
-11. `npm run check` çalıştırılır.
-12. İlgili scenario veya feature koşulur.
-13. Test çalışmıyorsa minimum değişiklikle düzeltilir.
-14. Locator veya expected result doğrulanamıyorsa değişiklikler geri alınır ve engel raporlanır.
-
 ## Definition of Done
 
-Bir otomasyon değişikliği tamamlanmış sayılmak için aşağıdaki koşulları sağlamalıdır:
+Bir otomasyon değişikliği tamamlanmış sayılmak için aşağıdaki şartları sağlamalıdır:
 
 | Kontrol | Beklenti |
 | --- | --- |
-| Feature | İş dilinde, `features/generated/` altında ve `*` adımlarıyla yazılmış |
+| Feature | `features/generated` altında, business dilinde ve `*` adımlarıyla yazılmış |
+| Scenario | Manuel test case ID ile başlıyor |
 | Step | Duplicate olmayan, Türkçe ve reusable step metni kullanılmış |
 | Locator | Gerçek uygulamada doğrulanmış ve `LOCATOR_REPORTS` ile eklenmiş |
-| Action | Sadece kullanıcı aksiyonu içeriyor, assertion içermiyor |
-| Assertion | Playwright web-first assertion kullanıyor, action içermiyor |
-| Raporlama | Reusable action/assertion rapora anlamlı bilgi yazıyor |
+| Action | Sadece kullanıcı aksiyonu içeriyor |
+| Assertion | Playwright web-first assertion kullanıyor |
+| Flow | Business anlamlı akışı yönetiyor |
 | Data | Hassas veri feature veya koda yazılmamış |
+| Runtime değer | `ScenarioStore` ile yönetilmiş |
 | Inventory | Yeni parçalar eklendiyse `INVENTORY.md` güncellenmiş |
 | Check | `npm run check` temiz geçmiş |
-| Test koşusu | İlgili scenario/feature çalıştırılmış veya neden çalıştırılamadığı raporlanmış |
+| Test | İlgili scenario veya feature çalıştırılmış ya da neden çalıştırılamadığı raporlanmış |
 | Kod temizliği | TODO, placeholder, geçici locator veya boş step yok |
+
+## Review Checklist
+
+PR veya test üretimi sonrası şu sorular kontrol edilmelidir:
+
+1. Test adı TC ID ile başlıyor mu?
+2. Feature dosyası `features/generated` altında mı?
+3. Feature dosyasında teknik locator veya Playwright detayı var mı?
+4. Step keyword olarak sadece `*` kullanılmış mı?
+5. Aynı anlama gelen duplicate step üretilmiş mi?
+6. Yeni step yazmadan önce `INVENTORY.md` ve `rg` ile arama yapılmış mı?
+7. Yeni locator gerçek uygulamada doğrulanmış mı?
+8. `LOCATOR_REPORTS` metadata bilgisi eklendi mi?
+9. Sidebar navigasyon için genel navigation step kullanılmış mı?
+10. Dropdown seçenek doğrulaması generic step + Data Table ile yapılmış mı?
+11. Beklenen seçenek listesi koda gömülmemiş mi?
+12. Action ve assertion katmanları karıştırılmış mı?
+13. Hassas data feature veya koda yazılmış mı?
+14. Runtime değer `ScenarioStore` ile mi taşınmış?
+15. `waitForTimeout` var mı?
+16. TODO, placeholder, geçici locator veya boş assertion var mı?
+17. `npm run inventory` gerekiyorsa çalıştırılmış mı?
+18. `npm run check` temiz mi?
+19. İlgili test çalıştırılmış mı?
+20. Doğrulanamayan parça varsa değişiklikler geri alınıp engel raporlanmış mı?
 
 ## Roller ve Sorumluluklar
 
 | Rol | Sorumluluk |
 | --- | --- |
-| QA Automation | Test otomasyon standardını uygular, feature/step/action/assertion kalitesini korur |
-| QA Reviewer | Manuel expected result ile otomasyon assertion'larının uyumunu kontrol eder |
-| Geliştirici | UI değişikliğinin locator ve test stabilitesine etkisini bildirir |
+| QA Automation | Otomasyon standardını uygular, feature/step/action/assertion kalitesini korur |
+| QA Reviewer | Expected Result ile assertion uyumunu kontrol eder |
+| Geliştirici | UI değişikliklerinin locator ve test stabilitesine etkisini bildirir |
 | Teknik Lider | Mimari değişiklik, dependency ekleme ve büyük refactor kararlarını değerlendirir |
-| AI Aracı | Sadece `AGENTS.md` kuralları ve mevcut sözlük doğrultusunda yardımcı kod üretir |
+| AI Aracı | `AGENTS.md` ve `INVENTORY.md` doğrultusunda kurallı destek sağlar |
 
 ## Riskler ve Önlemler
 
 | Risk | Etki | Önlem |
 | --- | --- | --- |
-| Ortam veya yetki eksikliği | Testler login veya ekran erişiminde kalır | `.env`, kullanıcı yetkisi ve ortam erişimi koşu öncesi kontrol edilir |
-| UI metni veya rol değişikliği | Locator kırılabilir | Locator raporları ve MCP doğrulaması ile hızlı tespit edilir |
+| Ortam veya yetki eksikliği | Test login veya ekran erişiminde kalır | `.env`, kullanıcı yetkisi ve ortam erişimi koşu öncesi kontrol edilir |
+| UI metni veya rol değişikliği | Locator kırılabilir | Locator raporları ve MCP doğrulaması ile hızlı analiz yapılır |
 | Duplicate step/locator üretimi | Bakım maliyeti artar | `INVENTORY.md` ve `npm run check` kullanılır |
 | Belirsiz expected result | Anlamsız assertion yazılabilir | Test koda bırakılmaz, beklenen sonuç netleştirilir |
 | Flaky test davranışı | CI güvenilirliği azalır | `waitForTimeout` kullanılmaz, web-first assertion tercih edilir |
 | Hassas verinin repoya sızması | Güvenlik riski oluşur | `.env` lokal tutulur, şifre raporda maskelenir |
-
-## Bakım ve Gözden Geçirme Süreci
-
-Bakım sırasında dikkat edilecek noktalar:
-
-- Yeni test yazmadan önce `INVENTORY.md` okunur.
-- Yeni locator eklenmeden önce uygulamada doğrulanır.
-- Ortak elemanlar `common` veya `navigation` gruplarına alınmadan önce gerçek yeniden kullanım ihtiyacı kontrol edilir.
-- Sayfaya özel locator veya assertion gereksiz şekilde common alana taşınmaz.
-- Action ve assertion katmanları karıştırılmaz.
-- `npm run check` PR öncesi çalıştırılır.
-- Test raporu incelenir ve fail varsa rapordaki locator/action bilgisiyle analiz yapılır.
-
-Gözden geçirme soruları:
-
-1. Bu step daha önce var mı?
-2. Bu locator daha önce tanımlı mı?
-3. Assertion expected result'ı gerçekten doğruluyor mu?
-4. Test data veya hassas bilgi feature'a yazılmış mı?
-5. Yeni parça doğru katmana mı eklendi?
-6. Locator gerçek uygulamada doğrulandı mı?
-7. Inventory güncel mi?
-8. `npm run check` temiz mi?
-
-## Mevcut Kapsam
-
-| Feature | Kapsam |
-| --- | --- |
-| `TC_001_login.feature` | Geçerli kullanıcı ile login, login sonrası URL ve profil butonu doğrulaması |
-| `YTKP-1009.feature` | Otomatik Parametre Tanımlama ekranına erişim ve oluşturma ekranına geçiş |
-
-YTKP-1009 içinde kapsanan kontroller:
-
-- Sidebar menü yoluyla ekrana erişim.
-- Seçili menü linki ve liste başlığı doğrulaması.
-- Oluştur linkinin varlığı ve aktifliği.
-- Oluşturma ekranında bilgi başlığı ve URL doğrulaması.
-- İşlem Kodu dropdown liste formatı ve count kontrolü.
-- İşlem Kodu seçimine göre Tür 2 ve KDV Oranı alanlarının aktif/pasif durumları.
-- Fiş Açıklama maksimum uzunluk ve Türkçe karakter kontrolü.
-- Fiş Açıklama zorunlu alan label kontrolü.
-- Tür, Tür 2 ve KDV Oranı dropdown seçeneklerinin Data Table ile doğrulanması.
-
-## Teknoloji Yığını
-
-| Alan | Teknoloji |
-| --- | --- |
-| Dil | TypeScript |
-| Browser otomasyonu | Playwright |
-| Test runner | Cucumber |
-| Senaryo dili | Gherkin |
-| Runtime TS desteği | ts-node |
-| Env yönetimi | dotenv |
-| Raporlama | Cucumber HTML/JSON ve özel console formatter |
-| CI | GitHub Actions |
-| Locator doğrulama | Playwright MCP |
 
 ## Karar Kayıtları
 
 | Karar | Gerekçe |
 | --- | --- |
 | Klasik POM kullanılmaması | Başlangıçta hızlı test üretimi ve sade katman ayrımı hedeflenir |
-| Locator'ların tek dosyada tutulması | Mevcut hacim düşük, tek kaynak yönetimi daha kolay |
+| Data ve locator katmanlarının tek dosyada kalması | Mevcut hacim düşük, tek kaynak yönetimi daha kolay |
 | Action/assertion katmanlarının domain bazlı ayrılması | Büyüme eşiği aşılmış ve bakım kolaylığı ihtiyacı oluşmuştur |
 | Inventory mekanizması | Reuse aramasını ve duplicate kontrolünü mekanik hale getirir |
 | Playwright MCP ile locator doğrulama | Tahmini selector riskini azaltır |
-| TODO/placeholder yasağı | Kod tabanının her zaman çalışan ve okunabilir kalmasını sağlar |
+| TODO/placeholder yasağı | Kod tabanının çalışan ve güvenilir kalmasını sağlar |
+
+## Mevcut Kapsam
+
+| Feature | Kapsam |
+| --- | --- |
+| `TC_001_login.feature` | Geçerli kullanıcı ile login ve login sonrası doğrulama |
+| `YTKP-1009.feature` | Otomatik Parametre Tanımlama ekranı ve ilgili kontroller |
+
+YTKP-1009 kapsamındaki örnek kontroller:
+
+- Sidebar menü yoluyla ekrana erişim.
+- Seçili menü linki ve liste başlığı doğrulaması.
+- Oluştur linkinin görünür ve aktif olması.
+- Oluşturma ekranında bilgi başlığı ve URL doğrulaması.
+- İşlem Kodu dropdown liste formatı ve count kontrolü.
+- İşlem Kodu seçimine göre alanların aktif/pasif durumu.
+- Fiş Açıklama maksimum uzunluk, Türkçe karakter ve zorunlu label kontrolü.
+- Tür, Tür 2 ve KDV Oranı dropdown seçeneklerinin Data Table ile doğrulanması.
+
+## Bakım Süreci
+
+Bakım sırasında:
+
+- Yeni test yazmadan önce `INVENTORY.md` okunur.
+- Yeni locator eklenmeden önce uygulamada doğrulanır.
+- Ortak elemanlar `common` veya `navigation` grubuna alınmadan önce gerçek reuse ihtiyacı kontrol edilir.
+- Sayfaya özel locator veya assertion gereksiz şekilde common alana taşınmaz.
+- Action ve assertion katmanları karıştırılmaz.
+- PR öncesi `npm run check` çalıştırılır.
+- Test raporu incelenir ve fail varsa rapordaki locator/action bilgisiyle analiz yapılır.
 
 ## Sonuç
 
-UI Automation projesi, manuel UI testlerini sürdürülebilir otomasyon varlıklarına dönüştürmek için standart bir mimari ve ortak bir otomasyon dili sunar. Proje; Cucumber ile okunabilir senaryolar, Playwright ile güvenilir browser otomasyonu, TypeScript ile tip güvenliği, inventory mekanizmasıyla yeniden kullanım kontrolü ve raporlama altyapısıyla izlenebilirlik sağlar.
+Bu proje, manuel UI testlerini sürdürülebilir otomasyon varlıklarına dönüştürmek için ortak bir dil ve kontrollü bir mimari sunar. Cucumber senaryoları iş akışını okunur tutar, Playwright uygulama etkileşimlerini yürütür, TypeScript katmanları reuse'u yönetir, `INVENTORY.md` ve `npm run check` ise ekip genelinde standardı korur.
 
-Detaylı geliştirme kuralları için ana kaynak `AGENTS.md` dosyasıdır. Bu Confluence dokümanı, proje paydaşları için kararların, sürecin ve kalite standartlarının özetlenmiş referansıdır.
+Detaylı geliştirme kuralları için ana kaynak `AGENTS.md` dosyasıdır. Bu Confluence dokümanı, proje paydaşları için kararların, süreçlerin ve kalite standartlarının okunabilir özetidir.
