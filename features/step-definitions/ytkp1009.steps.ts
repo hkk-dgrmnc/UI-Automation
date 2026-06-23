@@ -1,10 +1,6 @@
 import { Then, When } from '@cucumber/cucumber';
 import {
   fillOperationDescription,
-  openKdvRateDropdown,
-  openOperationCodeDropdown,
-  openSubTypeDropdown,
-  openTypeDropdown,
   selectOperationCode,
 } from '../../src/actions/automaticParameters.actions';
 import {
@@ -25,10 +21,6 @@ Then('Otomatik Parametre Tanımlama sayfasının açıldığı doğrulanır', as
 
 When('Yeni kayıt oluşturma ekranına geçiş yapılır', async function (this: CustomWorld) {
   await openAutomaticParametersCreatePage(getPage(this));
-});
-
-When("İşlem Kodu dropdown'ı açılır", async function (this: CustomWorld) {
-  await openOperationCodeDropdown(getPage(this));
 });
 
 Then('İşlem Kodu listesinin kod ve açıklama formatında listelendiği doğrulanır', async function (this: CustomWorld) {
@@ -61,16 +53,4 @@ Then('Fiş Açıklama alanının en fazla 15 karakter aldığı ve Türkçe kara
 
 Then('Fiş Açıklama alanının zorunlu olduğu doğrulanır', async function (this: CustomWorld) {
   await expectOperationDescriptionRequired(getPage(this));
-});
-
-When('Tür dropdown\'ı açılır', async function (this: CustomWorld) {
-  await openTypeDropdown(getPage(this));
-});
-
-When('Tür 2 dropdown\'ı açılır', async function (this: CustomWorld) {
-  await openSubTypeDropdown(getPage(this));
-});
-
-When('KDV Oranı dropdown\'ı açılır', async function (this: CustomWorld) {
-  await openKdvRateDropdown(getPage(this));
 });

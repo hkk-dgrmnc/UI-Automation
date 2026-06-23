@@ -38,6 +38,10 @@ const TEXTS = {
   },
 } as const;
 
+function escapeRegExp(value: string) {
+  return value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}
+
 // İşlem Kodu listesi format/count dogrulamasinda (kod + aciklama) tek kaynak olarak
 // kullanilir. Tür / Tür 2 gibi salt "su secenekler listede mi" dogrulamalarinda
 // beklenen liste feature Data Table'indan gelir; koda gomulmez (bkz. AGENTS.md 9.1).
@@ -56,6 +60,9 @@ export const locators = (page: Page) => ({
     // listbox uzerinden calisir; o anda tek dropdown acik oldugu icin yeterlidir.
     listboxOptions: page.getByRole('listbox').getByRole('option'),
     listboxOption: (name: string) => page.getByRole('listbox').getByRole('option', { name, exact: true }),
+    dropdownCombobox: (name: string) => page.getByRole('combobox', {
+      name: new RegExp(`^${escapeRegExp(name)}\\s*\\*?$`),
+    }),
     // Generic dropdown dogrulamasi (AGENTS.md 9.1): belirli bir ACIK listbox'in (id ile)
     // icindeki secenegi hedefler. id, o anda acik ve adi listName olan listbox'tan
     // runtime'da cozulur (assertions.ts -> resolveOpenListboxId). Boylece "Tür" dendiginde
@@ -110,6 +117,10 @@ export const LOCATOR_REPORTS = {
     listboxOption: (name: string) => ({
       name: `common.listboxOption('${name}')`,
       value: `role=listbox >> role=option name="${name}"`,
+    }),
+    dropdownCombobox: (name: string) => ({
+      name: `common.dropdownCombobox('${name}')`,
+      value: `role=combobox name=/^${escapeRegExp(name)}\\s*\\*?$/`,
     }),
     optionInListbox: (listboxId: string, name: string) => ({
       name: `common.optionInListbox('${name}')`,

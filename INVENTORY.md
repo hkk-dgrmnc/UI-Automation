@@ -16,6 +16,7 @@
 
 ### features/step-definitions/common.steps.ts
 
+- `When` {string} dropdown\'ı açılır
 - `Then` {string} listesinde aşağıdaki seçenekler listelenir
 
 ### features/step-definitions/navigation.steps.ts
@@ -26,7 +27,6 @@
 
 - `Then` Otomatik Parametre Tanımlama sayfasının açıldığı doğrulanır
 - `When` Yeni kayıt oluşturma ekranına geçiş yapılır
-- `When` İşlem Kodu dropdown'ı açılır
 - `Then` İşlem Kodu listesinin kod ve açıklama formatında listelendiği doğrulanır
 - `When` İşlem Kodu olarak {string} seçilir
 - `Then` Tür 2 alanının aktif, KDV Oranı alanının pasif olduğu doğrulanır
@@ -35,9 +35,6 @@
 - `When` Fiş Açıklama alanına {string} yazılır
 - `Then` Fiş Açıklama alanının en fazla 15 karakter aldığı ve Türkçe karakteri koruduğu doğrulanır
 - `Then` Fiş Açıklama alanının zorunlu olduğu doğrulanır
-- `When` Tür dropdown\'ı açılır
-- `When` Tür 2 dropdown\'ı açılır
-- `When` KDV Oranı dropdown\'ı açılır
 
 ## Locators
 
@@ -64,6 +61,7 @@
 - `common.createLink` → a#action-create
 - `common.listboxOptions` → role=listbox >> role=option
 - `common.listboxOption` (fn) → role=listbox >> role=option name="<arg>"
+- `common.dropdownCombobox` (fn) → role=combobox name=/^<arg>\s*\*?$/
 - `common.optionInListbox` (fn) → #<arg> >> role=option name="<arg>" (exact)
 
 ### navigation
@@ -82,11 +80,7 @@
 
 ### src/actions/automaticParameters.actions.ts
 
-- `openOperationCodeDropdown()`
 - `selectOperationCode()`
-- `openTypeDropdown()`
-- `openSubTypeDropdown()`
-- `openKdvRateDropdown()`
 - `fillOperationDescription()`
 
 ### src/actions/common.actions.ts
@@ -94,6 +88,7 @@
 - `fill()`
 - `click()`
 - `clickCreateLink()`
+- `openDropdown()`
 - `readElementText()`
 - `readElementAttribute()`
 - `fillElement()`

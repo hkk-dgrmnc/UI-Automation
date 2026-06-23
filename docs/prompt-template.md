@@ -62,7 +62,9 @@ Ek not: yok
 7. Sidebar menu gecisi gerekiyorsa mevcut genel navigation step'ini kullan:
    `"{string} menü yolundan sayfaya gidilir"`.
 8. Dropdown/listbox islemlerinde once string parametreli mevcut common/generic
-   step, action veya assertion'lari kullan. Secenek gorunurlugu icin:
+   step, action veya assertion'lari kullan. Dropdown acma icin
+   `"{string}" dropdown'ı açılır` step'ini kullan; sayfa-ozel acma step'i yazma.
+   Secenek gorunurlugu icin:
    `"{string} listesinde aşağıdaki seçenekler listelenir"` + Data Table.
    Mevcut common/generic yapi ihtiyaci guvenli karsilamiyorsa ve gercek ekran
    dogrulamasi gerektiriyorsa en kucuk ozel domain action/assertion ekle.

@@ -2,15 +2,6 @@ import { Page } from '@playwright/test';
 import { LOCATOR_REPORTS, locators } from '../locators/locators';
 import { click, fillElement } from './common.actions';
 
-export async function openOperationCodeDropdown(page: Page) {
-  const locator = locators(page);
-
-  await click(
-    locator.automaticParameters.operationCodeCombobox,
-    LOCATOR_REPORTS.automaticParameters.operationCodeCombobox,
-  );
-}
-
 // MUI Select (Tür/Tür 2/KDV) menusu acikken modal backdrop bir sonraki tiklamayi
 // engeller. Yeni bir dropdown'a/secime gecmeden once acik menuyu Escape ile kapatir.
 async function dismissOpenMenu(page: Page) {
@@ -33,36 +24,6 @@ export async function selectOperationCode(page: Page, optionText: string) {
   await click(
     locator.common.listboxOption(optionText),
     LOCATOR_REPORTS.common.listboxOption(optionText),
-  );
-}
-
-export async function openTypeDropdown(page: Page) {
-  const locator = locators(page);
-
-  await dismissOpenMenu(page);
-  await click(
-    locator.automaticParameters.typeCombobox,
-    LOCATOR_REPORTS.automaticParameters.typeCombobox,
-  );
-}
-
-export async function openSubTypeDropdown(page: Page) {
-  const locator = locators(page);
-
-  await dismissOpenMenu(page);
-  await click(
-    locator.automaticParameters.subTypeCombobox,
-    LOCATOR_REPORTS.automaticParameters.subTypeCombobox,
-  );
-}
-
-export async function openKdvRateDropdown(page: Page) {
-  const locator = locators(page);
-
-  await dismissOpenMenu(page);
-  await click(
-    locator.automaticParameters.kdvRateCombobox,
-    LOCATOR_REPORTS.automaticParameters.kdvRateCombobox,
   );
 }
 

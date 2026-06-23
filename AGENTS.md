@@ -730,6 +730,20 @@ expect(await locator.auth.userProfileButton.isVisible()).toBe(true);
 
 ## 9.1 Liste / Dropdown Secenek Dogrulama Standardi
 
+Dropdown acma islemi icin sayfa-ozel step yazilmaz. Alan adi parametre olarak
+verilen ortak step kullanilir:
+
+```gherkin
+* "İşlem Kodu" dropdown'ı açılır
+* "Tür" dropdown'ı açılır
+* "Tür 2" dropdown'ı açılır
+* "KDV Oranı" dropdown'ı açılır
+```
+
+Step       -> `features/step-definitions/common.steps.ts`
+Action     -> `src/actions/common.actions.ts -> openDropdown(page, dropdownName)`
+Locator    -> `src/locators/locators.ts -> common.dropdownCombobox(dropdownName)`
+
 Bir dropdown / listbox icinde "su secenekler listelenmis mi" dogrulamasi icin sayfa-ozel assertion ve sayfa-ozel step YAZILMAZ. Bu, navigation step (`{string} menü yolundan sayfaya gidilir`) ve save/use step (12.1) ile ayni felsefededir: mekanizma ortak, beklenen veri parametre olarak gelir.
 
 Hedef: her yeni dropdown icin yeni `expectXOptionsVisible` + yeni step + yeni sabit uretmek yerine tek generic step ve tek generic assertion kullanmak.
@@ -751,7 +765,7 @@ Locator    -> src/locators/locators.ts -> common.optionInListbox(listboxId, name
 Feature kullanimi:
 
 ```gherkin
-* Tür dropdown'ı açılır
+* "Tür" dropdown'ı açılır
 * "Tür" listesinde aşağıdaki seçenekler listelenir
   | MERKEZ |
   | BAŞMÜDÜRLÜK |

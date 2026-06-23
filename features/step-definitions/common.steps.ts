@@ -1,6 +1,11 @@
-import { DataTable, Then } from '@cucumber/cucumber';
+import { DataTable, Then, When } from '@cucumber/cucumber';
+import { openDropdown } from '../../src/actions/common.actions';
 import { expectListboxOptionsVisible } from '../../src/assertions/common.assertions';
 import { CustomWorld, getPage } from '../support/world';
+
+When('{string} dropdown\'ı açılır', async function (this: CustomWorld, dropdownName: string) {
+  await openDropdown(getPage(this), dropdownName);
+});
 
 // Generic liste dogrulama: acik bir dropdown'da beklenen seceneklerin listelendigini
 // dogrular. Beklenen secenekler feature Data Table'indan gelir; sayfa-ozel secenek

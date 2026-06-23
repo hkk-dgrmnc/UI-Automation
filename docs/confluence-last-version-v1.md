@@ -448,12 +448,13 @@ await expect(locator.businessDomain.submitButton).toBeEnabled();
 
 ## Liste ve Dropdown Doğrulama Standardı
 
-Dropdown veya listbox seçenek doğrulaması için sayfa bazlı özel assertion ve özel step yazılmaz. Generic step ve generic assertion kullanılır.
+Dropdown açma, dropdown seçenek doğrulaması ve listbox seçenek doğrulaması için sayfa bazlı özel step yazılmaz. Generic step ve generic assertion kullanılır.
 
 Kullanılacak yapı:
 
 ```text
 Step       -> features/step-definitions/common.steps.ts
+Action     -> src/actions/common.actions.ts
 Assertion  -> src/assertions/common.assertions.ts
 Locator    -> src/locators/locators.ts
 ```
@@ -461,7 +462,7 @@ Locator    -> src/locators/locators.ts
 Feature örneği:
 
 ```gherkin
-* Durum dropdown'ı açılır
+* "Durum" dropdown'ı açılır
 * "Durum" listesinde aşağıdaki seçenekler listelenir
   | SEÇENEK A |
   | SEÇENEK B |

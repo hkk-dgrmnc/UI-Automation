@@ -6,7 +6,7 @@ Feature: YTKP-1009 Otomatik Parametre Tanımlama
     * "MFYS > Genel Parametre Ayarları > Tanımlama İşlemleri > Otomatik Parametre Tanımlama" menü yolundan sayfaya gidilir
     * Otomatik Parametre Tanımlama sayfasının açıldığı doğrulanır
     * Yeni kayıt oluşturma ekranına geçiş yapılır
-    * İşlem Kodu dropdown'ı açılır
+    * "İşlem Kodu" dropdown'ı açılır
     * İşlem Kodu listesinin kod ve açıklama formatında listelendiği doğrulanır
     * İşlem Kodu olarak "[001] KAPAMA" seçilir
     * Tür 2 alanının aktif, KDV Oranı alanının pasif olduğu doğrulanır
@@ -17,13 +17,13 @@ Feature: YTKP-1009 Otomatik Parametre Tanımlama
     * Fiş Açıklama alanına "Yıl Sonu Kapanışı" yazılır
     * Fiş Açıklama alanının en fazla 15 karakter aldığı ve Türkçe karakteri koruduğu doğrulanır
     * Fiş Açıklama alanının zorunlu olduğu doğrulanır
-    * Tür dropdown'ı açılır
+    * "Tür" dropdown'ı açılır
     * "Tür" listesinde aşağıdaki seçenekler listelenir
       | MERKEZ |
       | BAŞMÜDÜRLÜK |
       | GENEL MÜDÜRLÜK |
     * İşlem Kodu olarak "[001] KAPAMA" seçilir
-    * Tür 2 dropdown'ı açılır
+    * "Tür 2" dropdown'ı açılır
     * "Tür 2" listesinde aşağıdaki seçenekler listelenir
       | KDV-1 |
       | KDV-2 |
@@ -32,7 +32,7 @@ Feature: YTKP-1009 Otomatik Parametre Tanımlama
       | KAMBİYO |
       | KONAKLAMA |
     * İşlem Kodu olarak "[003] DÖKÜM" seçilir
-    * KDV Oranı dropdown'ı açılır
+    * "KDV Oranı" dropdown'ı açılır
     * "KDV Oranı" listesinde aşağıdaki seçenekler listelenir
       | %18 |
       | %8 |

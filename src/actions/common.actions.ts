@@ -58,6 +58,19 @@ export async function clickCreateLink(page: Page) {
   );
 }
 
+export async function openDropdown(page: Page, name: string) {
+  const locator = locators(page);
+
+  if (await page.getByRole('listbox').count() > 0) {
+    await page.keyboard.press('Escape');
+  }
+
+  await click(
+    locator.common.dropdownCombobox(name),
+    LOCATOR_REPORTS.common.dropdownCombobox(name),
+  );
+}
+
 // --- Dinamik deger: oku / yaz / metne gore tikla ----------------------------
 // Bu fonksiyonlar ScenarioStore'dan bagimsizdir: deger alir veya dondurur.
 // Store'a saklama/okuma step katmaninda `this.saveValue/getValue` ile yapilir
