@@ -83,7 +83,6 @@ Kapsam dışı alanlar:
 
 - API test otomasyonu.
 - Performans, yük, güvenlik veya erişilebilirlik testleri.
-- Gauge runner veya Gauge concept dosyaları.
 - Klasik Page Object Model ve ekran bazlı `Page` class yapısı.
 - Hassas kullanıcı bilgilerinin repoda tutulması.
 
@@ -103,7 +102,6 @@ Kapsam dışı alanlar:
 
 Kullanılmayacak yapılar:
 
-- Gauge runner.
 - Klasik Page Object Model.
 - Her sayfa için ayrı `LoginPage`, `HomePage`, `BasketPage` gibi class dosyaları.
 - Gereksiz abstraction.
@@ -546,9 +544,6 @@ Kurallar:
 @smoke
 @regression
 @auth
-@product
-@basket
-@checkout
 ```
 
 ## Runtime Değer Saklama - ScenarioStore
