@@ -25,7 +25,6 @@ Bu sayfa, UI Automation projesinin mimari yaklaşımını, test üretim standard
 | [README.md](../README.md) | Kurulum, çalıştırma ve geliştirici onboarding bilgisi |
 | [INVENTORY.md](../INVENTORY.md) | Mevcut step, locator, action ve flow sözlüğü |
 | [docs/prompt-template.md](./prompt-template.md) | Manuel test senaryolarını otomasyona çevirme prompt şablonu |
-| [YTKP-1009-test-cases-codex.md](../YTKP-1009-test-cases-codex.md) | Örnek manuel test senaryosu dokümanı |
 
 ## Confluence Yerleşim Önerisi
 
@@ -53,7 +52,7 @@ test-standard
 
 ## Özet
 
-Bu proje, manuel UI test case'lerini Cucumber + Playwright + TypeScript ile okunabilir, tekrar kullanılabilir ve bakımı kolay otomasyon testlerine dönüştürmek için kurulmuştur.
+Bu proje standardı, manuel UI test senaryolarını Cucumber + Playwright + TypeScript ile okunabilir, tekrar kullanılabilir ve bakımı kolay otomasyon testlerine dönüştürmek için kullanılır.
 
 Temel hedefler:
 
@@ -154,7 +153,7 @@ playwright-automation/
 |
 +-- docs/
 |   +-- prompt-template.md
-|   +-- confluence-ui-automation-standard.md
+|   +-- confluence-last-version-v1.md
 |
 +-- features/
 |   +-- generated/
@@ -173,14 +172,14 @@ playwright-automation/
 +-- scripts/
 ```
 
-Mevcut durumda:
+Genel başlangıç ve büyüme modeli:
 
 | Katman | Durum |
 | --- | --- |
-| `src/actions/` | Domain bazlı ayrılmıştır: `common`, `auth`, `navigation`, `automaticParameters` |
-| `src/assertions/` | Domain bazlı ayrılmıştır: `common`, `auth`, `automaticParameters` |
-| `src/data/data.ts` | Tek dosya olarak korunur |
-| `src/locators/locators.ts` | Tek dosya olarak korunur |
+| `src/actions/` | `common`, `auth`, `navigation` ve ihtiyaç oluşan `<domain>` dosyalarıyla yönetilir |
+| `src/assertions/` | `common`, `auth` ve ihtiyaç oluşan `<domain>` dosyalarıyla yönetilir |
+| `src/data/data.ts` | Başlangıçta tek dosya olarak korunur; büyüme eşiği aşılırsa domain bazlı ayrılır |
+| `src/locators/locators.ts` | Başlangıçta tek dosya olarak korunur; büyüme eşiği aşılırsa domain bazlı ayrılır |
 
 ## Neden Klasik POM Kullanılmıyor?
 
@@ -252,6 +251,23 @@ Reuse karar sırası:
 5. Sadece ilgili sayfaya aitse ilgili domain grubunda tutulur.
 6. Gerçekten yeni ihtiyaçsa doğru katmana küçük ve temiz ekleme yapılır.
 
+## Her Projede Kullanılabilir Yapılar
+
+Bu mimari belirli bir uygulamanın testlerinden bağımsızdır. Aşağıdaki yapılar farklı UI automation projelerinde aynı prensiple kullanılabilir:
+
+| Yapı | Kullanım Amacı |
+| --- | --- |
+| `common.actions.ts` | Tıklama, doldurma, metin/attribute okuma gibi ortak kullanıcı aksiyonları |
+| `common.assertions.ts` | Görünürlük, count, text, enabled/disabled gibi ortak doğrulamalar |
+| `navigation.actions.ts` | Sidebar/topbar menü yolu açma ve hedef ekrana gitme |
+| Generic navigation step | `"{string} menü yolundan sayfaya gidilir"` formatıyla derinlikten bağımsız menü geçişi |
+| Generic listbox assertion | `"{string} listesinde aşağıdaki seçenekler listelenir"` + Data Table ile seçenek doğrulama |
+| `ScenarioStore` | Senaryo içinde runtime değer saklama ve sonraki adımda kullanma |
+| `LOCATOR_REPORTS` | Locator adı/değeri bilgisini raporlanabilir ve denetlenebilir tutma |
+| `INVENTORY.md` | Step, locator, action ve flow reuse sözlüğünü tek yerde görme |
+| `npm run check` | TypeScript, duplicate step/locator ve inventory güncellik kontrolü |
+| `docs/prompt-template.md` | Manuel test senaryosunu standart şekilde otomasyona dönüştürme prompt'u |
+
 ## Inventory ve Mekanik Kontroller
 
 `INVENTORY.md`, mevcut step, locator, action ve flow sözlüğünü tek yerde listeler. Yeni step veya locator eklendikten sonra güncellenmelidir.
@@ -285,16 +301,16 @@ Ortak kabul edilen elemanlar:
 
 ```ts
 locators(page).common.createLink
-locators(page).navigation.sidebarMenuButton('MFYS')
-locators(page).navigation.sidebarMenuLink('Otomatik Parametre Tanımlama')
-locators(page).navigation.selectedSidebarMenuLink('Otomatik Parametre Tanımlama')
-locators(page).automaticParameters.listTitle
+locators(page).navigation.sidebarMenuButton('Ana Menü')
+locators(page).navigation.sidebarMenuLink('Hedef Ekran')
+locators(page).navigation.selectedSidebarMenuLink('Hedef Ekran')
+locators(page).businessDomain.listTitle
 ```
 
 Sidebar navigasyon için sayfa bazlı özel step yazılmaz. Genel step kullanılır:
 
 ```gherkin
-* "MFYS > Genel Parametre Ayarları > Tanımlama İşlemleri > Otomatik Parametre Tanımlama" menü yolundan sayfaya gidilir
+* "Ana Menü > Alt Menü > Hedef Ekran" menü yolundan sayfaya gidilir
 ```
 
 Format:
@@ -377,7 +393,7 @@ Action fonksiyonları `src/actions/` altında domain bazlı dosyalarda tutulur.
 src/actions/common.actions.ts
 src/actions/auth.actions.ts
 src/actions/navigation.actions.ts
-src/actions/automaticParameters.actions.ts
+src/actions/<domain>.actions.ts
 ```
 
 Action kuralları:
@@ -394,7 +410,7 @@ Action kuralları:
 Örnek isimlendirme:
 
 ```ts
-openSidebarMenuPath(page, ['MFYS', 'Genel Parametre Ayarları'], 'Hedef Ekran')
+openSidebarMenuPath(page, ['Ana Menü', 'Alt Menü'], 'Hedef Ekran')
 clickSidebarMenuLink(page, 'Hedef Ekran')
 clickCreateLink(page)
 ```
@@ -408,7 +424,7 @@ Assertion fonksiyonları `src/assertions/` altında domain bazlı dosyalarda tut
 ```text
 src/assertions/common.assertions.ts
 src/assertions/auth.assertions.ts
-src/assertions/automaticParameters.assertions.ts
+src/assertions/<domain>.assertions.ts
 ```
 
 Assertion kuralları:
@@ -425,9 +441,9 @@ Assertion kuralları:
 İyi örnekler:
 
 ```ts
-await expect(page).toHaveURL(/shell-app-ui\/#\/journal-audits/);
-await expect(locator.auth.userProfileButton).toBeVisible();
-await expect(locator.auth.usernameInput).not.toBeVisible();
+await expect(page).toHaveURL(/target-route/);
+await expect(locator.businessDomain.pageTitle).toBeVisible();
+await expect(locator.businessDomain.submitButton).toBeEnabled();
 ```
 
 ## Liste ve Dropdown Doğrulama Standardı
@@ -445,11 +461,11 @@ Locator    -> src/locators/locators.ts
 Feature örneği:
 
 ```gherkin
-* Tür dropdown'ı açılır
-* "Tür" listesinde aşağıdaki seçenekler listelenir
-  | MERKEZ |
-  | BAŞMÜDÜRLÜK |
-  | GENEL MÜDÜRLÜK |
+* Durum dropdown'ı açılır
+* "Durum" listesinde aşağıdaki seçenekler listelenir
+  | SEÇENEK A |
+  | SEÇENEK B |
+  | SEÇENEK C |
 ```
 
 Kurallar:
@@ -474,11 +490,11 @@ Flow kuralları:
 Örnek:
 
 ```text
-features/generated/TC_001_login.feature
-  -> features/step-definitions/auth.steps.ts
-    -> src/flows/auth.flow.ts
-      -> src/actions/auth.actions.ts
-      -> src/assertions/auth.assertions.ts
+features/generated/<TC_ID>_<domain>.feature
+  -> features/step-definitions/<domain>.steps.ts
+    -> src/flows/<domain>.flow.ts
+      -> src/actions/<domain>.actions.ts
+      -> src/assertions/<domain>.assertions.ts
 ```
 
 ## Cucumber Step Definition Standardı
@@ -507,13 +523,13 @@ Feature dosyaları `features/generated` altında oluşturulur.
 Örnek:
 
 ```gherkin
-@smoke @auth
-Feature: Authentication login
+@smoke @domain
+Feature: Domain iş akışı
 
-  Scenario: TC_001 - Kullanıcı geçerli bilgilerle login olur
-    * Login ekranı açılır
-    * Kullanıcı bilgileri ile giriş yapılır
-    * Kullanıcının login olduğu doğrulanır
+  Scenario: <TC_ID> - Kullanıcı hedef iş akışını tamamlar
+    * Başlangıç ekranı açılır
+    * Kullanıcı gerekli işlemleri yapar
+    * Beklenen iş sonucu doğrulanır
 ```
 
 Kurallar:
@@ -715,34 +731,35 @@ Codex'e verilecek manuel test case mümkünse aşağıdaki formatta olmalıdır:
 
 ```text
 Test Case ID:
-TC_001
+<TC_ID>
 
 Başlık:
-Kullanıcı geçerli bilgilerle login olur
+Kullanıcı hedef iş akışını başarıyla tamamlar
 
 URL:
 /
 
 Precondition:
-- Kullanıcı login sayfasına erişebilir.
-- Geçerli kullanıcı bilgisi vardır.
+- Kullanıcı ilgili ekrana erişebilir.
+- Gerekli yetki ve test verisi hazırdır.
 
 Test Data:
 - user: USER1
+- data: <gerekli test verisi>
 
 Steps:
-1. Login sayfasına git.
-2. Kullanıcı adı alanına geçerli kullanıcı adı gir.
-3. Şifre alanına geçerli şifre gir.
-4. Giriş Yap butonuna tıkla.
+1. Başlangıç ekranına git.
+2. Gerekli alanları doldur.
+3. Gerekli aksiyonu çalıştır.
+4. Sonuç ekranını veya mesajını kontrol et.
 
 Expected Result:
-- Kullanıcı başarılı şekilde login olur.
-- Hesap menüsü görünür.
-- URL ana sayfa veya hesap sayfasına yönlenir.
+- Beklenen iş sonucu oluşur.
+- İlgili mesaj, kayıt, yönlendirme veya alan durumu doğrulanır.
+- Ekranda beklenen veri görünür.
 
 Tags:
-@smoke @auth
+@smoke @domain
 ```
 
 Expected Result belirsiz bırakılmamalıdır. "İşlem başarılı olur" gibi genel ifadeler yerine, neyin doğrulanacağı açık yazılmalıdır.
@@ -789,8 +806,8 @@ Raporlanan bilgiler:
 Örnek rapor satırları:
 
 ```text
-ACTION   Fill          Locator Name: auth.passwordInput   Locator Value: #password   -> ********
-ASSERT   To Be Visible Locator Name: automaticParameters.listTitle   -> visible
+ACTION   Fill          Locator Name: <domain>.inputField    Locator Value: <selector>   -> <masked-or-visible-value>
+ASSERT   To Be Visible Locator Name: <domain>.pageTitle     Locator Value: <selector>   -> visible
 ```
 
 Çıktı dosyaları:
