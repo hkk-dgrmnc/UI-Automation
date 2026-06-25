@@ -1,9 +1,7 @@
 import { Then, When } from '@cucumber/cucumber';
+import { fillOperationDescription } from '../../src/actions/automaticParameters.actions';
 import {
-  fillOperationDescription,
-  selectOperationCode,
-} from '../../src/actions/automaticParameters.actions';
-import {
+  expectAutomaticParametersCreatePageOpened,
   expectAutomaticParametersRouteOpened,
   expectOperationCodeListFormatted,
   expectOperationDescriptionMaxLengthAndTurkish,
@@ -12,23 +10,18 @@ import {
   expectSubTypeDisabledKdvRateEnabled,
   expectSubTypeEnabledKdvRateDisabled,
 } from '../../src/assertions/automaticParameters.assertions';
-import { openAutomaticParametersCreatePage } from '../../src/flows/ytkp1009.flow';
 import { CustomWorld, getPage } from '../support/world';
 
 Then('Otomatik Parametre Tanımlama sayfasının açıldığı doğrulanır', async function (this: CustomWorld) {
   await expectAutomaticParametersRouteOpened(getPage(this));
 });
 
-When('Yeni kayıt oluşturma ekranına geçiş yapılır', async function (this: CustomWorld) {
-  await openAutomaticParametersCreatePage(getPage(this));
+Then('Otomatik Parametre oluşturma ekranının açıldığı doğrulanır', async function (this: CustomWorld) {
+  await expectAutomaticParametersCreatePageOpened(getPage(this));
 });
 
 Then('İşlem Kodu listesinin kod ve açıklama formatında listelendiği doğrulanır', async function (this: CustomWorld) {
   await expectOperationCodeListFormatted(getPage(this));
-});
-
-When('İşlem Kodu olarak {string} seçilir', async function (this: CustomWorld, optionText: string) {
-  await selectOperationCode(getPage(this), optionText);
 });
 
 Then('Tür 2 alanının aktif, KDV Oranı alanının pasif olduğu doğrulanır', async function (this: CustomWorld) {

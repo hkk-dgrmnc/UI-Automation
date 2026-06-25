@@ -314,9 +314,10 @@ Reuse karari su sirayla verilmelidir:
 1. Ayni business step zaten varsa ayni step metni kullanilir.
 2. Ayni locator zaten varsa mevcut locator kullanilir.
 3. Ayni action/assertion/flow zaten varsa mevcut fonksiyon kullanilir.
-4. Ortak UI elemaniysa `common` veya `navigation` gruplarina eklenir.
-5. Sadece ilgili sayfaya aitse ilgili domain/sayfa grubunda tutulur.
-6. Gercekten yeni ihtiyacsa dogru katmana kucuk ve temiz ekleme yapilir.
+4. Ayni is icin sayfadan bagimsiz dinamik/generic step yazilabiliyorsa sayfa-ozel step yazilmaz; generic step uretilir.
+5. Ortak UI elemaniysa `common` veya `navigation` gruplarina eklenir.
+6. Sadece ilgili sayfaya aitse ilgili domain/sayfa grubunda tutulur.
+7. Gercekten yeni ihtiyacsa dogru katmana kucuk ve temiz ekleme yapilir.
 ```
 
 Ortak UI elemani tanimi:
@@ -364,9 +365,62 @@ Step sozlugu kurallari:
 - Ayni anlama gelen farkli step metinleri uretilmemelidir.
 - Once `features/step-definitions` ve `features/cases` icinde ayni anlamda step aranmalidir.
 - Varsa mevcut step metni aynen kullanilmalidir.
-- Yoksa yeni step Turkce, kisa, business seviyesinde ve tekrar kullanilabilir yazilmalidir.
+- Yoksa once sayfadan bagimsiz, parametreli ve tekrar kullanilabilir dinamik step yazilabilir mi degerlendirilmelidir.
+- Yeni step Turkce, kisa, business seviyesinde ve tekrar kullanilabilir yazilmalidir.
 - `Oluştur butonuna tıklanır`, `Create butonuna basılır`, `Kullanıcı oluşturur` gibi ayni isi yapan farkli step'ler birlikte bulunmamalidir.
 - Sayfaya ozel beklenen sonuc varsa step metni test case ID veya ekran anlami ile ayrismalidir.
+
+Dinamik/generic step uretim kurallari:
+
+- Codex'in varsayilan tercihi sayfaya ozel paket step yazmak degil, mevcut dinamik sozlugu kullanmaktir.
+- Mevcut dinamik step yoksa, once bu ihtiyac her sayfada kullanilabilecek parametreli bir common/navigation step'i olabilir mi degerlendirilmelidir.
+- Sayfaya ozel step sadece URL, secili menu, domain business sonucu, o sayfaya ozel algoritma veya gercekten sayfaya ozel davranis gerekiyorsa yazilir.
+- Action ve assertion ayrilmalidir. Bir action step'i click/fill/select gibi islemi yapar; o islemden sonra beklenen ekran veya sonuc ayri assertion step'i ile dogrulanir.
+- Generic action step icinde sayfaya ozel URL, baslik veya business assertion yazilmaz.
+- Expected Result icindeki baslik, kolon, input, buton, dropdown secenekleri gibi tekrar kullanilabilir UI beklentileri mumkunse feature Data Table veya string parametresi ile verilir; koda sabit liste olarak gomulmez.
+- Codex yeni step yazmadan once su soruyu sormalidir: "Bu step baska bir ekranda sadece parametreleri degistirilerek kullanilabilir mi?" Cevap evetse generic step yazilir.
+
+Tercih edilen dinamik step ornekleri:
+
+```gherkin
+* Oluştur butonuna tıklanır
+* "Adres Şablonları" başlığı görüldüğü doğrulanır
+* Tabloda aşağıdaki kolon başlıkları listelenir
+  | Kod  |
+  | Ad   |
+  | Ülke |
+* Sayfada aşağıdaki input alanları görüntülenir
+  | Kod  |
+  | Ad   |
+  | Ülke |
+* "Kaydet" butonu görüldüğü doğrulanır
+* "İşlem Kodu" dropdownından "[001] KAPAMA" seçilir
+* "Tür" listesinde aşağıdaki seçenekler listelenir
+  | MERKEZ |
+  | GENEL MÜDÜRLÜK |
+```
+
+Kacinilacak sayfa-ozel paket step ornekleri:
+
+```gherkin
+* Adres Şablonu oluşturma ekranına geçiş yapılır
+* Otomatik Parametre oluşturma ekranına geçiş yapılır
+* İşlem Kodu olarak "[001] KAPAMA" seçilir
+* Adres Şablonları kolonlarının görüntülendiği doğrulanır
+* Adres Şablonu input alanlarının görüntülendiği doğrulanır
+```
+
+Dogru ayrim ornegi:
+
+```gherkin
+* Oluştur butonuna tıklanır
+* Adres Şablonu oluşturma ekranının açıldığı doğrulanır
+* "Address Şablonu" başlığı görüldüğü doğrulanır
+* Sayfada aşağıdaki input alanları görüntülenir
+  | Kod  |
+  | Ad   |
+  | Ülke |
+```
 
 Yeni ortak parca ekleme kurallari:
 
@@ -1200,22 +1254,25 @@ Codex yeni test uretirken asagidaki sirayi izlemelidir:
 1. Manuel test case'i oku.
 2. Test case ID, title, steps ve expected result alanlarini analiz et.
 3. Mevcut step/locator/action/assertion/flow icin `rg` ile reuse aramasi yap.
-4. Ilgili mevcut flow var mi kontrol et.
-5. Ilgili flow varsa onu kullan.
-6. Flow yoksa src/data/data.ts, src/actions/ (domain dosyalari), src/assertions/ (domain dosyalari) ve src/locators/locators.ts yapisini kontrol et.
-7. Sidebar navigasyon ihtiyaci varsa `features/step-definitions/navigation.steps.ts` icindeki genel step'i kullan: `"UstMenu > AltMenu > SayfaAdi" menü yolundan sayfaya gidilir`. Ayri navigasyon step yazma.
-7b. Diger ortak UI ihtiyaci varsa once `common` veya `navigation` gruplarini kullan.
-7c. Bir degeri kaydedip baska adimda kullanacaksan (12.1) hazir generic fonksiyonlari kullan (`readElementText`/`readElementAttribute`/`fillElement`/`clickByText`/`expectTextPresent`); degeri `this.saveValue`/`this.getValue` ile sakla/oku (rapora SAVE/USE duser), `data.ts`'e veya feature'a hard-code etme. Dinamik dropdown secimi + arama gibi akislar icin kaynak alan ve hedef baglam parametreli kalibi tercih et: `"{Dropdown Adi}" dropdown'ından rastgele bir seçenek seçilir ve "{degerAnahtari}" olarak kaydedilir` -> `"{degerAnahtari}" olarak kaydedilen değer "{Hedef Tablo/Liste/Alan}" ile kayıt aranır`.
-7d. Bir dropdown/listbox secenek listesini dogrulayacaksan (9.1) generic step'i kullan: `"{Liste Adi}" listesinde aşağıdaki seçenekler listelenir` + Data Table. Sayfa-ozel `expectXOptionsVisible` veya sayfa-ozel step yazma; beklenen listeyi koda gomme.
-8. Eksik reusable parca varsa dogru yere kucuk ve temiz ekleme yap: actions/assertions icin ilgili domain dosyasina (yoksa yeni domain dosyasi ac, paylasilan primitive'leri common'dan import et); data/locators icin tek dosyaya.
-9. Tek dosya kalan bir katman (data/locators) buyume esigini asiyorsa, sadece o katmani domain bazli dosyalara ayir (POM'a donme).
-10. Feature dosyasini test tipine gore `features/cases/smoke` veya `features/cases/regression` altinda business seviyesinde olustur.
-11. Eksik Gherkin step karsiliklarini `features/step-definitions` icinde olustur.
-12. Step definition icinden mumkunse `src/flows` fonksiyonlarini cagir.
-13. Testi calistir.
-14. Hata varsa minimum degisiklikle duzelt.
-15. Hayali locator, dogrulanmamis assertion veya TODO birakma.
-16. Zorunlu bir parca dogrulanamiyorsa o promptta yaptigin test degisikliklerini geri al ve engeli raporla.
+4. Mevcut dinamik/generic step varsa once onu kullan; yoksa sayfaya ozel step yazmadan once her yerde kullanilabilecek parametreli generic step tasarla.
+5. Action ve assertion'i ayir: click/fill/select step'i sadece aksiyonu yapsin, sonuc dogrulamasi ayri assertion step'i olsun.
+6. Ilgili mevcut flow var mi kontrol et.
+7. Ilgili flow varsa onu kullan.
+8. Flow yoksa src/data/data.ts, src/actions/ (domain dosyalari), src/assertions/ (domain dosyalari) ve src/locators/locators.ts yapisini kontrol et.
+9. Sidebar navigasyon ihtiyaci varsa `features/step-definitions/navigation.steps.ts` icindeki genel step'i kullan: `"UstMenu > AltMenu > SayfaAdi" menü yolundan sayfaya gidilir`. Ayri navigasyon step yazma.
+9b. Diger ortak UI ihtiyaci varsa once `common` veya `navigation` gruplarini kullan. Ornek: `Oluştur butonuna tıklanır`, `"{string} başlığı görüldüğü doğrulanır"`, `Tabloda aşağıdaki kolon başlıkları listelenir`, `Sayfada aşağıdaki input alanları görüntülenir`.
+9c. Bir degeri kaydedip baska adimda kullanacaksan (12.1) hazir generic fonksiyonlari kullan (`readElementText`/`readElementAttribute`/`fillElement`/`clickByText`/`expectTextPresent`); degeri `this.saveValue`/`this.getValue` ile sakla/oku (rapora SAVE/USE duser), `data.ts`'e veya feature'a hard-code etme. Dinamik dropdown secimi + arama gibi akislar icin kaynak alan ve hedef baglam parametreli kalibi tercih et: `"{Dropdown Adi}" dropdown'ından rastgele bir seçenek seçilir ve "{degerAnahtari}" olarak kaydedilir` -> `"{degerAnahtari}" olarak kaydedilen değer "{Hedef Tablo/Liste/Alan}" ile kayıt aranır`.
+9d. Dropdown'dan belirli bir secenek sececeksen generic step'i kullan: `"{Dropdown Adi}" dropdownından "{Secenek}" seçilir`. Sayfa-ozel `İşlem Kodu olarak {string} seçilir` gibi step yazma.
+9e. Bir dropdown/listbox secenek listesini dogrulayacaksan (9.1) generic step'i kullan: `"{Liste Adi}" listesinde aşağıdaki seçenekler listelenir` + Data Table. Sayfa-ozel `expectXOptionsVisible` veya sayfa-ozel step yazma; beklenen listeyi koda gomme.
+10. Eksik reusable parca varsa dogru yere kucuk ve temiz ekleme yap: actions/assertions icin ilgili domain dosyasina (yoksa yeni domain dosyasi ac, paylasilan primitive'leri common'dan import et); data/locators icin tek dosyaya.
+11. Tek dosya kalan bir katman (data/locators) buyume esigini asiyorsa, sadece o katmani domain bazli dosyalara ayir (POM'a donme).
+12. Feature dosyasini test tipine gore `features/cases/smoke` veya `features/cases/regression` altinda business seviyesinde olustur.
+13. Eksik Gherkin step karsiliklarini `features/step-definitions` icinde olustur.
+14. Step definition icinden mumkunse `src/flows` fonksiyonlarini cagir.
+15. Testi calistir.
+16. Hata varsa minimum degisiklikle duzelt.
+17. Hayali locator, dogrulanmamis assertion veya TODO birakma.
+18. Zorunlu bir parca dogrulanamiyorsa o promptta yaptigin test degisikliklerini geri al ve engeli raporla.
 ```
 
 Codex sunlari yapmamalidir:
@@ -1228,6 +1285,8 @@ Codex sunlari yapmamalidir:
 - Gereksiz abstraction uretme.
 - Locator'lari test dosyalarina kontrolsuz sekilde dagitma.
 - Var olan step/locator/action/assertion varken ayni is icin yenisini uretme.
+- Mevcut dinamik/generic step varken sayfaya ozel paket step uretme.
+- Bir action step'ine sayfaya ozel assertion gomerek onu sadece tek ekrana baglama.
 - Ortak UI elemanini sayfa sayfa yeniden tanimlama.
 - Sidebar navigasyon icin sayfa bazli ozel step yazma; genel `{string} menü yolundan sayfaya gidilir` step'ini kullan.
 - Dropdown/listbox secenek dogrulamasi icin sayfa-ozel `expectXOptionsVisible` veya sayfa-ozel step yazma; generic `{string} listesinde aşağıdaki seçenekler listelenir` step'i + Data Table kullan (9.1). Beklenen listeyi koda gomme.

@@ -9,7 +9,6 @@ import {
   expectDisabled,
   expectEnabled,
   expectHasValue,
-  expectNotAttribute,
   expectUrl,
   expectVisible,
 } from './common.assertions';
@@ -26,18 +25,6 @@ export async function expectAutomaticParametersRouteOpened(page: Page) {
     locator.automaticParameters.listTitle,
     LOCATOR_REPORTS.automaticParameters.listTitle,
     { timeout: 30_000 },
-  );
-}
-
-export async function expectAutomaticParametersCreateLinkAvailable(page: Page) {
-  const locator = locators(page);
-
-  await expectCount(locator.common.createLink, LOCATOR_REPORTS.common.createLink, 1);
-  await expectNotAttribute(
-    locator.common.createLink,
-    LOCATOR_REPORTS.common.createLink,
-    'aria-disabled',
-    'true',
   );
 }
 

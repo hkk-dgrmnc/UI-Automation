@@ -56,6 +56,10 @@ export const locators = (page: Page) => ({
   },
   common: {
     createLink: page.locator(SELECTORS.common.createLink),
+    heading: (name: string) => page.getByRole('heading', { name, exact: true }),
+    tableColumnHeader: (name: string) => page.getByRole('columnheader', { name }),
+    inputField: (name: string) => page.getByLabel(new RegExp(`^${escapeRegExp(name)}\\s*\\*?$`)),
+    button: (name: string) => page.getByRole('button', { name, exact: true }),
     // İşlem Kodu format/count dogrulamasi (expectOperationCodeListFormatted) tek acik
     // listbox uzerinden calisir; o anda tek dropdown acik oldugu icin yeterlidir.
     listboxOptions: page.getByRole('listbox').getByRole('option'),
@@ -113,6 +117,22 @@ export const LOCATOR_REPORTS = {
   },
   common: {
     createLink: { name: 'common.createLink', value: SELECTORS.common.createLink },
+    heading: (name: string) => ({
+      name: `common.heading('${name}')`,
+      value: `role=heading name="${name}" (exact)`,
+    }),
+    tableColumnHeader: (name: string) => ({
+      name: `common.tableColumnHeader('${name}')`,
+      value: `role=columnheader name="${name}"`,
+    }),
+    inputField: (name: string) => ({
+      name: `common.inputField('${name}')`,
+      value: `getByLabel(/^${escapeRegExp(name)}\\s*\\*?$/)`,
+    }),
+    button: (name: string) => ({
+      name: `common.button('${name}')`,
+      value: `role=button name="${name}" (exact)`,
+    }),
     listboxOptions: { name: 'common.listboxOptions', value: 'role=listbox >> role=option' },
     listboxOption: (name: string) => ({
       name: `common.listboxOption('${name}')`,

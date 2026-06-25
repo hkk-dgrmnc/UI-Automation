@@ -204,6 +204,52 @@ export async function expectListboxOptionsVisible(
   }
 }
 
+export async function expectHeadingVisible(page: Page, headingText: string) {
+  const locator = locators(page);
+
+  await expectVisible(
+    locator.common.heading(headingText),
+    LOCATOR_REPORTS.common.heading(headingText),
+  );
+}
+
+export async function expectTableColumnHeadersVisible(
+  page: Page,
+  expectedHeaders: readonly string[],
+) {
+  const locator = locators(page);
+
+  for (const header of expectedHeaders) {
+    await expectVisible(
+      locator.common.tableColumnHeader(header),
+      LOCATOR_REPORTS.common.tableColumnHeader(header),
+    );
+  }
+}
+
+export async function expectInputFieldsVisible(
+  page: Page,
+  expectedFields: readonly string[],
+) {
+  const locator = locators(page);
+
+  for (const field of expectedFields) {
+    await expectVisible(
+      locator.common.inputField(field),
+      LOCATOR_REPORTS.common.inputField(field),
+    );
+  }
+}
+
+export async function expectButtonVisible(page: Page, buttonName: string) {
+  const locator = locators(page);
+
+  await expectVisible(
+    locator.common.button(buttonName),
+    LOCATOR_REPORTS.common.button(buttonName),
+  );
+}
+
 // --- Dinamik deger: metne gore varlik dogrulama -----------------------------
 // Store'dan bagimsizdir: deger alir. Kayitli degerle kullanim step katmaninda
 // `this.getValue(name)` ile yapilir (AGENTS.md 12.1). Baska sayfada da calisir.
