@@ -26,29 +26,6 @@ Bu sayfa, UI Automation projesinin mimari yaklaşımını, test üretim standard
 | [INVENTORY.md](../INVENTORY.md) | Mevcut step, locator, action ve flow sözlüğü |
 | [docs/prompt-template.md](./prompt-template.md) | Manuel test senaryolarını otomasyona çevirme prompt şablonu |
 
-## Confluence Yerleşim Önerisi
-
-Önerilen sayfa hiyerarşisi:
-
-```text
-QA Knowledge Base
-  -> Test Automation
-    -> UI Automation - Playwright + Cucumber Test Otomasyon Standardı
-    -> UI Automation - Prompt Template
-    -> UI Automation - Inventory / Reuse Sözlüğü
-```
-
-Önerilen etiketler:
-
-```text
-ui-automation
-playwright
-cucumber
-typescript
-qa-automation
-codex
-test-standard
-```
 
 ## Özet
 
@@ -180,29 +157,6 @@ Genel başlangıç ve büyüme modeli:
 | `src/assertions/` | `common`, `auth` ve ihtiyaç oluşan `<domain>` dosyalarıyla yönetilir |
 | `src/data/data.ts` | Başlangıçta tek dosya olarak korunur; büyüme eşiği aşılırsa domain bazlı ayrılır |
 | `src/locators/locators.ts` | Başlangıçta tek dosya olarak korunur; büyüme eşiği aşılırsa domain bazlı ayrılır |
-
-## Neden Klasik POM Kullanılmıyor?
-
-Bu projede her ekran için ayrı `Page` class dosyası oluşturulmaz. Başlangıç hedefi hızlı test üretimi, sade dosya yapısı ve ortak otomasyon sözlüğüdür.
-
-Kullanılmayan örnek yaklaşım:
-
-```text
-pages/
-  LoginPage.ts
-  HomePage.ts
-  ProductListPage.ts
-  BasketPage.ts
-  CheckoutPage.ts
-```
-
-Tercih edilen yaklaşım:
-
-- Locator'lar tek kaynakta yönetilir.
-- Kullanıcı hareketleri action katmanında tutulur.
-- Doğrulamalar assertion katmanında tutulur.
-- Birden fazla adımdan oluşan iş akışları flow katmanına taşınır.
-- Proje büyüdükçe POM'a dönülmez; sadece ihtiyaç olan katman domain bazlı ayrılır.
 
 ## Büyüme Stratejisi
 
@@ -704,24 +658,85 @@ Geri alınanlar: [bu turda oluşturulan dosya veya değişiklik özeti]
 
 ## Ortak Prompt Kullanımı
 
-Yeni test üretiminde tek standart prompt dosyası kullanılmalıdır:
+Yeni test üretiminde tek standart prompt dosyası kullanılmalıdır. Ortak prompt'un ana kaynağı repodaki `docs/prompt-template.md` dosyasıdır.
 
 ```text
 docs/prompt-template.md
 ```
 
-Kullanım:
+### Amaç
+
+Ortak prompt, manuel test case'leri farklı kişiler veya farklı AI oturumları tarafından aynı otomasyon standardıyla üretmek için kullanılır. Hedef, her yeni testte aynı mimari akışı, aynı step sözlüğünü, aynı locator doğrulama disiplinini ve aynı kalite kapılarını işletmektir.
+
+Bu template ile amaçlananlar:
+
+- AI'ın önce `AGENTS.md` ve `INVENTORY.md` dosyalarını okuyarak mevcut reusable step, locator, action, assertion ve flow yapılarını kullanması.
+- Aynı işi yapan farklı step metinlerinin veya locator/action kopyalarının oluşmasını engellemek.
+- Feature dosyalarının doğru suite altında (`features/cases/smoke` veya `features/cases/regression`) ve business dilinde oluşmasını sağlamak.
+- Locator doğrulanamıyorsa, beklenen sonuç belirsizse veya ekran erişilemiyorsa yarım/TODO test kodu bırakılmasını önlemek.
+- Her test üretiminden sonra `npm run inventory`, `npm.cmd run check` ve ilgili scenario koşumu gibi kalite adımlarını standartlaştırmak.
+
+### Neden Tek Prompt?
+
+Tek prompt kullanımı, ekip içinde otomasyon dilinin dağılmasını engeller. Prompt kuralları farklı mesajlarda kopyalanırsa zamanla eski sürümler dolaşır; biri eski klasör yapısını, biri eski dropdown step'lerini, biri farklı locator önceliğini kullanabilir. Bu yüzden uzun kurallar sohbetlere tekrar tekrar yapıştırılmaz; güncel kararlar `AGENTS.md`, reuse sözlüğü `INVENTORY.md`, çalıştırılacak standart istek ise `docs/prompt-template.md` üzerinden yönetilir.
+
+Prompt değişecekse Confluence metni veya eski chat mesajları değil, önce `docs/prompt-template.md` güncellenmelidir. Böylece herkes ve AI aracı aynı kaynağa bakar.
+
+### Nasıl Kullanılır?
+
+1. Otomasyona alınacak manuel test case bilgileri hazırlanır.
+2. `docs/prompt-template.md` dosyasındaki yalnızca `DOLDUR` alanı ilgili test turuna göre doldurulur.
+3. AI'a aşağıdaki kısa komut verilir:
 
 ```text
 docs/prompt-template.md dosyasındaki promptu uygula.
 ```
 
-Kurallar:
+4. AI, prompt gereği önce `AGENTS.md` ve `INVENTORY.md` dosyalarını okur.
+5. Mevcut reusable yapı varsa yenisini yazmaz; yoksa doğru katmana küçük ve doğrulanmış ekleme yapar.
+6. İş sonunda inventory/check/test sonuçlarını final cevapta raporlar.
+
+### Doldurulacak Template
+
+Her test üretiminde aşağıdaki alanlar doldurulmalıdır:
+
+```text
+Manuel test dosyasi:
+Bu turda otomasyona alinacak TC'ler:
+Haric tutulacak TC'ler:
+Senaryo islemi: [mevcut senaryoya devam et | mevcut feature icinde yeni scenario ac | yeni feature ac | repo yapisindan karar ver]
+Kullanici:
+Ek not: yok
+```
+
+Alan açıklamaları:
 
 - `DOLDUR` alanı ilgili test için doldurulur.
 - Boş alan bırakılmaz, bilinmeyen alanlara `yok` yazılır.
-- Senaryo kararından emin olunmuyorsa `Senaryo işlemi` alanına `repo yapısından karar ver` yazılır.
+- `Manuel test dosyasi`: AI'ın okuyacağı manuel case dokümanı veya dosya yolu.
+- `Bu turda otomasyona alinacak TC'ler`: Örneğin `TC-003, TC-004` veya `YTKP-1009 tamamı`.
+- `Haric tutulacak TC'ler`: Bu turda özellikle otomasyona alınmayacak case'ler.
+- `Senaryo islemi`: Mevcut feature'a devam mı edilecek, aynı feature içinde yeni scenario mu açılacak, yeni feature mı oluşturulacak, yoksa repo yapısından mı karar verilecek.
+- `Kullanici`: `.env` içinde tanımlı kullanıcı anahtarı; örnek `USER1`.
+- `Ek not`: Ekran yolu, yetki notu, özel data veya dikkat edilmesi gereken durum varsa yazılır; yoksa `yok`.
+- Senaryo kararından emin olunmuyorsa `Senaryo islemi` alanına `repo yapisindan karar ver` yazılır.
 - Kurallar prompt içine tekrar kopyalanmaz; ana kaynak `AGENTS.md`, reuse sözlüğü `INVENTORY.md` dosyasıdır.
+
+### Kullanım Örneği
+
+```text
+docs/prompt-template.md dosyasındaki promptu uygula.
+
+DOLDUR
+Manuel test dosyasi: YTKP-1009-test-cases-codex.md
+Bu turda otomasyona alinacak TC'ler: TC-008, TC-009, TC-010
+Haric tutulacak TC'ler: yok
+Senaryo islemi: mevcut feature icinde yeni scenario ac
+Kullanici: USER1
+Ek not: Dropdown acma icin generic "{string}" dropdown'ı açılır step'i kullanılmalı.
+```
+
+Not: Yukarıdaki örnek sadece kullanım şeklini gösterir. Güncel ve bağlayıcı prompt metni her zaman `docs/prompt-template.md` dosyasındadır.
 
 ## Manuel Test Case Formatı
 
