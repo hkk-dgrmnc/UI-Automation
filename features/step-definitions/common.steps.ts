@@ -31,7 +31,7 @@ When('Oluştur butonuna tıklanır', async function (this: CustomWorld) {
 // "{string}" listenin adidir ve listeyi DARALTMAK icin kullanilir: combobox bu adla
 // bulunur, aria-controls'u ile sadece o anki ACIK listbox'i hedefler (AGENTS.md 9.1).
 Then(
-  '{string} listesinde aşağıdaki seçenekler listelenir',
+  '{string} dropdown listesinde aşağıdaki seçenekler listelenir',
   async function (this: CustomWorld, listName: string, table: DataTable) {
     const expectedOptions = table.raw().map((row) => row[0]);
     await expectListboxOptionsVisible(getPage(this), listName, expectedOptions);

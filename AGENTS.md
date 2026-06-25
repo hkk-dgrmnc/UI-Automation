@@ -395,7 +395,7 @@ Tercih edilen dinamik step ornekleri:
   | Ülke |
 * "Kaydet" butonu görüldüğü doğrulanır
 * "İşlem Kodu" dropdownından "[001] KAPAMA" seçilir
-* "Tür" listesinde aşağıdaki seçenekler listelenir
+* "Tür" dropdown listesinde aşağıdaki seçenekler listelenir
   | MERKEZ |
   | GENEL MÜDÜRLÜK |
 ```
@@ -811,7 +811,7 @@ Kullanilacak generic yapi:
 
 ```text
 Step       -> features/step-definitions/common.steps.ts
-              "{string} listesinde aşağıdaki seçenekler listelenir" + Data Table
+              "{string} dropdown listesinde aşağıdaki seçenekler listelenir" + Data Table
 Assertion  -> src/assertions/common.assertions.ts -> expectListboxOptionsVisible(page, listName, expectedTexts)
 Locator    -> src/locators/locators.ts -> common.optionInListbox(listboxId, name)
 ```
@@ -820,7 +820,7 @@ Feature kullanimi:
 
 ```gherkin
 * "Tür" dropdown'ı açılır
-* "Tür" listesinde aşağıdaki seçenekler listelenir
+* "Tür" dropdown listesinde aşağıdaki seçenekler listelenir
   | MERKEZ |
   | BAŞMÜDÜRLÜK |
   | GENEL MÜDÜRLÜK |
@@ -1263,7 +1263,7 @@ Codex yeni test uretirken asagidaki sirayi izlemelidir:
 9b. Diger ortak UI ihtiyaci varsa once `common` veya `navigation` gruplarini kullan. Ornek: `Oluştur butonuna tıklanır`, `"{string} başlığı görüldüğü doğrulanır"`, `Tabloda aşağıdaki kolon başlıkları listelenir`, `Sayfada aşağıdaki input alanları görüntülenir`.
 9c. Bir degeri kaydedip baska adimda kullanacaksan (12.1) hazir generic fonksiyonlari kullan (`readElementText`/`readElementAttribute`/`fillElement`/`clickByText`/`expectTextPresent`); degeri `this.saveValue`/`this.getValue` ile sakla/oku (rapora SAVE/USE duser), `data.ts`'e veya feature'a hard-code etme. Dinamik dropdown secimi + arama gibi akislar icin kaynak alan ve hedef baglam parametreli kalibi tercih et: `"{Dropdown Adi}" dropdown'ından rastgele bir seçenek seçilir ve "{degerAnahtari}" olarak kaydedilir` -> `"{degerAnahtari}" olarak kaydedilen değer "{Hedef Tablo/Liste/Alan}" ile kayıt aranır`.
 9d. Dropdown'dan belirli bir secenek sececeksen generic step'i kullan: `"{Dropdown Adi}" dropdownından "{Secenek}" seçilir`. Sayfa-ozel `İşlem Kodu olarak {string} seçilir` gibi step yazma.
-9e. Bir dropdown/listbox secenek listesini dogrulayacaksan (9.1) generic step'i kullan: `"{Liste Adi}" listesinde aşağıdaki seçenekler listelenir` + Data Table. Sayfa-ozel `expectXOptionsVisible` veya sayfa-ozel step yazma; beklenen listeyi koda gomme.
+9e. Bir dropdown/listbox secenek listesini dogrulayacaksan (9.1) generic step'i kullan: `"{Dropdown Adi}" dropdown listesinde aşağıdaki seçenekler listelenir` + Data Table. Sayfa-ozel `expectXOptionsVisible` veya sayfa-ozel step yazma; beklenen listeyi koda gomme.
 10. Eksik reusable parca varsa dogru yere kucuk ve temiz ekleme yap: actions/assertions icin ilgili domain dosyasina (yoksa yeni domain dosyasi ac, paylasilan primitive'leri common'dan import et); data/locators icin tek dosyaya.
 11. Tek dosya kalan bir katman (data/locators) buyume esigini asiyorsa, sadece o katmani domain bazli dosyalara ayir (POM'a donme).
 12. Feature dosyasini test tipine gore `features/cases/smoke` veya `features/cases/regression` altinda business seviyesinde olustur.
@@ -1289,7 +1289,7 @@ Codex sunlari yapmamalidir:
 - Bir action step'ine sayfaya ozel assertion gomerek onu sadece tek ekrana baglama.
 - Ortak UI elemanini sayfa sayfa yeniden tanimlama.
 - Sidebar navigasyon icin sayfa bazli ozel step yazma; genel `{string} menü yolundan sayfaya gidilir` step'ini kullan.
-- Dropdown/listbox secenek dogrulamasi icin sayfa-ozel `expectXOptionsVisible` veya sayfa-ozel step yazma; generic `{string} listesinde aşağıdaki seçenekler listelenir` step'i + Data Table kullan (9.1). Beklenen listeyi koda gomme.
+- Dropdown/listbox secenek dogrulamasi icin sayfa-ozel `expectXOptionsVisible` veya sayfa-ozel step yazma; generic `{string} dropdown listesinde aşağıdaki seçenekler listelenir` step'i + Data Table kullan (9.1). Beklenen listeyi koda gomme.
 - waitForTimeout kullanma.
 - Hayali data, hayali locator veya hayali assertion yazma.
 - TODO, placeholder step, bos assertion veya gecici locator birakma.
@@ -1394,7 +1394,7 @@ Yeni bir test veya kod uretildikten sonra asagidaki kontrol listesi uygulanmalid
 [ ] Yeni locator eklendiyse `LOCATOR_REPORTS` icine de rapor metadatasi eklendi mi?
 [ ] `getPage` fonksiyonu her step definition dosyasinda ayri tanimlanmamis, `../support/world`'dan import edilmis mi?
 [ ] Sidebar navigasyon icin sayfa bazli ozel step yazilmamis, `"{string} menü yolundan sayfaya gidilir"` step'i kullanilmis mi?
-[ ] Dropdown/listbox secenek dogrulamasi icin sayfa-ozel assertion/step yazilmamis, generic `"{string} listesinde aşağıdaki seçenekler listelenir"` step'i + Data Table kullanilmis mi (9.1)?
+[ ] Dropdown/listbox secenek dogrulamasi icin sayfa-ozel assertion/step yazilmamis, generic `"{string} dropdown listesinde aşağıdaki seçenekler listelenir"` step'i + Data Table kullanilmis mi (9.1)?
 [ ] Beklenen secenek listesi koda gomulmemis, feature Data Table'inda mi?
 [ ] Ortak UI elemani `common`, ortak navigasyon elemani `navigation` grubunda mi?
 [ ] Sayfaya ozel locator yanlislikla common gruba alinmamis mi?

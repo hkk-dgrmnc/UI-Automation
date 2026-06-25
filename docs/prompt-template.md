@@ -74,7 +74,7 @@ Ek not: yok
    Secenek secimi icin `"{Dropdown Adi}" dropdownından "{Secenek}" seçilir`
    step'ini kullan; sayfa-ozel secim step'i yazma.
    Secenek gorunurlugu icin:
-   `"{string} listesinde aşağıdaki seçenekler listelenir"` + Data Table.
+   `"{string} dropdown listesinde aşağıdaki seçenekler listelenir"` + Data Table.
    Mevcut common/generic yapi ihtiyaci guvenli karsilamiyorsa ve gercek ekran
    dogrulamasi gerektiriyorsa en kucuk ozel domain action/assertion ekle.
 11. Dropdown'dan secilen veya ekrandan okunan dinamik bir deger sonraki adimda

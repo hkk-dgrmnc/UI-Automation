@@ -24,7 +24,7 @@
 - `When` {string} dropdown\'ı açılır
 - `When` {string} dropdownından {string} seçilir
 - `When` Oluştur butonuna tıklanır
-- `Then` {string} listesinde aşağıdaki seçenekler listelenir
+- `Then` {string} dropdown listesinde aşağıdaki seçenekler listelenir
 - `Then` {string} başlığı görüldüğü doğrulanır
 - `Then` Tabloda aşağıdaki kolon başlıkları listelenir
 - `Then` Sayfada aşağıdaki input alanları görüntülenir

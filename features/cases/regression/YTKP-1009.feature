@@ -19,13 +19,13 @@ Feature: YTKP-1009 Otomatik Parametre Tanımlama
     * Fiş Açıklama alanının en fazla 15 karakter aldığı ve Türkçe karakteri koruduğu doğrulanır
     * Fiş Açıklama alanının zorunlu olduğu doğrulanır
     * "Tür" dropdown'ı açılır
-    * "Tür" listesinde aşağıdaki seçenekler listelenir
+    * "Tür" dropdown listesinde aşağıdaki seçenekler listelenir
       | MERKEZ |
       | BAŞMÜDÜRLÜK |
       | GENEL MÜDÜRLÜK |
     * "İşlem Kodu" dropdownından "[001] KAPAMA" seçilir
     * "Tür 2" dropdown'ı açılır
-    * "Tür 2" listesinde aşağıdaki seçenekler listelenir
+    * "Tür 2" dropdown listesinde aşağıdaki seçenekler listelenir
       | KDV-1 |
       | KDV-2 |
       | DAMGA |
@@ -34,7 +34,7 @@ Feature: YTKP-1009 Otomatik Parametre Tanımlama
       | KONAKLAMA |
     * "İşlem Kodu" dropdownından "[003] DÖKÜM" seçilir
     * "KDV Oranı" dropdown'ı açılır
-    * "KDV Oranı" listesinde aşağıdaki seçenekler listelenir
+    * "KDV Oranı" dropdown listesinde aşağıdaki seçenekler listelenir
       | %18 |
       | %8 |
       | %1 |

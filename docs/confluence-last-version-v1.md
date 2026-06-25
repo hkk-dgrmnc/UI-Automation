@@ -215,7 +215,7 @@ Bu mimari belirli bir uygulamanın testlerinden bağımsızdır. Aşağıdaki ya
 | `common.assertions.ts` | Görünürlük, count, text, enabled/disabled gibi ortak doğrulamalar |
 | `navigation.actions.ts` | Sidebar/topbar menü yolu açma ve hedef ekrana gitme |
 | Generic navigation step | `"{string} menü yolundan sayfaya gidilir"` formatıyla derinlikten bağımsız menü geçişi |
-| Generic listbox assertion | `"{string} listesinde aşağıdaki seçenekler listelenir"` + Data Table ile seçenek doğrulama |
+| Generic listbox assertion | `"{string} dropdown listesinde aşağıdaki seçenekler listelenir"` + Data Table ile seçenek doğrulama |
 | `ScenarioStore` | Senaryo içinde runtime değer saklama ve sonraki adımda kullanma |
 | `LOCATOR_REPORTS` | Locator adı/değeri bilgisini raporlanabilir ve denetlenebilir tutma |
 | `INVENTORY.md` | Step, locator, action ve flow reuse sözlüğünü tek yerde görme |
@@ -417,7 +417,7 @@ Feature örneği:
 
 ```gherkin
 * "Durum" dropdown'ı açılır
-* "Durum" listesinde aşağıdaki seçenekler listelenir
+* "Durum" dropdown listesinde aşağıdaki seçenekler listelenir
   | SEÇENEK A |
   | SEÇENEK B |
   | SEÇENEK C |
