@@ -34,6 +34,6 @@
   // {line} ve {featurePath} birer kez gecer. Feature-level run'da {line} BOS
   // gelir -> tum feature; Scenario run'da {line}=satir no -> o senaryo (file:line).
   // Path tek tirnak icinde oldugundan Git Bash backslash'i bozmaz.
-  "cucumberRunner.commandTemplate": "L='{line}'; npx cucumber-js '{featurePath}'${L:+:$L}",
+  "cucumberRunner.commandTemplate": "L='{line}'; node scripts/run-allure-report.js allure-vscode '{featurePath}'${L:+:$L}",
   "terminal.integrated.defaultProfile.windows": "Git Bash"
 }

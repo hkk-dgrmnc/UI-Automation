@@ -13,6 +13,10 @@ jobs:
     - uses: actions/setup-node@v4
       with:
         node-version: lts/*
+    - uses: actions/setup-java@v4
+      with:
+        distribution: temurin
+        java-version: '17'
     - name: Install dependencies
       run: npm ci
     - name: Run quality checks
@@ -20,12 +24,13 @@ jobs:
     - name: Install Playwright browsers
       run: npx playwright install --with-deps
     - name: Run Cucumber tests
-      run: npm test
+      run: npm run test:allure
     - uses: actions/upload-artifact@v4
       if: ${{ !cancelled() }}
       with:
-        name: cucumber-report
+        name: test-reports
         path: |
           cucumber-report.html
           cucumber-report.json
+          allure-report
         retention-days: 30

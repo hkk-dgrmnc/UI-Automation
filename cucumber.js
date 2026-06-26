@@ -1,3 +1,5 @@
+const os = require('node:os');
+
 const sharedConfig = {
   requireModule: ['ts-node/register'],
   require: ['features/support/**/*.ts', 'features/step-definitions/**/*.ts'],
@@ -5,7 +7,18 @@ const sharedConfig = {
     './features/support/grouped-test-result-formatter.js',
     'html:cucumber-report.html',
     'json:cucumber-report.json',
+    'allure-cucumberjs/reporter',
   ],
+  formatOptions: {
+    resultsDir: 'allure-results',
+    environmentInfo: {
+      os_platform: os.platform(),
+      os_release: os.release(),
+      node_version: process.version,
+      browser: process.env.BROWSER ?? 'chromium',
+      running_env: process.env.RUNNING_ENV ?? 'test',
+    },
+  },
   publishQuiet: true,
 };
 
@@ -28,4 +41,17 @@ module.exports = {
     ...sharedConfig,
     paths: ['features/**/*.feature'],
   },
+  allure: {
+    ...sharedConfig,
+    paths: ['features/cases/**/*.feature'],
+  },
+  'allure-smoke': {
+    ...sharedConfig,
+    paths: ['features/cases/smoke/**/*.feature'],
+  },
+  'allure-regression': {
+    ...sharedConfig,
+    paths: ['features/cases/regression/**/*.feature'],
+  },
+  'allure-vscode': sharedConfig,
 };

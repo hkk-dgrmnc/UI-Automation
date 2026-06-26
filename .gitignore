@@ -13,6 +13,10 @@ node_modules/
 cucumber-report.html
 cucumber-report.json
 
+# Allure reports
+allure-results/
+allure-report/
+
 # Playwright reports
 playwright-report/
 

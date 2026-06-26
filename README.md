@@ -92,11 +92,41 @@ npm run test:headed
 npm run test:debug
 ```
 
+Allure raporlu calistirma:
+
+```powershell
+npm test
+npm run test:smoke
+npm run test:regression
+npm run test:allure
+npm run test:allure:smoke
+npm run test:allure:regression
+npm run allure:open
+```
+
+Projedeki `npm test`, `npm run test:*` ve VS Code Cucumber icon kosulari,
+Cucumber kosusundan sonra `allure-report/` altinda HTML Allure raporu uretir.
+Allure CLI rapor uretimi icin makinede Java kurulu olmalidir.
+
+Allure sonuclari varsayilan olarak birikir. Yani VS Code icon'u, `npm test`,
+`npm run test:smoke` veya `npm run test:regression` ile yapilan her kosu
+`allure-results/` uzerine eklenir ve `allure-report/` yeniden uretilir.
+Dogrudan `cucumber-js` veya VS Code debug launch kullanilirsa Allure formatter
+runner'i bypass edilebilir; bu durumda proje scriptlerini tercih et veya
+sonrasinda `npm run allure:generate` calistir.
+Raporu sifirdan baslatmak icin:
+
+```powershell
+npm run allure:clean
+```
+
 Rapor çıktıları:
 
 ```text
 cucumber-report.html
 cucumber-report.json
+allure-results/
+allure-report/
 ```
 
 ## Kalite Kontrolleri
