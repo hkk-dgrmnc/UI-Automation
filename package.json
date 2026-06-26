@@ -24,6 +24,10 @@
     "typecheck": "tsc --noEmit",
     "inventory": "ts-node scripts/check-inventory.ts",
     "inventory:check": "ts-node scripts/check-inventory.ts --check",
+    "env:check": "node scripts/check-env.js",
+    "live:check": "node scripts/live-check.js",
+    "claude:review": "node scripts/claude-review.js",
+    "claude:review:self-test": "node scripts/claude-review.js --self-test",
     "check": "npm run typecheck && npm run inventory:check"
   },
   "keywords": [],

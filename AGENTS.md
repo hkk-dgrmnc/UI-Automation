@@ -591,6 +591,8 @@ Kurallar:
 - Emin olunmayan locator once Playwright ile browser uzerinde denenmelidir.
 - Yeni locator/senaryo uretirken locator'lar Playwright MCP server (`playwright`) ile gercek sayfada acilip dogrulanmalidir; tahmin edilen selector dogrulanmadan koda yazilmaz.
 - Playwright MCP ile locator dogrulanamiyorsa (ekran acilmiyor, yetki/data yok, eleman yok) Bolum 5.3 geregi o promptta yapilan degisiklikler geri alinir ve engel raporlanir; TODO veya gecici locator birakilmaz.
+- Playwright MCP browser kodu Node dosya sistemi veya `.env` okuyamayabilir; `require`, `process` veya `.env` okuma varsayilmaz. Hassas degerler MCP koduna veya prompt'a yazilmaz.
+- Login/yetki gerektiren canli dogrulamalarda once `npm run env:check -- --user USER1` ile zorunlu env bloklari degerleri yazdirilmadan kontrol edilir. MCP oturumu login olamiyorsa ve dogrulama mevcut framework locator/action/assertion'lari ile yapilabiliyorsa `npm run live:check -- ...` fallback olarak kullanilir. Bu fallback yeni selector tahminini mesrulastirmaz; yeni selector yine gercek UI kaniti olmadan koda birakilmaz.
 - Ayni locator birden fazla yerde kullanilacaksa `src/locators/locators.ts` icine alinmalidir.
 - Tek kullanimlik locator test icinde kalabilir; tekrar ederse locator dosyasina tasinmalidir.
 - Ortak toolbar/form aksiyonlari `common` grubunda tutulmalidir.
@@ -1316,10 +1318,114 @@ docs/prompt-template.md dosyasindaki promptu uygula.
 Kurallar:
 
 - `docs/prompt-template.md` icindeki `DOLDUR` alani ilgili test turu icin doldurulmalidir.
+- Kullanici sadece `docs/prompt-template.md dosyasindaki promptu uygula.` derse NORMAL MOD calisir: Codex bu dokumandaki standart akisi tek basina uygular.
+- Kullanici herhangi bir talepte acikca `orchestration mode aktif` ifadesini kullanirsa ORCHESTRATION MOD calisir (bkz. 19.1). Bu tetikleyici prompt-template'e ozel degildir.
 - Bos alan birakilmamalidir; bilinmeyen alanlara `yok` yazilmalidir.
 - Senaryo kararindan emin olunmuyorsa `Senaryo islemi` alanina `repo yapisindan karar ver` yazilmalidir.
 - Prompt icinde bu dokumandaki kurallar tekrar cogaltilmamalidir; ana kural kaynagi her zaman `AGENTS.md`, reuse sozlugu ise `INVENTORY.md` dosyasidir.
 - Eski uzun prompt kopyalari kullanilmamalidir. Prompt standardi degisecekse `docs/prompt-template.md` guncellenmelidir.
+
+---
+
+## 19.1 Orchestration Mode
+
+Orchestration mode sadece kullanici acikca `orchestration mode aktif` derse
+calisir. Bu tetikleyici herhangi bir manuel task promptunda da gecerlidir;
+prompt-template kullanimi sart degildir.
+Normal `docs/prompt-template.md dosyasindaki promptu uygula.` komutu bu modu
+tetiklemez; normal tek-Codex akisi korunur.
+
+Ornek orchestration mode tetikleyicileri:
+
+```text
+docs/prompt-template.md dosyasindaki promptu orchestration mode aktif sekilde uygula.
+* "Adres Şablonları" başlığı görüldüğü doğrulanır adimini "Adres Şablonu" olarak degistir, orchestration mode aktif.
+YTKP-1009 feature'ini review edip riskleri duzelt, orchestration mode aktif.
+```
+
+Amac:
+
+```text
+Codex  -> writer + Playwright MCP/browser driver
+Claude -> read-only reviewer + itiraz eden mimar
+```
+
+Rol kurallari:
+
+- Codex tek writer'dir. Kod, feature, step, locator, action, assertion, data, config veya dokuman degisikligini sadece Codex yapar.
+- Playwright MCP/browser kontrolu sadece Codex tarafindadir. Claude browser session kullanmaz.
+- Claude read-only reviewer'dir; dosya degistirmez, komutla kod yazmaz, sadece risk ve itiraz raporu uretir.
+- Claude review en ust seviye akilla calisir: `opus` model, `xhigh` effort ve `UltraCode` workflow. Claude Code tarafinda ayri bir "thinking mode" bayragi kullanilmiyorsa `xhigh` effort bu istegin karsiligidir.
+- Claude'dan ham gizli dusunce istenmez; sadece gozlem, kanit, varsayim, blocker/non-blocker itiraz ve oneriler istenir.
+- Claude review, Codex'in AGENTS.md kurallarina gore verecegi karar yerine gecmez; nihai uygulama karari Codex'tedir.
+
+Orchestration akisi:
+
+```text
+1. Codex once AGENTS.md, INVENTORY.md ve docs/prompt-template.md dosyalarini okur.
+2. Claude review kullanilabilirligini `npm run claude:review:self-test` ile kontrol eder.
+   Session limit, auth veya CLI hatasi varsa orchestration baslamadan blokaj raporlar.
+3. Manuel test case'i analiz eder; mevcut step/locator/action/assertion/flow reuse arar.
+4. Login gerekiyorsa `npm run env:check -- --user <Kullanici>` ile env preflight yapar.
+5. Gerekli locator veya ekran davranisi varsa Playwright MCP ile gercek browser'da dogrular.
+   MCP `.env` okuyamadigi veya login oturumu kuramadigi icin dogrulama yapilamiyorsa,
+   mevcut framework locator/action/assertion'lariyla `npm run live:check -- ...` fallback'i
+   kullanilabilir; bu da dogrulayamazsa Bolum 5.3'e gore blokaj raporlanir.
+6. Kod yazmadan once kisa bir "Codex Evidence + Codex Plan" ozeti hazirlar.
+7. Claude review icin `npm run claude:review -- --input <review-context-file>` komutunu kullanir
+   veya ayni promptu stdin ile `node scripts/claude-review.js` aracina verir.
+   Bu helper Claude'u `opus` + `xhigh` + `UltraCode` review akliyla cagirir.
+8. Claude ciktisinda `BLOCKER` varsa Codex once ek kanit toplar, plani duzeltir veya Bolum 5.3'e gore blokaj raporlar.
+9. Claude ciktisi sadece non-blocker/oneriler iceriyorsa Codex uygun olanlari uygular ve kodu yazar.
+10. Yeni step/locator/action/flow eklendiyse `npm run inventory` calistirilir.
+11. Sonunda `npm.cmd run check` ve ilgili scenario/feature calistirilir.
+12. Final cevapta Claude review sonucu, uygulanan karar, degisen dosyalar ve kontrol/test sonucu kisa raporlanir.
+```
+
+Claude review baglami su formatta verilmelidir:
+
+```text
+Task:
+[kullanici talebi ve prompt-template DOLDUR alani]
+
+Relevant AGENTS/INVENTORY summary:
+[reuse ve uygulanacak kurallar]
+
+Codex Evidence:
+[browser gozlemleri, dogrulanan locatorlar, route, UI metni, varsayimlar]
+
+Codex Plan:
+[degisecek dosyalar, kullanilacak mevcut step/action/assertion/locator, yeni parca ihtiyaci]
+
+Questions for Claude:
+- AGENTS.md mimarisine aykiri bir nokta var mi?
+- Duplicate step/locator/action/assertion riski var mi?
+- Yeni yazilan step/action/assertion/locator gercekten gerekli mi, yoksa mevcut generic/dynamic yapi parametreyle kullanilabilir miydi?
+- Sayfaya ozel yazilan bir step common/navigation generic step olarak tasarlanmali miydi?
+- Assertion expected result'i gercekten karsiliyor mu?
+- Locator ve browser kaniti yeterli mi?
+- Flaky veya bakim riski var mi?
+```
+
+Claude review ciktisi su basliklarla istenmelidir:
+
+```text
+BLOCKER:
+- yok veya net blocker maddeleri
+
+NON-BLOCKER:
+- iyilestirme / dikkat notlari
+
+RECOMMENDATION:
+- APPROVE / REVISE / BLOCK
+```
+
+Claude review self-test veya review komutu calismazsa (Claude kurulu degil, auth yok,
+session limit dolu, CLI hata verir, timeout olur veya ciktisi okunamazsa)
+orchestration mode basarili sayilmaz.
+Bu durumda Codex kod yazmaya devam etmez; kullaniciya Claude review'un neden
+alinamadigini soyler. Kullanici isterse ayni promptu normal modda tekrar
+calistirabilir.
 
 ---
 

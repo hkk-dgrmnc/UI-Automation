@@ -7,7 +7,13 @@ Kullanim:
 
 1. Sadece `DOLDUR` alanini ilgili test icin guncelle.
 2. AI'a `docs/prompt-template.md dosyasindaki promptu uygula` demen yeterlidir.
-3. Kurallari prompt icinde cogaltma; ana kaynak her zaman `AGENTS.md` ve
+3. Claude read-only reviewer olarak da devreye girsin istersen AI'a
+   `docs/prompt-template.md dosyasindaki promptu uygula, orchestration mode aktif`
+   de. Ayni `orchestration mode aktif` ifadesi manuel yazdigin diger
+   task promptlarinda da kullanilabilir; bu ifade yoksa normal tek-Codex akisi calisir.
+   Orchestration mode'da once `npm run claude:review:self-test` ile Claude CLI
+   kullanilabilirligi kontrol edilir.
+4. Kurallari prompt icinde cogaltma; ana kaynak her zaman `AGENTS.md` ve
    mevcut reuse sozlugu `INVENTORY.md` dosyalaridir.
 
 Dolduran kisi icin not:
@@ -65,7 +71,8 @@ Ek not: yok
      gerekli scenario bu dosyada yazilir.
    - `repo yapisindan karar ver`: mevcut feature/senaryo yapisi ve manuel test
      akisi incelenir; emin olunamiyorsa tahminle kod yazmadan blokaj raporlanir.
-8. Login gerekiyorsa mevcut auth step/flow'unu kullan; yeni login akisi yazma.
+8. Login gerekiyorsa `npm run env:check -- --user <Kullanici>` ile env preflight yap,
+   mevcut auth step/flow'unu kullan; yeni login akisi yazma.
 9. Sidebar menu gecisi gerekiyorsa mevcut genel navigation step'ini kullan:
    `"{string} menü yolundan sayfaya gidilir"`.
 10. Dropdown/listbox islemlerinde once string parametreli mevcut common/generic
@@ -85,6 +92,9 @@ Ek not: yok
    Degeri `this.saveValue` / `this.getValue` ile sakla/oku; `data.ts`'e veya
    feature'a hard-code etme.
 12. Yeni locator gerekiyorsa Playwright MCP ile gercek uygulamada dogrula.
+   MCP `.env` okuyamadigi veya login oturumu kuramadigi icin dogrulama yapilamiyorsa,
+   mevcut framework locator/action/assertion'lariyla `npm run live:check -- ...`
+   fallback'i kullanilabilir. Bu fallback yeni selector tahminini mesrulastirmaz.
 13. Dogrulanmayan locator, tahmini selector, TODO, placeholder step veya bos assertion
    koda birakma.
 14. Feature dosyasi test tipine gore `features/cases/smoke` veya

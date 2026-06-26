@@ -1,5 +1,5 @@
 @regression @adres-sablonu
-Feature: YTKP-adres-sablonu cases
+Feature: Posta Çeki Hesabı İşlemleri
 
   Scenario: TC-001 - Adres Şablonu ekranı açılış kontrolü
     * "USER1" kullanıcısı ile login olunur
