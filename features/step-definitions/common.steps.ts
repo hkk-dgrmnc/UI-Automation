@@ -1,5 +1,10 @@
 import { DataTable, Then, When } from '@cucumber/cucumber';
-import { clickCreateLink, openDropdown, selectDropdownOption } from '../../src/actions/common.actions';
+import {
+  clickButtonByName,
+  collectVisibleBusinessTexts,
+  openDropdown,
+  selectDropdownOption,
+} from '../../src/actions/common.actions';
 import {
   expectButtonVisible,
   expectHeadingVisible,
@@ -7,6 +12,7 @@ import {
   expectListboxOptionsVisible,
   expectTableColumnHeadersVisible,
 } from '../../src/assertions/common.assertions';
+import { COLORS as C, INDENT } from '../../src/utils/console-format';
 import { CustomWorld, getPage } from '../support/world';
 
 When('{string} dropdown\'ı açılır', async function (this: CustomWorld, dropdownName: string) {
@@ -21,8 +27,8 @@ When('{string} dropdownından {string} seçilir', async function (
   await selectDropdownOption(getPage(this), dropdownName, optionText);
 });
 
-When('Oluştur butonuna tıklanır', async function (this: CustomWorld) {
-  await clickCreateLink(getPage(this));
+When('{string} butonuna tıklanır', async function (this: CustomWorld, buttonName: string) {
+  await clickButtonByName(getPage(this), buttonName);
 });
 
 // Generic liste dogrulama: acik bir dropdown'da beklenen seceneklerin listelendigini
@@ -61,3 +67,25 @@ Then(
 Then('{string} butonu görüldüğü doğrulanır', async function (this: CustomWorld, buttonName: string) {
   await expectButtonVisible(getPage(this), buttonName);
 });
+
+Then(
+  'Bulunulan sayfanın görünen iş içerikleri dil kontrolü için raporlanır',
+  async function (this: CustomWorld) {
+    const audit = await collectVisibleBusinessTexts(getPage(this));
+    const reportLines = [
+      'Görünen İş İçeriği Dil Kontrolü',
+      `Route: ${audit.route}`,
+      `Scope: ${audit.scope}`,
+      `Satır sayısı: ${audit.lines.length}`,
+      '',
+      ...audit.lines.map((line, index) => `${index + 1}. ${line}`),
+    ];
+
+    console.log(`${INDENT}${C.bold}${C.yellow}  AUDIT ${C.reset}  ${C.bold}Görünen İş İçeriği${C.reset}`);
+    for (const line of reportLines.slice(1)) {
+      console.log(`${INDENT}         ${C.dim}${line}${C.reset}`);
+    }
+
+    await this.attach(reportLines.join('\n'), 'text/plain');
+  },
+);

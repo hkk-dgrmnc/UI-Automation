@@ -56,6 +56,9 @@ export const locators = (page: Page) => ({
   },
   common: {
     createLink: page.locator(SELECTORS.common.createLink),
+    clickableControl: (name: string) => page.getByRole('button', { name, exact: true })
+      .or(page.getByRole('link', { name, exact: true }))
+      .or(page.locator(SELECTORS.common.createLink).filter({ hasText: name })),
     heading: (name: string) => page.getByRole('heading', { name, exact: true }),
     tableColumnHeader: (name: string) => page.getByRole('columnheader', { name }),
     inputField: (name: string) => page.getByLabel(new RegExp(`^${escapeRegExp(name)}\\s*\\*?$`)),
@@ -117,6 +120,10 @@ export const LOCATOR_REPORTS = {
   },
   common: {
     createLink: { name: 'common.createLink', value: SELECTORS.common.createLink },
+    clickableControl: (name: string) => ({
+      name: `common.clickableControl('${name}')`,
+      value: `role=button/link name="${name}" (exact) or ${SELECTORS.common.createLink} has text "${name}"`,
+    }),
     heading: (name: string) => ({
       name: `common.heading('${name}')`,
       value: `role=heading name="${name}" (exact)`,

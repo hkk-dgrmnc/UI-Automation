@@ -23,16 +23,22 @@
 
 - `When` {string} dropdown\'ı açılır
 - `When` {string} dropdownından {string} seçilir
-- `When` Oluştur butonuna tıklanır
+- `When` {string} butonuna tıklanır
 - `Then` {string} dropdown listesinde aşağıdaki seçenekler listelenir
 - `Then` {string} başlığı görüldüğü doğrulanır
 - `Then` Tabloda aşağıdaki kolon başlıkları listelenir
 - `Then` Sayfada aşağıdaki input alanları görüntülenir
 - `Then` {string} butonu görüldüğü doğrulanır
+- `Then` Bulunulan sayfanın görünen iş içerikleri dil kontrolü için raporlanır
+
+### features/step-definitions/identityTemplates.steps.ts
+
+- `Then` Kimlik Şablonu sayfasının açıldığı doğrulanır
 
 ### features/step-definitions/navigation.steps.ts
 
 - `When` {string} menü yolundan sayfaya gidilir
+- `Then` {string} menüsünün seçili olduğu doğrulanır
 
 ### features/step-definitions/ytkp1009.steps.ts
 
@@ -69,6 +75,7 @@
 ### common
 
 - `common.createLink` → a#action-create
+- `common.clickableControl` (fn) → role=button/link name="<arg>" (exact) or a#action-create has text "<arg>"
 - `common.heading` (fn) → role=heading name="<arg>" (exact)
 - `common.tableColumnHeader` (fn) → role=columnheader name="<arg>"
 - `common.inputField` (fn) → getByLabel(/^<arg>\s*\*?$/)
@@ -100,13 +107,14 @@
 
 - `fill()`
 - `click()`
-- `clickCreateLink()`
+- `clickButtonByName()`
 - `openDropdown()`
 - `selectDropdownOption()`
 - `readElementText()`
 - `readElementAttribute()`
 - `fillElement()`
 - `clickByText()`
+- `collectVisibleBusinessTexts()`
 
 ### src/actions/navigation.actions.ts
 

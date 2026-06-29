@@ -33,3 +33,16 @@ Ekle butonunun varlığı doğrulanır
 `Alanlar` başlığı ve alanının geldiği doğrulanır (Not: O alan boş da olabilir oluşturulmuş dinamik değerlerde olabilir !)
 
 ---
+
+### TC-003 - Türkçe olmayan kelime sorgusu
+
+**Action:**
+Bulunduğun sayfada türkçe olmayan kelime var mı kontrol edililir
+
+**Data:**
+Yok
+
+**Expected Result:**
+SaBulunduğun sayfada türkçe olmayan kelimenin olmadığı doğrulanır
+
+---

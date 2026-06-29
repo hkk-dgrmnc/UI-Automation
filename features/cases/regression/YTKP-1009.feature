@@ -5,7 +5,7 @@ Feature: YTKP-1009 Otomatik Parametre Tanımlama
     * "USER1" kullanıcısı ile login olunur
     * "MFYS > Genel Parametre Ayarları > Tanımlama İşlemleri > Otomatik Parametre Tanımlama" menü yolundan sayfaya gidilir
     * Otomatik Parametre Tanımlama sayfasının açıldığı doğrulanır
-    * Oluştur butonuna tıklanır
+    * "Oluştur" butonuna tıklanır
     * Otomatik Parametre oluşturma ekranının açıldığı doğrulanır
     * "İşlem Kodu" dropdown'ı açılır
     * İşlem Kodu listesinin kod ve açıklama formatında listelendiği doğrulanır
