@@ -1,6 +1,7 @@
 import { Locator, Page, expect } from '@playwright/test';
 import { LocatorReport, reportAssertion, reportError } from '../utils/action-report';
 import { LOCATOR_REPORTS, locators } from '../locators/locators';
+import { resolveTableColumnPosition } from '../utils/table';
 
 export type AssertionOptions = {
   timeout?: number;
@@ -227,6 +228,28 @@ export async function expectTableColumnHeadersVisible(
   }
 }
 
+export async function expectTableColumnValuesVisible(
+  page: Page,
+  columnName: string,
+  expectedValues: readonly string[],
+) {
+  const locator = locators(page);
+
+  await expectVisible(
+    locator.common.tableColumnHeader(columnName),
+    LOCATOR_REPORTS.common.tableColumnHeader(columnName),
+  );
+
+  const columnPosition = await resolveTableColumnPosition(page, columnName);
+
+  for (const value of expectedValues) {
+    await expectVisible(
+      locator.common.tableColumnCell(columnName, value, columnPosition),
+      LOCATOR_REPORTS.common.tableColumnCell(columnName, value, columnPosition),
+    );
+  }
+}
+
 export async function expectInputFieldsVisible(
   page: Page,
   expectedFields: readonly string[],
@@ -241,10 +264,60 @@ export async function expectInputFieldsVisible(
   }
 }
 
+export async function expectInputFieldValue(page: Page, fieldName: string, expectedValue: string) {
+  const locator = locators(page);
+
+  await expectHasValue(
+    locator.common.inputField(fieldName),
+    LOCATOR_REPORTS.common.inputField(fieldName),
+    expectedValue,
+    `"${expectedValue}" degeri yazili`,
+  );
+}
+
+export async function expectInputFieldValueLengthLessThanOrEqual(
+  page: Page,
+  fieldName: string,
+  maxLength: number,
+) {
+  const locator = locators(page);
+  const input = locator.common.inputField(fieldName);
+  const report = LOCATOR_REPORTS.common.inputField(fieldName);
+
+  reportAssertion({
+    assertion: 'To Have Value Length Less Than Or Equal',
+    locatorName: report.name,
+    locatorValue: report.value,
+    expected: `girilen karakter sayisi <= ${maxLength}`,
+  });
+  try {
+    await expect.poll(async () => {
+      const value = await input.inputValue();
+      return Array.from(value).length;
+    }).toBeLessThanOrEqual(maxLength);
+  } catch (error) {
+    reportError({
+      action: 'To Have Value Length Less Than Or Equal',
+      locatorName: report.name,
+      error,
+    });
+    throw error;
+  }
+}
+
 export async function expectButtonVisible(page: Page, buttonName: string) {
   const locator = locators(page);
 
   await expectVisible(
+    locator.common.button(buttonName),
+    LOCATOR_REPORTS.common.button(buttonName),
+  );
+}
+
+export async function expectButtonNotVisible(page: Page, buttonName: string) {
+  const locator = locators(page);
+
+  await expectNotVisible(
     locator.common.button(buttonName),
     LOCATOR_REPORTS.common.button(buttonName),
   );

@@ -1,16 +1,22 @@
 import { DataTable, Then, When } from '@cucumber/cucumber';
 import {
   clickButtonByName,
+  clickTableColumnValue,
   collectVisibleBusinessTexts,
+  fillInputFieldByName,
   openDropdown,
   selectDropdownOption,
 } from '../../src/actions/common.actions';
 import {
+  expectButtonNotVisible,
   expectButtonVisible,
   expectHeadingVisible,
+  expectInputFieldValue,
+  expectInputFieldValueLengthLessThanOrEqual,
   expectInputFieldsVisible,
   expectListboxOptionsVisible,
   expectTableColumnHeadersVisible,
+  expectTableColumnValuesVisible,
 } from '../../src/assertions/common.assertions';
 import { COLORS as C, INDENT } from '../../src/utils/console-format';
 import { CustomWorld, getPage } from '../support/world';
@@ -30,6 +36,23 @@ When('{string} dropdownından {string} seçilir', async function (
 When('{string} butonuna tıklanır', async function (this: CustomWorld, buttonName: string) {
   await clickButtonByName(getPage(this), buttonName);
 });
+
+When(
+  '{string} input alanına {string} değeri yazılır',
+  async function (this: CustomWorld, fieldName: string, value: string) {
+    const page = getPage(this);
+
+    await fillInputFieldByName(page, fieldName, value);
+    await expectInputFieldValue(page, fieldName, value);
+  },
+);
+
+When(
+  'Tablonun {string} isimli kolon başlığının altındandaki {string} değere tıklanır',
+  async function (this: CustomWorld, columnName: string, value: string) {
+    await clickTableColumnValue(getPage(this), columnName, value);
+  },
+);
 
 // Generic liste dogrulama: acik bir dropdown'da beklenen seceneklerin listelendigini
 // dogrular. Beklenen secenekler feature Data Table'indan gelir; sayfa-ozel secenek
@@ -57,6 +80,14 @@ Then(
 );
 
 Then(
+  'Tablonun {string} isimli kolon başlığının altında aşağıdaki değerler listelenir',
+  async function (this: CustomWorld, columnName: string, table: DataTable) {
+    const expectedValues = table.raw().map((row) => row[0].trim());
+    await expectTableColumnValuesVisible(getPage(this), columnName, expectedValues);
+  },
+);
+
+Then(
   'Sayfada aşağıdaki input alanları görüntülenir',
   async function (this: CustomWorld, table: DataTable) {
     const expectedFields = table.raw().map((row) => row[0]);
@@ -64,8 +95,19 @@ Then(
   },
 );
 
+Then(
+  '{string} input alanında girilen karakter sayısı {int} değerinden küçük veya eşit olduğu doğrulanır',
+  async function (this: CustomWorld, fieldName: string, maxLength: number) {
+    await expectInputFieldValueLengthLessThanOrEqual(getPage(this), fieldName, maxLength);
+  },
+);
+
 Then('{string} butonu görüldüğü doğrulanır', async function (this: CustomWorld, buttonName: string) {
   await expectButtonVisible(getPage(this), buttonName);
+});
+
+Then('{string} butonunun görülmediği doğrulanır', async function (this: CustomWorld, buttonName: string) {
+  await expectButtonNotVisible(getPage(this), buttonName);
 });
 
 Then(

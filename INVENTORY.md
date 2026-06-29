@@ -24,11 +24,16 @@
 - `When` {string} dropdown\'ı açılır
 - `When` {string} dropdownından {string} seçilir
 - `When` {string} butonuna tıklanır
+- `When` {string} input alanına {string} değeri yazılır
+- `When` Tablonun {string} isimli kolon başlığının altındandaki {string} değere tıklanır
 - `Then` {string} dropdown listesinde aşağıdaki seçenekler listelenir
 - `Then` {string} başlığı görüldüğü doğrulanır
 - `Then` Tabloda aşağıdaki kolon başlıkları listelenir
+- `Then` Tablonun {string} isimli kolon başlığının altında aşağıdaki değerler listelenir
 - `Then` Sayfada aşağıdaki input alanları görüntülenir
+- `Then` {string} input alanında girilen karakter sayısı {int} değerinden küçük veya eşit olduğu doğrulanır
 - `Then` {string} butonu görüldüğü doğrulanır
+- `Then` {string} butonunun görülmediği doğrulanır
 - `Then` Bulunulan sayfanın görünen iş içerikleri dil kontrolü için raporlanır
 
 ### features/step-definitions/identityTemplates.steps.ts
@@ -78,6 +83,8 @@
 - `common.clickableControl` (fn) → role=button/link name="<arg>" (exact) or a#action-create has text "<arg>"
 - `common.heading` (fn) → role=heading name="<arg>" (exact)
 - `common.tableColumnHeader` (fn) → role=columnheader name="<arg>"
+- `common.tableColumnHeaders` → role=columnheader
+- `common.tableColumnCell` (fn) → tbody tr td:nth-child(<arg>) text="<arg>" (first match)
 - `common.inputField` (fn) → getByLabel(/^<arg>\s*\*?$/)
 - `common.button` (fn) → role=button name="<arg>" (exact)
 - `common.listboxOptions` → role=listbox >> role=option
@@ -108,6 +115,8 @@
 - `fill()`
 - `click()`
 - `clickButtonByName()`
+- `fillInputFieldByName()`
+- `clickTableColumnValue()`
 - `openDropdown()`
 - `selectDropdownOption()`
 - `readElementText()`

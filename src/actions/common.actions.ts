@@ -1,6 +1,7 @@
 import { Locator, Page } from '@playwright/test';
 import { LocatorReport, reportAction, reportError } from '../utils/action-report';
 import { LOCATOR_REPORTS, locators } from '../locators/locators';
+import { resolveTableColumnPosition } from '../utils/table';
 
 export type ClickOptions = {
   timeout?: number;
@@ -61,6 +62,37 @@ export async function clickButtonByName(page: Page, name: string) {
   await click(
     locator.common.clickableControl(name).filter({ visible: true }).first(),
     LOCATOR_REPORTS.common.clickableControl(name),
+  );
+}
+
+export async function fillInputFieldByName(page: Page, fieldName: string, value: string) {
+  const locator = locators(page);
+
+  await fillElement(
+    locator.common.inputField(fieldName),
+    LOCATOR_REPORTS.common.inputField(fieldName),
+    value,
+  );
+}
+
+export async function clickTableColumnValue(page: Page, columnName: string, value: string) {
+  const locator = locators(page);
+  let columnPosition: number;
+
+  try {
+    columnPosition = await resolveTableColumnPosition(page, columnName);
+  } catch (error) {
+    reportError({
+      action: 'Resolve table column position',
+      locatorName: LOCATOR_REPORTS.common.tableColumnHeader(columnName).name,
+      error,
+    });
+    throw error;
+  }
+
+  await click(
+    locator.common.tableColumnCell(columnName, value, columnPosition),
+    LOCATOR_REPORTS.common.tableColumnCell(columnName, value, columnPosition),
   );
 }
 

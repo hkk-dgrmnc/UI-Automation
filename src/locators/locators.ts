@@ -42,6 +42,10 @@ function escapeRegExp(value: string) {
   return value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 }
 
+function exactTextRegex(value: string) {
+  return new RegExp(`^\\s*${escapeRegExp(value)}\\s*$`);
+}
+
 // İşlem Kodu listesi format/count dogrulamasinda (kod + aciklama) tek kaynak olarak
 // kullanilir. Tür / Tür 2 gibi salt "su secenekler listede mi" dogrulamalarinda
 // beklenen liste feature Data Table'indan gelir; koda gomulmez (bkz. AGENTS.md 9.1).
@@ -60,7 +64,12 @@ export const locators = (page: Page) => ({
       .or(page.getByRole('link', { name, exact: true }))
       .or(page.locator(SELECTORS.common.createLink).filter({ hasText: name })),
     heading: (name: string) => page.getByRole('heading', { name, exact: true }),
+    tableColumnHeaders: page.getByRole('columnheader'),
     tableColumnHeader: (name: string) => page.getByRole('columnheader', { name }),
+    tableColumnCell: (_columnName: string, value: string, columnPosition: number) =>
+      page.locator(`tbody tr td:nth-child(${columnPosition})`).filter({
+        hasText: exactTextRegex(value),
+      }).first(),
     inputField: (name: string) => page.getByLabel(new RegExp(`^${escapeRegExp(name)}\\s*\\*?$`)),
     button: (name: string) => page.getByRole('button', { name, exact: true }),
     // İşlem Kodu format/count dogrulamasi (expectOperationCodeListFormatted) tek acik
@@ -131,6 +140,11 @@ export const LOCATOR_REPORTS = {
     tableColumnHeader: (name: string) => ({
       name: `common.tableColumnHeader('${name}')`,
       value: `role=columnheader name="${name}"`,
+    }),
+    tableColumnHeaders: { name: 'common.tableColumnHeaders', value: 'role=columnheader' },
+    tableColumnCell: (columnName: string, value: string, columnPosition: number) => ({
+      name: `common.tableColumnCell('${columnName}', '${value}')`,
+      value: `tbody tr td:nth-child(${columnPosition}) text="${value}" (first match)`,
     }),
     inputField: (name: string) => ({
       name: `common.inputField('${name}')`,
