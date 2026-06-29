@@ -25,6 +25,7 @@
 - `When` {string} dropdownından {string} seçilir
 - `When` {string} butonuna tıklanır
 - `When` {string} input alanına {string} değeri yazılır
+- `Then` {string} input alanına {string} değeri yazıldığı doğrulanır
 - `When` Tablonun {string} isimli kolon başlığının altındandaki {string} değere tıklanır
 - `Then` {string} dropdown listesinde aşağıdaki seçenekler listelenir
 - `Then` {string} başlığı görüldüğü doğrulanır

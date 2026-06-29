@@ -40,10 +40,14 @@ When('{string} butonuna tıklanır', async function (this: CustomWorld, buttonNa
 When(
   '{string} input alanına {string} değeri yazılır',
   async function (this: CustomWorld, fieldName: string, value: string) {
-    const page = getPage(this);
+    await fillInputFieldByName(getPage(this), fieldName, value);
+  },
+);
 
-    await fillInputFieldByName(page, fieldName, value);
-    await expectInputFieldValue(page, fieldName, value);
+Then(
+  '{string} input alanına {string} değeri yazıldığı doğrulanır',
+  async function (this: CustomWorld, fieldName: string, value: string) {
+    await expectInputFieldValue(getPage(this), fieldName, value);
   },
 );
 

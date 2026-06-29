@@ -72,6 +72,8 @@ Feature: Posta Çeki Hesabı İşlemleri
     * "Müşteri Grubu" menüsünün seçili olduğu doğrulanır
     * "Müşteri Grup Listesi" başlığı görüldüğü doğrulanır
     * "Müşteri Grup Kodu" input alanına "12345678" değeri yazılır
+    * "Müşteri Grup Kodu" input alanına "12345678" değeri yazıldığı doğrulanır
     * "Müşteri Grup Adı" input alanına "grup adı" değeri yazılır
+    * "Müşteri Grup Adı" input alanına "grup adı" değeri yazıldığı doğrulanır
     * "Müşteri Grup Kodu" input alanında girilen karakter sayısı 9 değerinden küçük veya eşit olduğu doğrulanır
     * "Müşteri Grup Adı" input alanında girilen karakter sayısı 9 değerinden küçük veya eşit olduğu doğrulanır
