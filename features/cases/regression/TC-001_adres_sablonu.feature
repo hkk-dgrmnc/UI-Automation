@@ -61,7 +61,7 @@ Feature: Posta Çeki Hesabı İşlemleri
       | Pasaport       |
     * "Düzenle" butonunun görülmediği doğrulanır
     * "Sil" butonunun görülmediği doğrulanır
-    * Tablonun "Kod" isimli kolon başlığının altındandaki "PASAPORT" değere tıklanır
+    * Tablonun "Kod" isimli kolon başlığının altındaki "PASAPORT" değere tıklanır
     * "Düzenle" butonunun görülmediği doğrulanır
     * "Sil" butonu görüldüğü doğrulanır
 

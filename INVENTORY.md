@@ -26,12 +26,14 @@
 - `When` {string} butonuna tıklanır
 - `When` {string} input alanına {string} değeri yazılır
 - `Then` {string} input alanına {string} değeri yazıldığı doğrulanır
-- `When` Tablonun {string} isimli kolon başlığının altındandaki {string} değere tıklanır
+- `When` Tablonun {string} isimli kolon başlığının altındaki {string} değere tıklanır
 - `Then` {string} dropdown listesinde aşağıdaki seçenekler listelenir
 - `Then` {string} başlığı görüldüğü doğrulanır
 - `Then` Tabloda aşağıdaki kolon başlıkları listelenir
 - `Then` Tablonun {string} isimli kolon başlığının altında aşağıdaki değerler listelenir
 - `Then` Sayfada aşağıdaki input alanları görüntülenir
+- `Then` Sayfada aşağıdaki dropdown alanları görüntülenir
+- `Then` {string} dropdownında {string} değeri seçili olduğu doğrulanır
 - `Then` {string} input alanında girilen karakter sayısı {int} değerinden küçük veya eşit olduğu doğrulanır
 - `Then` {string} butonu görüldüğü doğrulanır
 - `Then` {string} butonunun görülmediği doğrulanır
@@ -87,7 +89,6 @@
 - `common.tableColumnHeaders` → role=columnheader
 - `common.tableColumnCell` (fn) → tbody tr td:nth-child(<arg>) text="<arg>" (first match)
 - `common.inputField` (fn) → getByLabel(/^<arg>\s*\*?$/)
-- `common.button` (fn) → role=button name="<arg>" (exact)
 - `common.listboxOptions` → role=listbox >> role=option
 - `common.listboxOption` (fn) → role=listbox >> role=option name="<arg>"
 - `common.dropdownCombobox` (fn) → role=combobox name=/^<arg>\s*\*?$/

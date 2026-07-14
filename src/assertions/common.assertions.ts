@@ -1,11 +1,60 @@
 import { Locator, Page, expect } from '@playwright/test';
 import { LocatorReport, reportAssertion, reportError } from '../utils/action-report';
 import { LOCATOR_REPORTS, locators } from '../locators/locators';
+import { escapeRegExp } from '../utils/regex';
 import { resolveTableColumnPosition } from '../utils/table';
 
 export type AssertionOptions = {
   timeout?: number;
 };
+
+function escapeAttributeValue(value: string) {
+  return value.replace(/\\/g, '\\\\').replace(/"/g, '\\"');
+}
+
+function normalizeControlValue(value: string) {
+  return value
+    .replace(/[\u200B-\u200D\uFEFF]/g, '')
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
+async function resolveDropdownControlByLabel(page: Page, fieldName: string) {
+  const labelText = new RegExp(`^\\s*${escapeRegExp(fieldName)}[\\s\\u2009]*\\*?\\s*$`);
+  const label = page.locator('label').filter({ hasText: labelText }).first();
+
+  await label.waitFor({ state: 'visible' });
+
+  const controlId = await label.getAttribute('for');
+  if (!controlId) {
+    throw new Error(`"${fieldName}" dropdown etiketi icin bagli kontrol id'si bulunamadi.`);
+  }
+
+  const locator = page.locator(`[id="${escapeAttributeValue(controlId)}"]`);
+  // Bu locator KAYITLI common.dropdownCombobox degildir: secili degeri okumak icin
+  // label[for] -> gercek kontrol id'si uzerinden cozulur. Rapor adi bu yuzden kayitli
+  // locator'i taklit etmez, gercek cozum yolunu yansitir (AGENTS.md 6).
+  const locatorReport: LocatorReport = {
+    name: `dropdownControlByLabel('${fieldName}')`,
+    value: `label "${fieldName}" for="${controlId}" -> #${controlId}`,
+  };
+
+  return { locator, locatorReport };
+}
+
+async function readControlValue(locator: Locator) {
+  return locator.evaluate((element) => {
+    if (
+      element instanceof HTMLInputElement
+      || element instanceof HTMLTextAreaElement
+      || element instanceof HTMLSelectElement
+    ) {
+      return element.value;
+    }
+
+    return element.textContent ?? '';
+  });
+}
 
 // Asagidaki primitive assertion wrapper'lari tum domain assertion dosyalari
 // tarafindan kullanilir; yeni domain assertion dosyasi bunlari buradan import
@@ -264,6 +313,47 @@ export async function expectInputFieldsVisible(
   }
 }
 
+export async function expectDropdownFieldsVisible(
+  page: Page,
+  expectedFields: readonly string[],
+) {
+  const locator = locators(page);
+
+  for (const field of expectedFields) {
+    await expectVisible(
+      locator.common.dropdownCombobox(field),
+      LOCATOR_REPORTS.common.dropdownCombobox(field),
+    );
+  }
+}
+
+export async function expectDropdownFieldSelectedValue(
+  page: Page,
+  fieldName: string,
+  expectedValue: string,
+) {
+  const { locator, locatorReport } = await resolveDropdownControlByLabel(page, fieldName);
+  const normalizedExpectedValue = normalizeControlValue(expectedValue);
+
+  reportAssertion({
+    assertion: 'To Contain Selected Dropdown Value',
+    locatorName: locatorReport.name,
+    locatorValue: locatorReport.value,
+    expected: `"${normalizedExpectedValue}" secili degerini icermesi`,
+  });
+  try {
+    await expect.poll(async () => normalizeControlValue(await readControlValue(locator)))
+      .toContain(normalizedExpectedValue);
+  } catch (error) {
+    reportError({
+      action: 'To Contain Selected Dropdown Value',
+      locatorName: locatorReport.name,
+      error,
+    });
+    throw error;
+  }
+}
+
 export async function expectInputFieldValue(page: Page, fieldName: string, expectedValue: string) {
   const locator = locators(page);
 
@@ -305,12 +395,16 @@ export async function expectInputFieldValueLengthLessThanOrEqual(
   }
 }
 
+// "Buton" gorunurluk dogrulamasi, tiklama step'i ile AYNI kontrol ailesini hedefler
+// (common.clickableControl: role=button / role=link / a#action-create). Boylece
+// "X butonuna tiklanir" ile tiklanabilen bir kontrol (orn. link olan "Oluştur")
+// "X butonu görüldüğü doğrulanır" ile de tutarli sekilde dogrulanabilir.
 export async function expectButtonVisible(page: Page, buttonName: string) {
   const locator = locators(page);
 
   await expectVisible(
-    locator.common.button(buttonName),
-    LOCATOR_REPORTS.common.button(buttonName),
+    locator.common.clickableControl(buttonName).filter({ visible: true }).first(),
+    LOCATOR_REPORTS.common.clickableControl(buttonName),
   );
 }
 
@@ -318,8 +412,8 @@ export async function expectButtonNotVisible(page: Page, buttonName: string) {
   const locator = locators(page);
 
   await expectNotVisible(
-    locator.common.button(buttonName),
-    LOCATOR_REPORTS.common.button(buttonName),
+    locator.common.clickableControl(buttonName).filter({ visible: true }).first(),
+    LOCATOR_REPORTS.common.clickableControl(buttonName),
   );
 }
 

@@ -3,46 +3,60 @@
 
 ## Test Cases
 
-### TC-001 - Kimlik Şablonu ekranı açılış kontrolü
+### TC-001 - GM Kasa Limit Girişi ekranına gidilir
 
 **Action:**
-Sol bardan Posta Çeki Hesabı İşlemleri > Kimlik Şablonu ekranına gidilir.
+Sol bardan MFYS > Merkezi Muhasebe Yönetim Sistemi > Tanımlama ve Yardımcı İşlemler > GM Kasa Limit Girişi ekranına gidilir.
 
 **Data:**
 Yok
 
 **Expected Result:**
-Sol barda `Kimlik Şablonu`'nın seçildiği doğrulanır
-Kimlik Şablonu ekranın açıldığı doğrulanır
-Üstte `Kimlik Şablonu` başlığı, altta oluşturulan Adres Şablonu tablosunda `Kod` ve `Hesap Adı` başlıkları doğrulanır (Not: O alan boş da olabilir oluşturulmuş dinamik değerlerde olabilir !)
+Sol barda `GM Kasa Limit Girişi`'nın seçildiği doğrulanır
+Üstte `GM Para Limit Giriş Listesi` başlığı doğrulanır
 
 ---
 
-### TC-002 - Kimlik Şablonu Oluştur buton kontrolü
+### TC-002 - GM Kasa Limit Girişi ekranı kriter alanı paramatre doğrulama
 
 **Action:**
-Oluştur butonuna tıklanır
 
 **Data:**
 Yok
 
 **Expected Result:**
-`Kimlik Türü Tanım` bağlığı geldiği doğrulanır
-Sayfada "Kod" ve "Hesap Adı" input alanlarının varlığı doğrulanır
-Ekle butonunun varlığı doğrulanır
-`Alanlar` başlığı ve alanının geldiği doğrulanır (Not: O alan boş da olabilir oluşturulmuş dinamik değerlerde olabilir !)
+Bölge kodu dropdownın varlığı doğrulanır
+Para türü dropdownın varlığı doğrulanır
+Limit tutarı inputunun varlığı doğrulanır
+---
+
+### TC-003 - Kriter değer girişleri yapılır
+
+**Action:**
+Bölge kodu dropdownından 4.BÖLGE MÜDÜRLÜĞÜ seçilir
+Para türü dropdownından AMERİKA DOLARI seçilir
+Limit tutarı inputuna 115000 değeri girilir
+
+**Data:**
+Yok
+
+**Expected Result:**
+Bölge kodu dropdownından 4.BÖLGE MÜDÜRLÜĞÜ seçildiği doğrulanır
+Para türü dropdownından AMERİKA DOLARI seçildiği doğrulanır
+Limit tutarı inputuna 115000 değeri girildiği doğrulanır
 
 ---
 
-### TC-003 - Türkçe olmayan kelime sorgusu
+### TC-004 - Filtreleme ve sonrası doğrulama
 
 **Action:**
-Bulunduğun sayfada türkçe olmayan kelime var mı kontrol edililir
+Filtrele butonuna tıklanır
 
 **Data:**
 Yok
 
 **Expected Result:**
-SaBulunduğun sayfada türkçe olmayan kelimenin olmadığı doğrulanır
+Bölge adı liste başlığının görüldüğü doğrulanır
+Para Türü liste başlığının görüldüğü doğrulanır
 
 ---

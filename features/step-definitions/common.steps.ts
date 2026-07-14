@@ -10,6 +10,8 @@ import {
 import {
   expectButtonNotVisible,
   expectButtonVisible,
+  expectDropdownFieldSelectedValue,
+  expectDropdownFieldsVisible,
   expectHeadingVisible,
   expectInputFieldValue,
   expectInputFieldValueLengthLessThanOrEqual,
@@ -52,7 +54,7 @@ Then(
 );
 
 When(
-  'Tablonun {string} isimli kolon başlığının altındandaki {string} değere tıklanır',
+  'Tablonun {string} isimli kolon başlığının altındaki {string} değere tıklanır',
   async function (this: CustomWorld, columnName: string, value: string) {
     await clickTableColumnValue(getPage(this), columnName, value);
   },
@@ -96,6 +98,21 @@ Then(
   async function (this: CustomWorld, table: DataTable) {
     const expectedFields = table.raw().map((row) => row[0]);
     await expectInputFieldsVisible(getPage(this), expectedFields);
+  },
+);
+
+Then(
+  'Sayfada aşağıdaki dropdown alanları görüntülenir',
+  async function (this: CustomWorld, table: DataTable) {
+    const expectedFields = table.raw().map((row) => row[0]);
+    await expectDropdownFieldsVisible(getPage(this), expectedFields);
+  },
+);
+
+Then(
+  '{string} dropdownında {string} değeri seçili olduğu doğrulanır',
+  async function (this: CustomWorld, fieldName: string, expectedValue: string) {
+    await expectDropdownFieldSelectedValue(getPage(this), fieldName, expectedValue);
   },
 );
 

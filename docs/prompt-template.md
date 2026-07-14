@@ -39,11 +39,11 @@ yenisini yazma; mevcut reusable yapilari kullan.
 ### DOLDUR
 
 ```text
-Manuel test dosyasi:
-Bu turda otomasyona alinacak TC'ler:
-Haric tutulacak TC'ler:
-Senaryo islemi: [mevcut senaryoya devam et | mevcut feature icinde yeni scenario ac | yeni feature ac | repo yapisindan karar ver]
-Kullanici:
+Manuel test dosyasi: YTKP-deneme-test-cases-codex.md
+Bu turda otomasyona alinacak TC'ler: TC-003 ve TC-004
+Haric tutulacak TC'ler: TC-003 ve TC-004 hariç hepsi
+Senaryo islemi: mevcut senaryoya devam et 
+Kullanici: USER1
 Ek not: yok
 ```
 

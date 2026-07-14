@@ -1,5 +1,6 @@
 import { Page } from '@playwright/test';
 import type { LocatorReport } from '../utils/action-report';
+import { escapeRegExp } from '../utils/regex';
 
 // Selector ve UI metinleri tek kaynaktir: ayni string hem locator kurulumunda
 // hem LOCATOR_REPORTS value alaninda kullanilir. Boylece locator degistirilip
@@ -38,10 +39,6 @@ const TEXTS = {
   },
 } as const;
 
-function escapeRegExp(value: string) {
-  return value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-}
-
 function exactTextRegex(value: string) {
   return new RegExp(`^\\s*${escapeRegExp(value)}\\s*$`);
 }
@@ -71,7 +68,6 @@ export const locators = (page: Page) => ({
         hasText: exactTextRegex(value),
       }).first(),
     inputField: (name: string) => page.getByLabel(new RegExp(`^${escapeRegExp(name)}\\s*\\*?$`)),
-    button: (name: string) => page.getByRole('button', { name, exact: true }),
     // İşlem Kodu format/count dogrulamasi (expectOperationCodeListFormatted) tek acik
     // listbox uzerinden calisir; o anda tek dropdown acik oldugu icin yeterlidir.
     listboxOptions: page.getByRole('listbox').getByRole('option'),
@@ -149,10 +145,6 @@ export const LOCATOR_REPORTS = {
     inputField: (name: string) => ({
       name: `common.inputField('${name}')`,
       value: `getByLabel(/^${escapeRegExp(name)}\\s*\\*?$/)`,
-    }),
-    button: (name: string) => ({
-      name: `common.button('${name}')`,
-      value: `role=button name="${name}" (exact)`,
     }),
     listboxOptions: { name: 'common.listboxOptions', value: 'role=listbox >> role=option' },
     listboxOption: (name: string) => ({
