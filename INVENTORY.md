@@ -1,7 +1,7 @@
 # INVENTORY
 
 > Otomatik uretildi — elle duzenleme. `npm run inventory` ile guncellenir.
-> Yeni step/locator/action/flow yazmadan ONCE burada reuse ara (AGENTS.md 5.2).
+> Yeni step/locator/action/assertion/flow yazmadan ONCE burada reuse ara (AGENTS.md 5.2).
 > `common` ve `navigation` gruplari sadece birden fazla sayfada kullanilan
 > elemanlar icindir; sayfaya ozel olanlar domain grubunda tutulur.
 
@@ -21,7 +21,7 @@
 
 ### features/step-definitions/common.steps.ts
 
-- `When` {string} dropdown\'ı açılır
+- `When` {string} dropdown'ı açılır
 - `When` {string} dropdownından {string} seçilir
 - `When` {string} butonuna tıklanır
 - `When` {string} input alanına {string} değeri yazılır
@@ -68,6 +68,7 @@
 - `auth.passwordInput` → #password
 - `auth.loginButton` → button[name="login"]
 - `auth.userProfileButton` → role=button name="Kullanıcı Profil"
+- `auth.fatalLoginError` → exact text 'HTTP Request Error' OR 'invalid_resource'
 
 ### automaticParameters
 
@@ -116,21 +117,103 @@
 
 - `fill()`
 - `click()`
-- `clickButtonByName()`
-- `fillInputFieldByName()`
-- `clickTableColumnValue()`
-- `openDropdown()`
-- `selectDropdownOption()`
 - `readElementText()`
 - `readElementAttribute()`
 - `fillElement()`
 - `clickByText()`
-- `collectVisibleBusinessTexts()`
+
+### src/actions/control.actions.ts
+
+- `clickButtonByName()`
+
+### src/actions/dropdown.actions.ts
+
+- `openDropdown()`
+- `selectDropdownOption()`
+
+### src/actions/form.actions.ts
+
+- `fillInputFieldByName()`
 
 ### src/actions/navigation.actions.ts
 
 - `openSidebarMenuPath()`
 - `clickSidebarMenuLink()`
+
+### src/actions/table.actions.ts
+
+- `clickTableColumnValue()`
+
+### src/actions/uiAudit.actions.ts
+
+- `collectVisibleBusinessTexts()`
+
+## Assertions
+
+### src/assertions/addressTemplates.assertions.ts
+
+- `expectAddressTemplatesPageOpened()`
+- `expectAddressTemplateCreatePageOpened()`
+
+### src/assertions/auth.assertions.ts
+
+- `expectLoginPageVisible()`
+- `expectAuthenticationSuccess()`
+- `expectLoginSuccess()`
+
+### src/assertions/automaticParameters.assertions.ts
+
+- `expectAutomaticParametersRouteOpened()`
+- `expectAutomaticParametersCreatePageOpened()`
+- `expectOperationCodeListFormatted()`
+- `expectOperationDescriptionMaxLengthAndTurkish()`
+- `expectOperationDescriptionRequired()`
+- `expectSubTypeEnabledKdvRateDisabled()`
+- `expectSubTypeAndKdvRateDisabled()`
+- `expectSubTypeDisabledKdvRateEnabled()`
+
+### src/assertions/common.assertions.ts
+
+- `expectUrl()`
+- `expectVisible()`
+- `expectNotVisible()`
+- `expectCount()`
+- `expectNotAttribute()`
+- `expectHasValue()`
+- `expectEnabled()`
+- `expectDisabled()`
+- `expectHeadingVisible()`
+- `expectTextPresent()`
+
+### src/assertions/control.assertions.ts
+
+- `expectButtonVisible()`
+- `expectButtonNotVisible()`
+
+### src/assertions/dropdown.assertions.ts
+
+- `expectListboxOptionsVisible()`
+- `expectDropdownFieldsVisible()`
+- `expectDropdownFieldSelectedValue()`
+
+### src/assertions/form.assertions.ts
+
+- `expectInputFieldsVisible()`
+- `expectInputFieldValue()`
+- `expectInputFieldValueLengthLessThanOrEqual()`
+
+### src/assertions/identityTemplates.assertions.ts
+
+- `expectIdentityTemplatesPageOpened()`
+
+### src/assertions/navigation.assertions.ts
+
+- `expectSelectedSidebarMenu()`
+
+### src/assertions/table.assertions.ts
+
+- `expectTableColumnHeadersVisible()`
+- `expectTableColumnValuesVisible()`
 
 ## Flows
 

@@ -23,7 +23,7 @@ Bu sayfa, UI Automation projesinin mimari yaklaşımını, test üretim standard
 | --- | --- |
 | [AGENTS.md](../AGENTS.md) | Kod üretim kuralları, mimari kararlar ve AI çalışma standardı |
 | [README.md](../README.md) | Kurulum, çalıştırma ve geliştirici onboarding bilgisi |
-| [INVENTORY.md](../INVENTORY.md) | Mevcut step, locator, action ve flow sözlüğü |
+| [INVENTORY.md](../INVENTORY.md) | Mevcut step, locator, action, assertion ve flow sözlüğü |
 | [docs/prompt-template.md](./prompt-template.md) | Manuel test senaryolarını otomasyona çevirme prompt şablonu |
 
 
@@ -53,7 +53,7 @@ Bu standart aşağıdaki alanları kapsar:
 | Aksiyon ve doğrulama | Domain bazlı action/assertion katmanları |
 | Akış yönetimi | `src/flows` içindeki business flow fonksiyonları |
 | Raporlama | Cucumber HTML/JSON raporu ve reusable action/assertion logları |
-| Kalite kontrolleri | TypeScript check, inventory check, duplicate step/locator kontrolü |
+| Kalite kontrolleri | TypeScript, ESLint, Prettier, unit, Gherkin policy, Cucumber dry-run ve inventory/duplicate kapıları |
 | AI kullanımı | Codex/Claude gibi araçlarla kurallı test üretimi |
 
 Kapsam dışı alanlar:
@@ -211,20 +211,21 @@ Bu mimari belirli bir uygulamanın testlerinden bağımsızdır. Aşağıdaki ya
 
 | Yapı | Kullanım Amacı |
 | --- | --- |
-| `common.actions.ts` | Tıklama, doldurma, metin/attribute okuma gibi ortak kullanıcı aksiyonları |
-| `common.assertions.ts` | Görünürlük, count, text, enabled/disabled gibi ortak doğrulamalar |
+| `common.actions.ts` | Click/fill primitive'leri ve metin/attribute okuma gibi dinamik değer motoru |
+| Capability action/assertion dosyaları | `control`, `dropdown`, `form`, `table`, `uiAudit` davranışlarını POM'suz ve küçük modüllerde tutma |
+| `common.assertions.ts` | Görünürlük, count, URL, text, enabled/disabled gibi ortak assertion primitive'leri |
 | `navigation.actions.ts` | Sidebar/topbar menü yolu açma ve hedef ekrana gitme |
 | Generic navigation step | `"{string} menü yolundan sayfaya gidilir"` formatıyla derinlikten bağımsız menü geçişi |
 | Generic listbox assertion | `"{string} dropdown listesinde aşağıdaki seçenekler listelenir"` + Data Table ile seçenek doğrulama |
 | `ScenarioStore` | Senaryo içinde runtime değer saklama ve sonraki adımda kullanma |
 | `LOCATOR_REPORTS` | Locator adı/değeri bilgisini raporlanabilir ve denetlenebilir tutma |
-| `INVENTORY.md` | Step, locator, action ve flow reuse sözlüğünü tek yerde görme |
-| `npm run check` | TypeScript, duplicate step/locator ve inventory güncellik kontrolü |
+| `INVENTORY.md` | Step, locator, action, assertion ve flow reuse sözlüğünü tek yerde görme |
+| `npm run check` | TypeScript, ESLint, Prettier, unit, Gherkin policy, Cucumber dry-run ve inventory kapısı |
 | `docs/prompt-template.md` | Manuel test senaryosunu standart şekilde otomasyona dönüştürme prompt'u |
 
 ## Inventory ve Mekanik Kontroller
 
-`INVENTORY.md`, mevcut step, locator, action ve flow sözlüğünü tek yerde listeler. Yeni step veya locator eklendikten sonra güncellenmelidir.
+`INVENTORY.md`, mevcut step, locator, action, assertion ve flow sözlüğünü tek yerde listeler. Bu yapılardan biri eklendikten sonra güncellenmelidir.
 
 Komutlar:
 
@@ -242,6 +243,10 @@ npm run check
 | Duplicate step | Normalize edildiğinde aynı metne düşen iki step tanımı varsa |
 | Inventory güncelliği | Locator veya step eklenip `INVENTORY.md` güncellenmemişse |
 | TypeScript hatası | `tsc --noEmit` başarısızsa |
+| Kod stili | ESLint veya Prettier kontrolü başarısızsa |
+| Unit test | Tooling/lifecycle saf fonksiyon testleri başarısızsa |
+| Gherkin policy | Scenario ID/tag, klasör category tag'i veya `*` step kuralı ihlal edilmişse |
+| Cucumber dry-run | Step tanımı eksik/ambiguous ise; gerçek env veya browser gerektirmez |
 
 ## Ortak UI ve Navigasyon Standardı
 
@@ -345,6 +350,9 @@ Action fonksiyonları `src/actions/` altında domain bazlı dosyalarda tutulur.
 
 ```text
 src/actions/common.actions.ts
+src/actions/dropdown.actions.ts
+src/actions/form.actions.ts
+src/actions/table.actions.ts
 src/actions/auth.actions.ts
 src/actions/navigation.actions.ts
 src/actions/<domain>.actions.ts
@@ -377,6 +385,10 @@ Assertion fonksiyonları `src/assertions/` altında domain bazlı dosyalarda tut
 
 ```text
 src/assertions/common.assertions.ts
+src/assertions/control.assertions.ts
+src/assertions/dropdown.assertions.ts
+src/assertions/form.assertions.ts
+src/assertions/table.assertions.ts
 src/assertions/auth.assertions.ts
 src/assertions/<domain>.assertions.ts
 ```
@@ -408,8 +420,8 @@ Kullanılacak yapı:
 
 ```text
 Step       -> features/step-definitions/common.steps.ts
-Action     -> src/actions/common.actions.ts
-Assertion  -> src/assertions/common.assertions.ts
+Action     -> src/actions/dropdown.actions.ts
+Assertion  -> src/assertions/dropdown.assertions.ts
 Locator    -> src/locators/locators.ts
 ```
 
@@ -422,6 +434,8 @@ Feature örneği:
   | SEÇENEK B |
   | SEÇENEK C |
 ```
+
+Seçili dropdown değeri görünmez karakterler ve boşluklar normalize edildikten sonra tam eşitlikle doğrulanır; substring eşleşmesi başarı sayılmaz.
 
 Kurallar:
 
@@ -783,6 +797,12 @@ Lokal kalite komutları:
 
 ```powershell
 npm run inventory
+npm run typecheck
+npm run lint
+npm run format:check
+npm run test:unit
+npm run gherkin:check
+npm run cucumber:dry
 npm run check
 ```
 
@@ -815,6 +835,7 @@ Raporlanan bilgiler:
 - Girilen değer veya beklenen sonuç.
 - Hata durumunda kısaltılmış hata mesajı.
 - Başarısız senaryoda screenshot.
+- Screenshot/attachment/cleanup hataları asli step hatasını maskelemez; context ve browser ayrı ayrı kapatılmaya çalışılır.
 
 Örnek rapor satırları:
 
@@ -829,6 +850,8 @@ ASSERT   To Be Visible Locator Name: <domain>.pageTitle     Locator Value: <sele
 | --- | --- |
 | `cucumber-report.html` | İnsan tarafından okunabilir HTML rapor |
 | `cucumber-report.json` | Entegrasyon ve işleme için JSON rapor |
+| `allure-results/` | Varsayılan olarak yalnız güncel koşu; birleştirme sadece açık `--append` ile |
+| `allure-report/` | Tarayıcı metadata'sı ve kararlı browser-specific history içeren HTML rapor |
 
 ## CI Standardı
 
@@ -840,8 +863,8 @@ CI akışı:
 2. Node.js kurulur.
 3. `npm ci` ile bağımlılıklar yüklenir.
 4. `npm run check` çalışır.
-5. Playwright tarayıcıları kurulur.
-6. `npm test` ile Cucumber senaryoları koşulur.
+5. Yalnız CI'da kullanılan Chromium kurulur.
+6. `npm run test:allure` ile Cucumber senaryoları koşulur.
 7. Cucumber raporları artifact olarak saklanır.
 
 CI için gerekli koşullar:

@@ -1,36 +1,39 @@
 name: Cucumber Tests
 on:
   push:
-    branches: [ main, master ]
+    branches: [main, master]
   pull_request:
-    branches: [ main, master ]
+    branches: [main, master]
 jobs:
   test:
     timeout-minutes: 60
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v4
-    - uses: actions/setup-node@v4
-      with:
-        node-version: lts/*
-    - uses: actions/setup-java@v4
-      with:
-        distribution: temurin
-        java-version: '17'
-    - name: Install dependencies
-      run: npm ci
-    - name: Run quality checks
-      run: npm run check
-    - name: Install Playwright browsers
-      run: npx playwright install --with-deps
-    - name: Run Cucumber tests
-      run: npm run test:allure
-    - uses: actions/upload-artifact@v4
-      if: ${{ !cancelled() }}
-      with:
-        name: test-reports
-        path: |
-          cucumber-report.html
-          cucumber-report.json
-          allure-report
-        retention-days: 30
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - name: Use pinned npm
+        run: npm install --global $(node -p "require('./package.json').packageManager")
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+      - name: Install dependencies
+        run: npm ci
+      - name: Run quality checks
+        run: npm run check
+      - name: Install Chromium
+        run: npm run playwright:install:chromium
+      - name: Run Cucumber tests
+        run: npm run test:allure
+      - uses: actions/upload-artifact@v4
+        if: ${{ !cancelled() }}
+        with:
+          name: test-reports
+          path: |
+            cucumber-report.html
+            cucumber-report.json
+            allure-report
+          retention-days: 30

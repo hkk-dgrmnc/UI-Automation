@@ -1,4 +1,5 @@
 import { AsyncLocalStorage } from 'node:async_hooks';
+import { runBestEffort } from './best-effort';
 import { COLORS as C, INDENT } from './console-format';
 
 type Attach = (data: string, mediaType: string) => void | Promise<void>;
@@ -52,7 +53,9 @@ export async function runWithActionReport<T>(
     return await actionReportContext.run({ attach, lines }, async () => callback());
   } finally {
     if (lines.length > 0) {
-      await attach(lines.join('\n'), 'text/plain');
+      await runBestEffort('Attach Cucumber action report', () =>
+        attach(lines.join('\n'), 'text/plain'),
+      );
     }
   }
 }
@@ -66,7 +69,9 @@ function logAction(action: string, locatorName: string, value?: string) {
 
 function logAssert(assertion: string, locatorName: string, expected: string) {
   const label = `${C.bold}${C.green} ASSERT ${C.reset}`;
-  console.log(`${INDENT}${label}  ${C.bold}${assertion}${C.reset}  ${C.gray}${locatorName}${C.reset}  ${C.dim}→ ${expected}${C.reset}`);
+  console.log(
+    `${INDENT}${label}  ${C.bold}${assertion}${C.reset}  ${C.gray}${locatorName}${C.reset}  ${C.dim}→ ${expected}${C.reset}`,
+  );
 }
 
 function logError(action: string, locatorName: string, message: string) {
@@ -77,15 +82,16 @@ function logError(action: string, locatorName: string, message: string) {
 
 function logValue(event: 'SAVE' | 'USE', name: string, value: string) {
   const label = `${C.bold}${C.yellow}  STORE ${C.reset}`;
-  console.log(`${INDENT}${label}  ${C.bold}${event}${C.reset}  ${C.gray}'${name}'${C.reset}  ${C.dim}= ${value}${C.reset}`);
+  console.log(
+    `${INDENT}${label}  ${C.bold}${event}${C.reset}  ${C.gray}'${name}'${C.reset}  ${C.dim}= ${value}${C.reset}`,
+  );
 }
 
 export function reportAction(options: ReportActionOptions) {
   const context = actionReportContext.getStore();
 
-  const displayValue = options.value !== undefined
-    ? (options.maskValue ? '••••••••' : options.value)
-    : undefined;
+  const displayValue =
+    options.value !== undefined ? (options.maskValue ? '••••••••' : options.value) : undefined;
 
   logAction(options.action, options.locatorName, displayValue);
 
@@ -93,7 +99,12 @@ export function reportAction(options: ReportActionOptions) {
     return;
   }
 
-  const parts = ['ACTION', options.action, `Locator Name: ${options.locatorName}`, `Locator Value: ${options.locatorValue}`];
+  const parts = [
+    'ACTION',
+    options.action,
+    `Locator Name: ${options.locatorName}`,
+    `Locator Value: ${options.locatorValue}`,
+  ];
   if (displayValue !== undefined) parts.push(`▸ ${displayValue}`);
   context.lines.push(parts.join('   '));
 }
@@ -107,19 +118,28 @@ export function reportAssertion(options: ReportAssertionOptions) {
     return;
   }
 
-  context.lines.push(['ASSERT', options.assertion, `Locator Name: ${options.locatorName}`, `Locator Value: ${options.locatorValue}`, `→ ${options.expected}`].join('   '));
+  context.lines.push(
+    [
+      'ASSERT',
+      options.assertion,
+      `Locator Name: ${options.locatorName}`,
+      `Locator Value: ${options.locatorValue}`,
+      `→ ${options.expected}`,
+    ].join('   '),
+  );
 }
 
 export function reportError(options: ReportErrorOptions) {
   const context = actionReportContext.getStore();
-  const message = options.error instanceof Error
-    ? options.error.message
-        .split('\n')
-        .map(l => l.trim())
-        .filter(l => l.length > 0)
-        .slice(0, 4)
-        .join(' · ')
-    : String(options.error);
+  const message =
+    options.error instanceof Error
+      ? options.error.message
+          .split('\n')
+          .map((l) => l.trim())
+          .filter((l) => l.length > 0)
+          .slice(0, 4)
+          .join(' · ')
+      : String(options.error);
 
   logError(`${options.action} failed`, options.locatorName, message);
 

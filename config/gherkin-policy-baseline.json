@@ -1,0 +1,21 @@
+{
+  "version": 1,
+  "entries": [
+    {
+      "fingerprint": "scenario-id::features/cases/regression/TC-001_adres_sablonu.feature::adres-sablonu::adres-sablonu",
+      "reason": "The authoritative manual test case ID is not available; do not invent one."
+    },
+    {
+      "fingerprint": "scenario-id::features/cases/regression/TC-001_adres_sablonu.feature::kimlik-sablonu::kimlik-sablonu",
+      "reason": "The authoritative manual test case ID is not available; do not invent one."
+    },
+    {
+      "fingerprint": "scenario-id::features/cases/regression/TC-001_adres_sablonu.feature::kimlik-sablonu-test2::kimlik-sablonu-test2",
+      "reason": "The authoritative manual test case ID is not available; do not invent one."
+    },
+    {
+      "fingerprint": "scenario-id::features/cases/regression/TC-001_adres_sablonu.feature::musteri-grubu::musteri-grubu",
+      "reason": "The authoritative manual test case ID is not available; do not invent one."
+    }
+  ]
+}

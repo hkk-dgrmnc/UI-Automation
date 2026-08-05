@@ -1,4 +1,7 @@
 const os = require('node:os');
+const { resolveBrowser } = require('./scripts/lib/allure-metadata');
+
+const configuredBrowser = resolveBrowser(process.argv.slice(2), process.env);
 
 const sharedConfig = {
   requireModule: ['ts-node/register'],
@@ -15,7 +18,7 @@ const sharedConfig = {
       os_platform: os.platform(),
       os_release: os.release(),
       node_version: process.version,
-      browser: process.env.BROWSER ?? 'chromium',
+      browser: configuredBrowser,
       running_env: process.env.RUNNING_ENV ?? 'test',
     },
   },

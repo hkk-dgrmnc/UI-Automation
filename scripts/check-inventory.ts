@@ -10,7 +10,7 @@
  *      (kopyala-yapistir sonucu yanlis raporlanan locator'i yakalar).
  *   3. Normalize edildiginde ayni metne dusen iki step tanimi varsa -> HATA
  *      (ornek: "Oluştur butonuna tıklanır" vs "Oluştur butonuna tıklanır.").
- *   4. INVENTORY.md uretir: mevcut step / locator / action / flow sozlugu.
+ *   4. INVENTORY.md uretir: mevcut step / locator / action / assertion / flow sozlugu.
  *      Yeni test yazmadan once tek dosyadan reuse aramak icin.
  *
  * Kullanim:
@@ -26,6 +26,7 @@ import type { LocatorReport } from '../src/utils/action-report';
 const ROOT = join(__dirname, '..');
 const STEP_DIR = join(ROOT, 'features', 'step-definitions');
 const ACTIONS_DIR = join(ROOT, 'src', 'actions');
+const ASSERTIONS_DIR = join(ROOT, 'src', 'assertions');
 const FLOWS_DIR = join(ROOT, 'src', 'flows');
 const INVENTORY_FILE = join(ROOT, 'INVENTORY.md');
 
@@ -75,7 +76,7 @@ function checkLocators(locators: FlatLocator[]) {
     if (!ok) {
       addError(
         `LOCATOR_REPORTS.${loc.path} -> name "${loc.name}" yolu ile uyusmuyor ` +
-        `(beklenen: "${loc.path}"). Kopyala-yapistir hatasi olabilir.`,
+          `(beklenen: "${loc.path}"). Kopyala-yapistir hatasi olabilir.`,
       );
     }
   }
@@ -90,11 +91,11 @@ function checkLocators(locators: FlatLocator[]) {
   }
 
   for (const [value, list] of byValue) {
-    const distinctPaths = [...new Set(list.map(l => l.path))];
+    const distinctPaths = [...new Set(list.map((l) => l.path))];
     if (distinctPaths.length > 1) {
       addError(
         `Ayni selector birden fazla locator'da: "${value}" -> ${distinctPaths.join(', ')}. ` +
-        `Tek isimde birlestir, digerlerini ona referans ver.`,
+          `Tek isimde birlestir, digerlerini ona referans ver.`,
       );
     }
   }
@@ -113,9 +114,7 @@ function listTsFiles(dir: string): string[] {
   } catch {
     return [];
   }
-  return entries
-    .filter(name => name.endsWith('.ts'))
-    .map(name => join(dir, name));
+  return entries.filter((name) => name.endsWith('.ts')).map((name) => join(dir, name));
 }
 
 function collectSteps(): StepEntry[] {
@@ -152,7 +151,7 @@ function checkSteps(steps: StepEntry[]) {
 
   for (const [, list] of byNorm) {
     if (list.length > 1) {
-      const variants = list.map(s => `"${s.text}" (${s.file})`).join(' | ');
+      const variants = list.map((s) => `"${s.text}" (${s.file})`).join(' | ');
       addError(`Ayni anlama gelen step birden fazla tanimli: ${variants}. Tek metinde birlestir.`);
     }
   }
@@ -169,18 +168,18 @@ function collectExportedFns(file: string): string[] {
   } catch {
     return [];
   }
-  return [...content.matchAll(EXPORT_FN_RE)].map(m => m[1]);
+  return [...content.matchAll(EXPORT_FN_RE)].map((m) => m[1]);
 }
 
 // Bir dizindeki her .ts dosyasinin export'lanan fonksiyonlarini dosya bazli toplar.
 // Hem actions (common/auth/navigation/... domain dosyalari) hem flows icin kullanilir.
 function collectModuleExports(dir: string): { file: string; fns: string[] }[] {
   return listTsFiles(dir)
-    .map(file => ({
+    .map((file) => ({
       file: file.slice(ROOT.length + 1).replace(/\\/g, '/'),
       fns: collectExportedFns(file),
     }))
-    .filter(entry => entry.fns.length > 0);
+    .filter((entry) => entry.fns.length > 0);
 }
 
 // --- INVENTORY.md uret ------------------------------------------------------
@@ -189,6 +188,7 @@ function buildInventory(
   locators: FlatLocator[],
   steps: StepEntry[],
   actions: { file: string; fns: string[] }[],
+  assertions: { file: string; fns: string[] }[],
   flows: { file: string; fns: string[] }[],
 ): string {
   const lines: string[] = [];
@@ -196,7 +196,9 @@ function buildInventory(
   lines.push('# INVENTORY');
   lines.push('');
   lines.push('> Otomatik uretildi — elle duzenleme. `npm run inventory` ile guncellenir.');
-  lines.push('> Yeni step/locator/action/flow yazmadan ONCE burada reuse ara (AGENTS.md 5.2).');
+  lines.push(
+    '> Yeni step/locator/action/assertion/flow yazmadan ONCE burada reuse ara (AGENTS.md 5.2).',
+  );
   lines.push('> `common` ve `navigation` gruplari sadece birden fazla sayfada kullanilan');
   lines.push('> elemanlar icindir; sayfaya ozel olanlar domain grubunda tutulur.');
   lines.push('');
@@ -254,6 +256,20 @@ function buildInventory(
     }
   }
 
+  lines.push('## Assertions');
+  lines.push('');
+  if (assertions.length === 0) {
+    lines.push('_(yok)_');
+    lines.push('');
+  } else {
+    for (const mod of assertions) {
+      lines.push(`### ${mod.file}`);
+      lines.push('');
+      for (const fn of mod.fns) lines.push(`- \`${fn}()\``);
+      lines.push('');
+    }
+  }
+
   lines.push('## Flows');
   lines.push('');
   if (flows.length === 0) {
@@ -267,7 +283,12 @@ function buildInventory(
     }
   }
 
-  return lines.join('\n').replace(/\n{3,}/g, '\n\n').trimEnd() + '\n';
+  return (
+    lines
+      .join('\n')
+      .replace(/\n{3,}/g, '\n\n')
+      .trimEnd() + '\n'
+  );
 }
 
 // --- Calistir ---------------------------------------------------------------
@@ -278,15 +299,16 @@ function main() {
   const locators = flattenLocatorReports();
   const steps = collectSteps();
   const actions = collectModuleExports(ACTIONS_DIR);
+  const assertions = collectModuleExports(ASSERTIONS_DIR);
   const flows = collectModuleExports(FLOWS_DIR);
 
   checkLocators(locators);
   checkSteps(steps);
 
-  const inventory = buildInventory(locators, steps, actions, flows);
+  const inventory = buildInventory(locators, steps, actions, assertions, flows);
 
   if (checkOnly) {
-    let current = '';
+    let current: string;
     try {
       current = readFileSync(INVENTORY_FILE, 'utf8');
     } catch {
@@ -297,7 +319,9 @@ function main() {
     }
   } else {
     writeFileSync(INVENTORY_FILE, inventory, 'utf8');
-    console.log(`${C.green}✓${C.reset} INVENTORY.md guncellendi (${locators.length} locator, ${steps.length} step).`);
+    console.log(
+      `${C.green}✓${C.reset} INVENTORY.md guncellendi (${locators.length} locator, ${steps.length} step).`,
+    );
   }
 
   if (errors.length > 0) {

@@ -22,16 +22,14 @@ const SELECTORS = {
 const TEXTS = {
   auth: {
     userProfileButton: 'Kullanıcı Profil',
+    httpRequestErrorTitle: 'HTTP Request Error',
+    invalidResourceErrorMessage: 'invalid_resource',
   },
   automaticParameters: {
     listTitle: 'Otomatik Parametre Listesi',
     infoTitle: 'Otomatik Parametre Bilgileri',
     operationCodeLabel: 'İşlem Kodu',
-    operationCodeOptions: [
-      '[001] KAPAMA',
-      '[002] VERGİSEL ŞUBE KAPAMA',
-      '[003] DÖKÜM',
-    ],
+    operationCodeOptions: ['[001] KAPAMA', '[002] VERGİSEL ŞUBE KAPAMA', '[003] DÖKÜM'],
     typeLabel: 'Tür',
     subTypeLabel: 'Tür 2',
     kdvRateLabel: 'KDV Oranı',
@@ -54,27 +52,38 @@ export const locators = (page: Page) => ({
     passwordInput: page.locator(SELECTORS.auth.passwordInput),
     loginButton: page.locator(SELECTORS.auth.loginButton),
     userProfileButton: page.getByRole('button', { name: TEXTS.auth.userProfileButton }),
+    fatalLoginError: page
+      .getByText(TEXTS.auth.httpRequestErrorTitle, { exact: true })
+      .or(page.getByText(TEXTS.auth.invalidResourceErrorMessage, { exact: true }))
+      .first(),
   },
   common: {
     createLink: page.locator(SELECTORS.common.createLink),
-    clickableControl: (name: string) => page.getByRole('button', { name, exact: true })
-      .or(page.getByRole('link', { name, exact: true }))
-      .or(page.locator(SELECTORS.common.createLink).filter({ hasText: name })),
+    clickableControl: (name: string) =>
+      page
+        .getByRole('button', { name, exact: true })
+        .or(page.getByRole('link', { name, exact: true }))
+        .or(page.locator(SELECTORS.common.createLink).filter({ hasText: name })),
     heading: (name: string) => page.getByRole('heading', { name, exact: true }),
     tableColumnHeaders: page.getByRole('columnheader'),
     tableColumnHeader: (name: string) => page.getByRole('columnheader', { name }),
     tableColumnCell: (_columnName: string, value: string, columnPosition: number) =>
-      page.locator(`tbody tr td:nth-child(${columnPosition})`).filter({
-        hasText: exactTextRegex(value),
-      }).first(),
+      page
+        .locator(`tbody tr td:nth-child(${columnPosition})`)
+        .filter({
+          hasText: exactTextRegex(value),
+        })
+        .first(),
     inputField: (name: string) => page.getByLabel(new RegExp(`^${escapeRegExp(name)}\\s*\\*?$`)),
     // İşlem Kodu format/count dogrulamasi (expectOperationCodeListFormatted) tek acik
     // listbox uzerinden calisir; o anda tek dropdown acik oldugu icin yeterlidir.
     listboxOptions: page.getByRole('listbox').getByRole('option'),
-    listboxOption: (name: string) => page.getByRole('listbox').getByRole('option', { name, exact: true }),
-    dropdownCombobox: (name: string) => page.getByRole('combobox', {
-      name: new RegExp(`^${escapeRegExp(name)}\\s*\\*?$`),
-    }),
+    listboxOption: (name: string) =>
+      page.getByRole('listbox').getByRole('option', { name, exact: true }),
+    dropdownCombobox: (name: string) =>
+      page.getByRole('combobox', {
+        name: new RegExp(`^${escapeRegExp(name)}\\s*\\*?$`),
+      }),
     // Generic dropdown dogrulamasi (AGENTS.md 9.1): belirli bir ACIK listbox'in (id ile)
     // icindeki secenegi hedefler. id, o anda acik ve adi listName olan listbox'tan
     // runtime'da cozulur (assertions.ts -> resolveOpenListboxId). Boylece "Tür" dendiginde
@@ -83,23 +92,38 @@ export const locators = (page: Page) => ({
       page.locator(`[id="${listboxId}"]`).getByRole('option', { name, exact: true }),
   },
   navigation: {
-    sidebarMenuButton: (name: string) => page.locator('nav').getByRole('button').filter({
-      has: page.getByText(name, { exact: true }),
-    }),
+    sidebarMenuButton: (name: string) =>
+      page
+        .locator('nav')
+        .getByRole('button')
+        .filter({
+          has: page.getByText(name, { exact: true }),
+        }),
     sidebarMenuLink: (name: string) => page.locator('nav').getByRole('link', { name }),
-    selectedSidebarMenuLink: (name: string) => page.locator(SELECTORS.navigation.selectedSidebarMenuLink).filter({
-      hasText: name,
-    }),
+    selectedSidebarMenuLink: (name: string) =>
+      page.locator(SELECTORS.navigation.selectedSidebarMenuLink).filter({
+        hasText: name,
+      }),
   },
   automaticParameters: {
     listTitle: page.getByText(TEXTS.automaticParameters.listTitle, { exact: true }),
     infoTitle: page.getByText(TEXTS.automaticParameters.infoTitle, { exact: true }),
-    operationCodeCombobox: page.getByRole('combobox', { name: TEXTS.automaticParameters.operationCodeLabel }),
-    typeCombobox: page.getByRole('combobox', { name: TEXTS.automaticParameters.typeLabel, exact: true }),
+    operationCodeCombobox: page.getByRole('combobox', {
+      name: TEXTS.automaticParameters.operationCodeLabel,
+    }),
+    typeCombobox: page.getByRole('combobox', {
+      name: TEXTS.automaticParameters.typeLabel,
+      exact: true,
+    }),
     subTypeCombobox: page.getByRole('combobox', { name: TEXTS.automaticParameters.subTypeLabel }),
     kdvRateCombobox: page.getByRole('combobox', { name: TEXTS.automaticParameters.kdvRateLabel }),
-    operationDescriptionInput: page.getByRole('textbox', { name: TEXTS.automaticParameters.operationDescriptionLabel, exact: true }),
-    operationDescriptionRequiredLabel: page.getByText(`${TEXTS.automaticParameters.operationDescriptionLabel} *`, { exact: true }).first(),
+    operationDescriptionInput: page.getByRole('textbox', {
+      name: TEXTS.automaticParameters.operationDescriptionLabel,
+      exact: true,
+    }),
+    operationDescriptionRequiredLabel: page
+      .getByText(`${TEXTS.automaticParameters.operationDescriptionLabel} *`, { exact: true })
+      .first(),
   },
 });
 
@@ -121,7 +145,14 @@ export const LOCATOR_REPORTS = {
     usernameInput: { name: 'auth.usernameInput', value: SELECTORS.auth.usernameInput },
     passwordInput: { name: 'auth.passwordInput', value: SELECTORS.auth.passwordInput },
     loginButton: { name: 'auth.loginButton', value: SELECTORS.auth.loginButton },
-    userProfileButton: { name: 'auth.userProfileButton', value: `role=button name="${TEXTS.auth.userProfileButton}"` },
+    userProfileButton: {
+      name: 'auth.userProfileButton',
+      value: `role=button name="${TEXTS.auth.userProfileButton}"`,
+    },
+    fatalLoginError: {
+      name: 'auth.fatalLoginError',
+      value: `exact text '${TEXTS.auth.httpRequestErrorTitle}' OR '${TEXTS.auth.invalidResourceErrorMessage}'`,
+    },
   },
   common: {
     createLink: { name: 'common.createLink', value: SELECTORS.common.createLink },
@@ -175,13 +206,37 @@ export const LOCATOR_REPORTS = {
     }),
   },
   automaticParameters: {
-    listTitle: { name: 'automaticParameters.listTitle', value: `getByText('${TEXTS.automaticParameters.listTitle}', { exact: true })` },
-    infoTitle: { name: 'automaticParameters.infoTitle', value: `getByText('${TEXTS.automaticParameters.infoTitle}', { exact: true })` },
-    operationCodeCombobox: { name: 'automaticParameters.operationCodeCombobox', value: `role=combobox name="${TEXTS.automaticParameters.operationCodeLabel}"` },
-    typeCombobox: { name: 'automaticParameters.typeCombobox', value: `role=combobox name="${TEXTS.automaticParameters.typeLabel}" (exact)` },
-    subTypeCombobox: { name: 'automaticParameters.subTypeCombobox', value: `role=combobox name="${TEXTS.automaticParameters.subTypeLabel}"` },
-    kdvRateCombobox: { name: 'automaticParameters.kdvRateCombobox', value: `role=combobox name="${TEXTS.automaticParameters.kdvRateLabel}"` },
-    operationDescriptionInput: { name: 'automaticParameters.operationDescriptionInput', value: `role=textbox name="${TEXTS.automaticParameters.operationDescriptionLabel}" (exact)` },
-    operationDescriptionRequiredLabel: { name: 'automaticParameters.operationDescriptionRequiredLabel', value: `getByText('${TEXTS.automaticParameters.operationDescriptionLabel} *', { exact: true })` },
+    listTitle: {
+      name: 'automaticParameters.listTitle',
+      value: `getByText('${TEXTS.automaticParameters.listTitle}', { exact: true })`,
+    },
+    infoTitle: {
+      name: 'automaticParameters.infoTitle',
+      value: `getByText('${TEXTS.automaticParameters.infoTitle}', { exact: true })`,
+    },
+    operationCodeCombobox: {
+      name: 'automaticParameters.operationCodeCombobox',
+      value: `role=combobox name="${TEXTS.automaticParameters.operationCodeLabel}"`,
+    },
+    typeCombobox: {
+      name: 'automaticParameters.typeCombobox',
+      value: `role=combobox name="${TEXTS.automaticParameters.typeLabel}" (exact)`,
+    },
+    subTypeCombobox: {
+      name: 'automaticParameters.subTypeCombobox',
+      value: `role=combobox name="${TEXTS.automaticParameters.subTypeLabel}"`,
+    },
+    kdvRateCombobox: {
+      name: 'automaticParameters.kdvRateCombobox',
+      value: `role=combobox name="${TEXTS.automaticParameters.kdvRateLabel}"`,
+    },
+    operationDescriptionInput: {
+      name: 'automaticParameters.operationDescriptionInput',
+      value: `role=textbox name="${TEXTS.automaticParameters.operationDescriptionLabel}" (exact)`,
+    },
+    operationDescriptionRequiredLabel: {
+      name: 'automaticParameters.operationDescriptionRequiredLabel',
+      value: `getByText('${TEXTS.automaticParameters.operationDescriptionLabel} *', { exact: true })`,
+    },
   },
 } satisfies LocatorReportsShape;

@@ -1,14 +1,16 @@
 require('dotenv/config');
 
 function printUsageAndExit(exitCode = 2) {
-  console.error([
-    'Usage:',
-    '  node scripts/check-env.js [--user USER1] [--key EXTRA_ENV_KEY]',
-    '',
-    'Examples:',
-    '  npm run env:check',
-    '  npm run env:check -- --user USER2 --key API_BASE_URL',
-  ].join('\n'));
+  console.error(
+    [
+      'Usage:',
+      '  node scripts/check-env.js [--user USER1] [--key EXTRA_ENV_KEY]',
+      '',
+      'Examples:',
+      '  npm run env:check',
+      '  npm run env:check -- --user USER2 --key API_BASE_URL',
+    ].join('\n'),
+  );
   process.exit(exitCode);
 }
 

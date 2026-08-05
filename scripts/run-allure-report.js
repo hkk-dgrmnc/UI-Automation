@@ -1,16 +1,31 @@
 const { spawnSync } = require('node:child_process');
 const fs = require('node:fs');
 const path = require('node:path');
+const {
+  addBrowserMetadata,
+  getResultBrowser,
+  resolveBrowser,
+  resolveResultsMode,
+  updateEnvironmentBrowsers,
+} = require('./lib/allure-metadata');
 
 const ROOT = path.join(__dirname, '..');
 const profile = process.argv[2] ?? 'allure';
 const rawArgs = process.argv.slice(3);
-const cleanMode = rawArgs.includes('--clean');
 const cucumberArgs = rawArgs.filter((arg) => arg !== '--append' && arg !== '--clean');
 const resultsDir = path.join(ROOT, 'allure-results');
 const reportDir = path.join(ROOT, 'allure-report');
-const runId = process.env.ALLURE_RUN_ID
-  ?? `run-${new Date().toISOString().replace(/[-:.TZ]/g, '').slice(0, 14)}-${process.pid}`;
+const environmentFile = path.join(resultsDir, 'environment.properties');
+
+let browser;
+let resultsMode;
+try {
+  browser = resolveBrowser(cucumberArgs, process.env);
+  resultsMode = resolveResultsMode(rawArgs);
+} catch (error) {
+  console.error(error.message);
+  process.exit(2);
+}
 
 function localBin(name) {
   const extension = process.platform === 'win32' ? '.cmd' : '';
@@ -22,7 +37,8 @@ function listResultFiles() {
     return [];
   }
 
-  return fs.readdirSync(resultsDir)
+  return fs
+    .readdirSync(resultsDir)
     .filter((name) => name.endsWith('-result.json'))
     .map((name) => path.join(resultsDir, name));
 }
@@ -32,7 +48,7 @@ function run(command, args) {
     cwd: ROOT,
     env: {
       ...process.env,
-      ALLURE_RUN_ID: runId,
+      BROWSER: browser,
     },
     stdio: 'inherit',
     shell: process.platform === 'win32',
@@ -51,7 +67,7 @@ function run(command, args) {
   return typeof result.status === 'number' ? result.status : 1;
 }
 
-function addRunMetadata(existingResultFiles) {
+function addResultMetadata(existingResultFiles) {
   const existing = new Set(existingResultFiles);
   let updatedCount = 0;
 
@@ -61,26 +77,39 @@ function addRunMetadata(existingResultFiles) {
     }
 
     const result = JSON.parse(fs.readFileSync(file, 'utf8'));
-    const baseId = result.testCaseId ?? result.fullName ?? result.name ?? path.basename(file);
-    const runSpecificId = `${baseId}#${runId}`;
+    const updatedResult = addBrowserMetadata(result, browser, path.basename(file));
 
-    result.testCaseId = runSpecificId;
-    result.historyId = runSpecificId;
-    result.parameters = Array.isArray(result.parameters)
-      ? result.parameters.filter((parameter) => parameter.name !== 'Run ID')
-      : [];
-    result.parameters.push({ name: 'Run ID', value: runId });
-
-    fs.writeFileSync(file, `${JSON.stringify(result)}\n`, 'utf8');
+    fs.writeFileSync(file, `${JSON.stringify(updatedResult)}\n`, 'utf8');
     updatedCount += 1;
   }
 
-  console.log(`Allure result metadata updated: ${updatedCount}`);
+  console.log(`Allure result metadata updated for ${browser}: ${updatedCount}`);
 }
 
-console.log(`Allure Run ID: ${runId}`);
+function updateEnvironmentMetadata() {
+  const browsers = [];
 
-if (cleanMode) {
+  for (const file of listResultFiles()) {
+    const result = JSON.parse(fs.readFileSync(file, 'utf8'));
+    const resultBrowser = getResultBrowser(result);
+
+    if (resultBrowser) {
+      browsers.push(resultBrowser);
+    }
+  }
+
+  const content = fs.existsSync(environmentFile) ? fs.readFileSync(environmentFile, 'utf8') : '';
+  fs.writeFileSync(
+    environmentFile,
+    updateEnvironmentBrowsers(content, browsers.length > 0 ? browsers : [browser]),
+    'utf8',
+  );
+}
+
+console.log(`Allure browser: ${browser}`);
+console.log(`Allure results mode: ${resultsMode === 'append' ? 'append' : 'current run (clean)'}`);
+
+if (resultsMode === 'clean') {
   fs.rmSync(resultsDir, { recursive: true, force: true });
 }
 
@@ -88,15 +117,12 @@ fs.rmSync(reportDir, { recursive: true, force: true });
 
 const existingResultFiles = listResultFiles();
 
-const cucumberStatus = run(localBin('cucumber-js'), [
-  '--profile',
-  profile,
-  ...cucumberArgs,
-]);
+const cucumberStatus = run(localBin('cucumber-js'), ['--profile', profile, ...cucumberArgs]);
 
-let allureStatus = 0;
+let allureStatus;
 if (fs.existsSync(resultsDir)) {
-  addRunMetadata(existingResultFiles);
+  addResultMetadata(existingResultFiles);
+  updateEnvironmentMetadata();
 
   allureStatus = run(localBin('allure'), [
     'generate',

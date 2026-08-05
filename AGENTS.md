@@ -13,7 +13,7 @@ Codex calisma prensibi:
 - Var olan kod stili, klasor yapisi ve test uretim standardi korunmalidir.
 
 
-Bu projede klasik Page Object Model kullanilmayacaktir. Her sayfa icin ayri `Page.ts` class dosyasi olusturulmayacaktir. Baslangic mimarisi sade tutulacaktir: data, locator, action ve assertion katmanlari tek dosya olarak yonetilecektir. Bu tek dosya modeli baslangic hizini artirmak icindir; proje buyudukce best practice, POM'a donmeden domain bazli katman dosyalarina ayrilmaktir.
+Bu projede klasik Page Object Model kullanilmayacaktir. Her sayfa icin ayri `Page.ts` class dosyasi olusturulmayacaktir. Guncel repoda `data` ve `locator` katmanlari buyume esigi asilmadigi icin tek dosyadir; `action` katmani `control`/`dropdown`/`form`/`table`/`uiAudit`, `assertion` katmani `control`/`dropdown`/`form`/`table` capability'lerine ve business domain dosyalarina ayrilmistir. `common` dosyalari yalniz gercek ortak primitive'leri ve dinamik deger motorunu tasir.
 
 ---
 
@@ -42,13 +42,14 @@ Bu projede temel katmanlar asagidaki gibidir:
 ```text
 Data      -> src/data/data.ts
 Locator   -> src/locators/locators.ts
-Action    -> src/actions/  (domain bazli: common/auth/navigation/... .actions.ts)
-Assertion -> src/assertions/  (domain bazli: common/auth/... .assertions.ts)
+Action    -> src/actions/  (common primitive + capability + business domain)
+Assertion -> src/assertions/  (common primitive + capability + business domain)
 Flow      -> src/flows
 Cucumber  -> features
 Step Def  -> features/step-definitions
 Support   -> features/support
-Config    -> src/config
+Config    -> src/config (environment + merkezi timeout)
+Quality   -> scripts, config, tests
 Feature   -> features/cases/smoke veya features/cases/regression
 ```
 
@@ -61,13 +62,15 @@ src/data/data.ts
 src/locators/locators.ts
   Tum reusable element locator tanimlarini tek dosyada tutar.
 
-src/actions/  (common.actions.ts, auth.actions.ts, navigation.actions.ts, ...)
-  Tekil ve reusable kullanici aksiyonlarini domain bazli dosyalarda tutar.
-  Paylasilan primitive'ler (click/fill) ve generic motor common.actions.ts'tedir.
+src/actions/
+  Paylasilan alt seviye primitive'leri ve dinamik deger motorunu common.actions.ts'te,
+  ortak UI davranislarini capability dosyalarinda, business davranislarini domain
+  dosyalarinda tutar.
 
-src/assertions/  (common.assertions.ts, auth.assertions.ts, ...)
-  Reusable dogrulama metotlarini domain bazli dosyalarda tutar.
-  Paylasilan primitive'ler (expectVisible/expectCount ...) ve generic dogrulamalar common.assertions.ts'tedir.
+src/assertions/
+  Paylasilan expect primitive'lerini common.assertions.ts'te, ortak UI
+  dogrulamalarini capability dosyalarinda, business expected result'larini domain
+  dosyalarinda tutar.
 
 src/flows
   Birden fazla action ve assertion iceren business akislarini tutar.
@@ -85,7 +88,10 @@ features/support
   Cucumber World, hook, login session ve Playwright browser/page lifecycle yapilarini tutar.
 
 src/config
-  Ortam ve environment ayarlarini tutar.
+  Ortam ayarlarini ve merkezi timeout sozlesmesini tutar.
+
+scripts, config, tests
+  Kalite kapilarini, Allure kosu/metadata yonetimini ve saf unit testleri tutar.
 
 ```
 
@@ -96,24 +102,46 @@ src/config
 ```text
 playwright-automation/
 |
+├── .github/workflows/cucumber.yml
+├── .mcp.json
+├── .nvmrc
+├── .prettierrc.json
 ├── AGENTS.md
 ├── cucumber.js
+├── eslint.config.js
 ├── package.json
 ├── tsconfig.json
+├── config/
+│   └── gherkin-policy-baseline.json
+├── scripts/
+│   ├── check-gherkin-policy.js
+│   ├── run-allure-report.js
+│   ├── run-cucumber-dry.js
+│   └── lib/
+│       ├── allure-metadata.js
+│       └── gherkin-policy.js
+├── tests/
+│   └── unit/
+│       └── *.test.js
 |
 ├── features/
 │   ├── cases/
 │   │   ├── smoke/
 │   │   │   └── TC_001_login.feature
 │   │   └── regression/
-│   │       └── YTKP-1009.feature
+│   │       ├── TC-001_adres_sablonu.feature
+│   │       ├── YTKP-1009.feature
+│   │       └── YTKP-deneme.feature
 │   │
 │   ├── step-definitions/
-│   │   └── auth.steps.ts
+│   │   └── *.steps.ts
 │   │
 │   └── support/
-│       ├── world.ts
-│       └── hooks.ts
+│       ├── action-reporting.ts
+│       ├── grouped-test-result-formatter.js
+│       ├── hooks.ts
+│       ├── scenario-store.ts
+│       └── world.ts
 |
 └── src/
     ├── data/
@@ -122,24 +150,42 @@ playwright-automation/
     ├── locators/
     │   └── locators.ts
     │
-    ├── actions/                    # Domain bazli (esik asildi, bolundu)
-    │   ├── common.actions.ts       # Paylasilan click/fill + generic motor
+    ├── actions/                    # Common primitive + capability + domain
+    │   ├── common.actions.ts       # Paylasilan primitive + dinamik deger motoru
+    │   ├── control.actions.ts
+    │   ├── dropdown.actions.ts
+    │   ├── form.actions.ts
+    │   ├── table.actions.ts
+    │   ├── uiAudit.actions.ts
     │   ├── auth.actions.ts
     │   ├── navigation.actions.ts
     │   └── automaticParameters.actions.ts
     │
-    ├── assertions/                 # Domain bazli (esik asildi, bolundu)
-    │   ├── common.assertions.ts    # Paylasilan expect* + generic dropdown/text
+    ├── assertions/                 # Common primitive + capability + domain
+    │   ├── common.assertions.ts    # Paylasilan expect* primitive + generic text
+    │   ├── control.assertions.ts
+    │   ├── dropdown.assertions.ts
+    │   ├── form.assertions.ts
+    │   ├── table.assertions.ts
+    │   ├── addressTemplates.assertions.ts
     │   ├── auth.assertions.ts
-    │   └── automaticParameters.assertions.ts
+    │   ├── automaticParameters.assertions.ts
+    │   ├── identityTemplates.assertions.ts
+    │   └── navigation.assertions.ts
     │
     ├── flows/
     │   └── auth.flow.ts
     │
     ├── config/
-    │   └── env.ts
+    │   ├── env.ts
+    │   └── timeouts.ts
     │
-    └── utils/              # Sadece gercek ortak helper ihtiyaci olursa eklenir
+    └── utils/
+        ├── action-report.ts
+        ├── best-effort.ts
+        ├── console-format.ts
+        ├── regex.ts
+        └── table.ts
 ```
 
 `components/` klasoru baslangicta kullanilmayacaktir. Modal, ortak component veya tekrar eden kompleks UI yapilari ortaya cikarsa daha sonra eklenebilir.
@@ -194,7 +240,7 @@ pages/
   AccountPage.ts
 ```
 
-Bu projede baslangic icin domain bazli data, action, assertion ve locator dosyalari da olusturulmayacaktir.
+Projenin ilk kurulumunda domain bazli data, action, assertion ve locator dosyalari olusturulmamistir. Bu, tarihsel baslangic modelidir; guncel `action`/`assertion` ayrimi icin Bolum 5.1 esas alinir.
 
 Baslangicta yapilmayacak ornek:
 
@@ -279,11 +325,12 @@ Gecis kurallari:
 
 Guncel durum (bu repo):
 
-- `actions` ve `assertions` katmanlari buyume esigini (200-300 satir) astigi icin domain bazli dosyalara BOLUNMUSTUR. Gecerli yapi:
-  - `src/actions/`: `common.actions.ts` (paylasilan `click`/`fill` + generic motor: `readElementText`/`readElementAttribute`/`fillElement`/`clickByText` + `clickCreateLink`), `auth.actions.ts`, `navigation.actions.ts`, `automaticParameters.actions.ts`
-  - `src/assertions/`: `common.assertions.ts` (paylasilan `expectVisible`/`expectCount`/... primitive'leri + generic `expectListboxOptionsVisible`/`expectTextPresent`), `auth.assertions.ts`, `automaticParameters.assertions.ts`
+- `actions` ve `assertions` katmanlari buyume esigini (200-300 satir) astigi icin domain ve capability bazli dosyalara BOLUNMUSTUR. Gecerli yapi:
+  - `src/actions/`: `common.actions.ts` (paylasilan `click`/`fill` + dinamik deger motoru), capability dosyalari (`control`/`dropdown`/`form`/`table`/`uiAudit`), `auth.actions.ts`, `navigation.actions.ts`, `automaticParameters.actions.ts`
+  - `src/assertions/`: `common.assertions.ts` (paylasilan `expectVisible`/`expectCount`/... primitive'leri + generic text), capability dosyalari (`control`/`dropdown`/`form`/`table`), `auth.assertions.ts`, `automaticParameters.assertions.ts`
 - `src/data/data.ts` ve `src/locators/locators.ts` hala TEK dosyadir (esik asilmadi); buyuyunce ayni strateji ile bolunur.
-- Yeni action/assertion eklerken: dogru domain dosyasina ekle; paylasilan bir primitive gerekiyorsa `common.actions`/`common.assertions`'tan import et; uygun domain dosyasi yoksa yeni bir `<domain>.actions.ts` / `<domain>.assertions.ts` ac. Tek bir `actions.ts` / `assertions.ts` dosyasina GERI DONME.
+- Yeni ortak UI action/assertion eklerken once mevcut capability dosyasini kullan: `control`, `dropdown`, `form`, `table` veya `uiAudit`. Business'e ozel davranis ilgili domain dosyasinda kalir. Yalniz en alt seviye ortak primitive veya dinamik deger motoru `common.actions` / `common.assertions` icine eklenir.
+- Yeni capability veya domain dosyasi ancak gercek tekrar ya da buyume esigi varsa acilir. Tek bir `actions.ts` / `assertions.ts` dosyasina veya buyumus `common` dosyalarina GERI DONME.
 
 ---
 
@@ -291,7 +338,7 @@ Guncel durum (bu repo):
 
 Bu projede farkli branch ve farkli PC'lerde calisan kisilerin ayni otomasyon dilini kullanmasi hedeflenir. Codex veya gelistirici yeni test uretirken once mevcut sozlugu ve reusable parcalari aramalidir.
 
-Reuse aramasinin hizli yolu `INVENTORY.md` dosyasidir. Bu dosya otomatik uretilir (`npm run inventory`) ve mevcut tum step / locator / action / flow sozlugunu tek yerde listeler. Yeni test yazmadan once once bu dosya okunmali, ardindan gerekiyorsa `rg` ile derinlemesine arama yapilmalidir:
+Reuse aramasinin hizli yolu `INVENTORY.md` dosyasidir. Bu dosya otomatik uretilir (`npm run inventory`) ve mevcut tum step / locator / action / assertion / flow sozlugunu tek yerde listeler. Yeni test yazmadan once once bu dosya okunmali, ardindan gerekiyorsa `rg` ile derinlemesine arama yapilmalidir:
 
 ```powershell
 rg "Oluştur|Kaydet|Sil|Ara|Temizle|Vazgeç|Onayla|Geri" src features
@@ -299,14 +346,16 @@ rg "step metni veya beklenen ekran basligi" features src
 rg "locator adi veya UI metni" src/locators src/actions src/assertions src/flows features/step-definitions
 ```
 
-Reuse kurallari mekanik kapilarla da korunur. `npm run check` (typecheck + `inventory:check`) su durumlarda hata verir ve test gecmez:
+Reuse kurallari mekanik kapilarla da korunur. `npm run check`; typecheck, ESLint, Prettier, unit test, Gherkin policy, Cucumber dry-run ve `inventory:check` kapilarini birlikte calistirir. Asagidaki reuse ihlallerinde de hata verir:
 
 - Ayni selector (locator value) iki farkli locator isminde tanimliysa.
 - `LOCATOR_REPORTS` icindeki `name`, kendi `grup.key` yolu ile uyusmuyorsa.
 - Normalize edildiginde (kucuk harf, noktalama, bosluk) ayni metne dusen iki step tanimi varsa.
-- `INVENTORY.md` guncel degilse (locator/step ekleyip `npm run inventory` calistirilmamissa).
+- `INVENTORY.md` guncel degilse (step/locator/action/assertion/flow ekleyip `npm run inventory` calistirilmamissa).
 
-Yeni locator/step ekledikten sonra `npm run inventory` calistirilip uretilen `INVENTORY.md` commit edilmelidir.
+`npm run check` statik ve dry-run kalite kapisidir; canli browser senaryosunun yerine gecmez. Kapidan sonra ilgili scenario/feature gercek ortamda ayrica calistirilmalidir.
+
+Yeni locator/step/action/assertion/flow ekledikten sonra `npm run inventory` calistirilip uretilen `INVENTORY.md` commit edilmelidir.
 
 Reuse karari su sirayla verilmelidir:
 
@@ -662,7 +711,7 @@ Kurallar:
 
 ## 8. Action Yazim Kurallari
 
-Action metotlari `src/actions/` altinda domain bazli dosyalarda tutulmalidir (`common.actions.ts`, `auth.actions.ts`, `navigation.actions.ts`, ...). Paylasilan primitive'ler (`click`/`fill`) ve generic motor `common.actions.ts`'tedir; yeni domain dosyasi bunlari oradan import eder. (Bkz. 5.1 Guncel durum.)
+Action metotlari `src/actions/` altinda ortak primitive, capability ve business domain sorumluluklarina gore tutulmalidir. `common.actions.ts` paylasilan `click`/`fill` primitive'lerini ve dinamik deger motorunu; `control`/`dropdown`/`form`/`table`/`uiAudit` dosyalari ortak UI capability'lerini; `auth`/`navigation` gibi dosyalar business davranislarini tasir. (Bkz. 5.1 Guncel durum.)
 
 Action, tekil ve reusable kullanici islemini temsil eder.
 
@@ -671,24 +720,25 @@ Ornek:
 ```ts
 // src/actions/auth.actions.ts
 import { Page } from '@playwright/test';
-import { locators } from '../locators/locators';
+import { LOCATOR_REPORTS, locators } from '../locators/locators';
+import { click, fill } from './common.actions';
 
 export async function fillLoginUsername(page: Page, username: string) {
   const locator = locators(page);
 
-  await locator.auth.usernameInput.fill(username);
+  await fill(locator.auth.usernameInput, LOCATOR_REPORTS.auth.usernameInput, username);
 }
 
 export async function fillLoginPassword(page: Page, password: string) {
   const locator = locators(page);
 
-  await locator.auth.passwordInput.fill(password);
+  await fill(locator.auth.passwordInput, LOCATOR_REPORTS.auth.passwordInput, password, true);
 }
 
 export async function clickLoginButton(page: Page) {
   const locator = locators(page);
 
-  await locator.auth.loginButton.click();
+  await click(locator.auth.loginButton, LOCATOR_REPORTS.auth.loginButton);
 }
 ```
 
@@ -706,6 +756,7 @@ Kurallar:
 - Reusable action wrapper yazilirken Playwright cagrisi (click, fill vb.) try-catch icine alinmalidir; hata durumunda `reportError` ile Action adi ve Locator Name console ve Cucumber raporuna yazilmali, hata yeniden fırlatilmalidir (`throw error`).
 - Sifre, token, gizli cevap gibi hassas degerler rapora acik yazilmamalidir; maskelenmelidir.
 - Raporlama/loglama bu projede her reusable wrapper'in VARSAYILAN davranisidir. Bu yuzden fonksiyon ismine `WithReport`, `WithLog`, `Reported` gibi son ek EKLENMEZ. Isim fonksiyonun ne yaptigini soyler, raporladigini degil: `click`, `fill`, `selectOption` (`clickWithReport`, `fillWithReport` degil). Ayni mantik assertion wrapper'lari icin de gecerlidir: `expectVisible`, `expectCount` (`expectVisibleWithReport` degil).
+- Bekleme yapan reusable action, varsayilan timeout'i `resolveUiTimeout` ile merkezi sozlesmeden alir. Ozel sure gerektiren capability/composite fonksiyonlari trailing `{ timeout }` kabul eder ve ayni override'i tum alt cagrilara iletir.
 
 Ortak reusable action isimleri bu mantikta tutulabilir:
 
@@ -727,31 +778,40 @@ export async function click(locator: Locator) {
 
 ## 9. Assertion Yazim Kurallari
 
-Assertion metotlari `src/assertions/` altinda domain bazli dosyalarda tutulmalidir (`common.assertions.ts`, `auth.assertions.ts`, ...). Paylasilan primitive'ler (`expectVisible`/`expectCount` ...) `common.assertions.ts`'tedir; yeni domain dosyasi bunlari oradan import eder. (Bkz. 5.1 Guncel durum.)
+Assertion metotlari `src/assertions/` altinda ortak primitive, capability ve business domain sorumluluklarina gore tutulmalidir. `common.assertions.ts` web-first expect primitive'lerini ve generic text kontrolunu; `control`/`dropdown`/`form`/`table` dosyalari ortak UI capability'lerini; `auth` ve diger domain dosyalari business expected result'larini tasir. (Bkz. 5.1 Guncel durum.)
 
 Assertion, reusable dogrulama metodunu temsil eder.
 
-Ornek:
+Guncel public akisin ozeti (`expectStableHealthyLoginLanding` private helper'inin tam implementation'i icin mevcut dosya referanstir):
 
 ```ts
 // src/assertions/auth.assertions.ts
-import { Page, expect } from '@playwright/test';
-import { locators } from '../locators/locators';
+import { Page } from '@playwright/test';
+import { LOCATOR_REPORTS, locators } from '../locators/locators';
+import { expectNotVisible, expectUrl, expectVisible } from './common.assertions';
+
+export async function expectAuthenticationSuccess(page: Page) {
+  const locator = locators(page);
+
+  await expectUrl(page, /shell-app-ui\/#\/journal-audits/);
+  await expectNotVisible(locator.auth.usernameInput, LOCATOR_REPORTS.auth.usernameInput);
+  await expectVisible(locator.auth.userProfileButton, LOCATOR_REPORTS.auth.userProfileButton);
+}
 
 export async function expectLoginSuccess(page: Page) {
   const locator = locators(page);
 
-  await expect(page).toHaveURL(/shell-app-ui\/#\/journal-audits/);
-  await expect(locator.auth.usernameInput).not.toBeVisible();
-  await expect(locator.auth.userProfileButton).toBeVisible();
+  await expectAuthenticationSuccess(page);
+  await expectStableHealthyLoginLanding(page);
+  await expectVisible(locator.auth.userProfileButton, LOCATOR_REPORTS.auth.userProfileButton);
 }
 
 export async function expectLoginPageVisible(page: Page) {
   const locator = locators(page);
 
-  await expect(locator.auth.usernameInput).toBeVisible();
-  await expect(locator.auth.passwordInput).toBeVisible();
-  await expect(locator.auth.loginButton).toBeVisible();
+  await expectVisible(locator.auth.usernameInput, LOCATOR_REPORTS.auth.usernameInput);
+  await expectVisible(locator.auth.passwordInput, LOCATOR_REPORTS.auth.passwordInput);
+  await expectVisible(locator.auth.loginButton, LOCATOR_REPORTS.auth.loginButton);
 }
 ```
 
@@ -767,13 +827,16 @@ Kurallar:
 - Assertion raporu expect'ten once yazilmalidir; boylece fail durumunda da hangi locator ve beklenen sonuc oldugu raporda gorunur.
 - Business expected result netse assertion ona gore yazilmalidir.
 - Sadece gorunurluk degil, mumkunse URL, text, count, state veya business sonuc dogrulanmalidir.
+- Login success sadece URL/profil gorunurluguyle kanitlanmaz. `expectStableHealthyLoginLanding`, gercek UI'da dogrulanmis exact `HTTP Request Error` / `invalid_resource` fatal hata indikatorunu `TIMEOUTS.loginLandingStability` penceresi boyunca izler; indikator gorunurse test fail olur. Tek anlik `not.toBeVisible()` gecikmeli bozuk landing'i yakalamadigi icin login oracle olarak kullanilmaz.
+- Regression/setup `login()` akisi, hedef ekrana ilerleyebilmek icin yalniz `expectAuthenticationSuccess` teknik on kosulunu kullanir. Acik login smoke senaryosu `verifyLoginSuccess()` -> `expectLoginSuccess()` ile tam landing saglik oracle'ini calistirir; setup kontrolu smoke expected result yerine kullanilmaz.
+- Oracle eklenirken yapilan 2026-08-05 canli dogrulamasinda ortam bozuk landing gosterdigi icin saglikli ekrana ait yeni pozitif ready locator'i dogrulanamamistir. Gercek UI kaniti olmadan pozitif locator uydurulmaz; uygulama duzeldiginde dogrulanmis bir ready indikatoru bulunursa oracle bilincli olarak guclendirilebilir.
 
 Iyi assertion ornekleri:
 
 ```ts
-await expect(page).toHaveURL(/shell-app-ui\/#\/journal-audits/);
-await expect(locator.auth.userProfileButton).toBeVisible();
-await expect(locator.auth.usernameInput).not.toBeVisible();
+await expectUrl(page, /shell-app-ui\/#\/journal-audits/);
+await expectVisible(locator.auth.userProfileButton, LOCATOR_REPORTS.auth.userProfileButton);
+await expectNotVisible(locator.auth.usernameInput, LOCATOR_REPORTS.auth.usernameInput);
 ```
 
 Kacinilacak ornek:
@@ -797,7 +860,7 @@ verilen ortak step kullanilir:
 ```
 
 Step       -> `features/step-definitions/common.steps.ts`
-Action     -> `src/actions/common.actions.ts -> openDropdown(page, dropdownName)`
+Action     -> `src/actions/dropdown.actions.ts -> openDropdown(page, dropdownName)`
 Locator    -> `src/locators/locators.ts -> common.dropdownCombobox(dropdownName)`
 
 Bir dropdown / listbox icinde "su secenekler listelenmis mi" dogrulamasi icin sayfa-ozel assertion ve sayfa-ozel step YAZILMAZ. Bu, navigation step (`{string} menü yolundan sayfaya gidilir`) ve save/use step (12.1) ile ayni felsefededir: mekanizma ortak, beklenen veri parametre olarak gelir.
@@ -814,7 +877,7 @@ Kullanilacak generic yapi:
 ```text
 Step       -> features/step-definitions/common.steps.ts
               "{string} dropdown listesinde aşağıdaki seçenekler listelenir" + Data Table
-Assertion  -> src/assertions/common.assertions.ts -> expectListboxOptionsVisible(page, listName, expectedTexts)
+Assertion  -> src/assertions/dropdown.assertions.ts -> expectListboxOptionsVisible(page, listName, expectedTexts)
 Locator    -> src/locators/locators.ts -> common.optionInListbox(listboxId, name)
 ```
 
@@ -828,9 +891,18 @@ Feature kullanimi:
   | GENEL MÜDÜRLÜK |
 ```
 
+Secili deger dogrulamasi da generic yapidir:
+
+```text
+Step       -> features/step-definitions/common.steps.ts
+              "{string} dropdownında {string} değeri seçili olduğu doğrulanır"
+Assertion  -> src/assertions/dropdown.assertions.ts -> expectDropdownFieldSelectedValue(...)
+```
+
 Kurallar:
 
 - Once ilgili dropdown'i acan step cagrilir; ardindan generic dogrulama step'i kullanilir.
+- Secili dropdown degeri gorunmez karakterler/bosluklar normalize edildikten sonra TAM ESITLIK ile dogrulanir; substring (`contains`) bir basari olcutu olarak kullanilmaz.
 - `"{string}"` listenin adidir (Tür, Tür 2, ...) ve listeyi DARALTMAK icin kullanilir. Assertion acik listbox'lar arasindan adi listName olani secer: MUI'de acik listbox'in `aria-labelledby`'i ilgili alanin label'ina isaret eder (orn. Tür listesi -> "Tür" label'i; gercek sayfada dogrulandi). Secenekler SADECE o listbox icinde aranir. Boylece "Tür" dendiginde fiziksel olarak Tür listesine bakilir; ekranda baska bir liste acik kalsa bile dogru olan ada gore secilir, yanlis listeden eslesme olmaz. Label metni "Tür *" gibi zorunlu yildizi icerebilir; normalize edilip (yildiz cikarilip trim) tam esleslenir, boylece "Tür" istenince "Tür 2" secilmez.
 - Bu generic step "verilen secenekler gorunur" dogrulamasi yapar (count/"tam olarak bunlar" degil). "Tam N adet ve format" gibi daha guclu dogrulama gerekiyorsa (orn. İşlem Kodu kod+aciklama formati) ayri, amaca ozel assertion yazilir; generic step bununla degistirilmez.
 - Yeni dropdown geldiginde kod yazilmaz; sadece feature'a yeni Data Table eklenir.
@@ -854,7 +926,11 @@ import {
   fillLoginPassword,
   fillLoginUsername,
 } from '../actions/auth.actions';
-import { expectLoginPageVisible, expectLoginSuccess } from '../assertions/auth.assertions';
+import {
+  expectAuthenticationSuccess,
+  expectLoginPageVisible,
+  expectLoginSuccess,
+} from '../assertions/auth.assertions';
 import { env } from '../config/env';
 import { TestUser } from '../data/data';
 
@@ -877,7 +953,7 @@ export async function verifyLoginSuccess(page: Page) {
 export async function login(page: Page, user: TestUser) {
   await openLoginPage(page);
   await submitLogin(page, user);
-  await verifyLoginSuccess(page);
+  await expectAuthenticationSuccess(page);
 }
 ```
 
@@ -956,25 +1032,42 @@ export class CustomWorld extends World {
 setWorldConstructor(CustomWorld);
 ```
 
-Hook ornegi:
+Hook lifecycle deseni (browser secimi ve `Before` kurulumu icin tam referans mevcut `hooks.ts` dosyasidir):
 
 ```ts
 // features/support/hooks.ts
-import { Before, After } from '@cucumber/cucumber';
-import { chromium } from '@playwright/test';
+import { After, Status, setDefaultTimeout } from '@cucumber/cucumber';
+import { TIMEOUTS } from '../../src/config/timeouts';
+import { runBestEffort, SecondaryFailure } from '../../src/utils/best-effort';
 import { CustomWorld } from './world';
 
-Before(async function (this: CustomWorld) {
-  this.browser = await chromium.launch();
-  this.context = await this.browser.newContext({ ignoreHTTPSErrors: true });
-  this.page = await this.context.newPage();
-});
+setDefaultTimeout(TIMEOUTS.cucumberStep);
 
-After(async function (this: CustomWorld) {
-  await this.context?.close();
-  await this.browser?.close();
+After(async function (this: CustomWorld, scenario) {
+  const secondaryFailures: SecondaryFailure[] = [];
+  const attempt = async (operation: string, callback: () => unknown | Promise<unknown>) => {
+    const failure = await runBestEffort(operation, callback);
+    if (failure) secondaryFailures.push(failure);
+    return failure;
+  };
+
+  try {
+    // Failed senaryoda screenshot ve attachment ayri best-effort adimlaridir.
+  } finally {
+    if (this.context) await attempt('Close context', () => this.context?.close());
+    if (this.browser) await attempt('Close browser', () => this.browser?.close());
+    this.page = undefined;
+    this.context = undefined;
+    this.browser = undefined;
+  }
+
+  if (scenario.result?.status === Status.PASSED && secondaryFailures.length > 0) {
+    throw new AggregateError(secondaryFailures.map(({ error }) => error));
+  }
 });
 ```
+
+`Before` hook, browser'i world parameter / `BROWSER` / varsayilan Chromium sirasi ile cozer ve page default/navigation timeout'larini `TIMEOUTS.uiOperation` olarak ayarlar. Yukaridaki kod lifecycle desenini gosterir; calisan browser secimi, screenshot ve attachment detaylari icin tek referans `features/support/hooks.ts` dosyasidir.
 
 Kurallar:
 
@@ -983,7 +1076,10 @@ Kurallar:
 - Cucumber World gereksiz data deposuna donusturulmemelidir.
 - Test data icin yine `src/data/data.ts` kullanilmalidir.
 - Statik test datasi World'e konmaz; ancak test sirasinda yakalanan runtime degerler (orn. secilen dropdown) `CustomWorld.store` (ScenarioStore) ile isimle saklanir. Bkz. 12.1.
-- Browser secimi script, world parameter veya environment variable ile yonetilebilir.
+- Browser secimi world parameter, `BROWSER` environment variable veya varsayilan `chromium` ile yonetilir; metadata da ayni kaynaktan cozulur.
+- Screenshot ve attachment hatalari cleanup'i engellemez; context ve browser birbirinden bagimsiz best-effort adimlariyla kapatilir.
+- Senaryo zaten basarisizsa raporlama/cleanup gibi secondary failure asli step hatasini maskelemez. Senaryo basariliysa gercek teardown failure `AggregateError` ile testi basarisiz yapar.
+- Action report attachment'i diagnostiktir; attachment hatasi callback/step'in asli sonucunun yerine gecmez.
 
 ---
 
@@ -1054,7 +1150,7 @@ Ornek (gelecekteki kullanim):
 
 ---
 
-## 12. Cucumber Login Session Kurallari
+## 12.2 Cucumber Login Session Kurallari
 
 Eger testlerin buyuk bolumu login gerektiriyorsa her testte tekrar login yapmak yerine storage state kullanilmalidir.
 
@@ -1070,7 +1166,7 @@ import {
   fillLoginPassword,
   fillLoginUsername,
 } from '../../src/actions/auth.actions';
-import { expectLoginSuccess } from '../../src/assertions/auth.assertions';
+import { expectAuthenticationSuccess } from '../../src/assertions/auth.assertions';
 import { env } from '../../src/config/env';
 import { CustomWorld } from './world';
 
@@ -1086,7 +1182,7 @@ Before({ tags: '@authState' }, async function (this: CustomWorld) {
   await fillLoginPassword(this.page, user.password);
   await clickLoginButton(this.page);
 
-  await expectLoginSuccess(this.page);
+  await expectAuthenticationSuccess(this.page);
 
   await this.context.storageState({ path: '.auth/user.json' });
 });
@@ -1096,6 +1192,7 @@ Kurallar:
 
 - Login cok fazla testte gerekiyorsa `storageState` kullanilmalidir.
 - Login testleri ayrica yazilmalidir.
+- Regression on kosulu icin uretilen storage state, acik login smoke oracle'inin yerine gecmez; login smoke yine `expectLoginSuccess` ile landing sagligini kanitlar.
 - Login olmayan senaryolar icin storage state kullanilmamalidir.
 - Storage state ihtiyaci Cucumber hook'lari ile yonetilmelidir; Playwright Test on hazirlik dosyasi olusturulmayacaktir.
 - `.auth/user.json` gibi session dosyalari git'e commit edilmemelidir.
@@ -1107,6 +1204,7 @@ Kurallar:
 
 Ortam bilgileri `src/config/env.ts` uzerinden yonetilmelidir.
 Uygulama URL'i sadece `BASE_URL` environment variable uzerinden yonetilmelidir.
+Timeout varsayilanlari `src/config/timeouts.ts` uzerinden tek kaynaktan yonetilmelidir.
 
 Ornek:
 
@@ -1138,6 +1236,8 @@ Kurallar:
 - `page.goto('/')` gibi baseURL uyumlu kullanim tercih edilmelidir.
 - Ortama gore degisen data veya URL environment variable ile yonetilmelidir.
 - `dotenv/config` import'u sadece `features/support/hooks.ts` ve `src/config/env.ts` icinde bulunmalidir. `src/data/data.ts` gibi diger dosyalar dotenv import etmemelidir; env yuklemesi entry point tarafindan zaten yapilmis olur.
+- `TIMEOUTS.cucumberStep`, `TIMEOUTS.uiOperation` ve `TIMEOUTS.loginLandingStability` anahtarlarinin degerleri yalniz `src/config/timeouts.ts` icinde tutulur; sayisal degerler dokumanlara veya domain dosyalarina ikinci kaynak olarak kopyalanmaz.
+- Runtime override `TimeoutOptions` ve `resolveUiTimeout` uzerinden pozitif/finite olarak dogrulanir; reusable capability/composite fonksiyonlari override'i alt cagrilara iletir.
 
 ---
 
@@ -1173,14 +1273,17 @@ Feature: Authentication login
 
 Kurallar:
 
-- Feature dosyasi manuel test case ID ile baslayan scenario icermelidir.
-- Tag'ler feature veya scenario seviyesinde yazilmalidir.
+- Her scenario adi, yetkili manuel kaynakta bulunan test case ID ile baslamalidir; ID tahmin edilmez veya uydurulmaz.
+- Her scenario feature seviyesinden en az bir tag miras almali veya scenario seviyesinde tag tanimlamalidir.
+- `features/cases/smoke` altindaki her scenario `@smoke`, `features/cases/regression` altindaki her scenario `@regression` tag'ini miras almali veya tanimlamalidir.
 - Feature dosyasinda locator, selector veya teknik Playwright detayi olmamalidir.
 - Feature dosyasi business senaryo gibi okunmalidir.
 - Beklenen sonuclar business anlamli `*` adimlari ile ifade edilmelidir.
 - Step implementation `features/step-definitions` altinda olmalidir.
 - Step definition icinden action/assertion dogrudan karistirilmak yerine mumkunse `src/flows` fonksiyonlari cagrilmalidir.
 - Test data mumkunse `src/data/data.ts` icinden gelmelidir.
+- `npm run gherkin:check`; feature lokasyonu, en az bir scenario, authoritative scenario ID, tag/category tag ve yalniz `*` step keyword kurallarini mekanik olarak uygular.
+- `config/gherkin-policy-baseline.json` yalniz yetkili ID'si henuz bulunamayan belgelenmis legacy senaryolar icindir. Yeni bir testin ihlalini gizlemek icin baseline genisletilmez; ID yoksa kodda test birakilmaz ve blokaj raporlanir. Legacy ihlal duzeldiginde stale baseline girdisi kaldirilir; stale girdi de kalite kapisini kirar.
 
 Ornek tag'ler:
 
@@ -1245,6 +1348,33 @@ Kurallar:
 - Playwright auto-wait ve web-first assertion mekanizmasi kullanilmalidir.
 - Gerekirse belirli state beklenmelidir.
 - Zorunlu olmadikca manuel bekleme yazilmamalidir.
+- Cucumber step ve UI operation timeout'lari `TIMEOUTS` sabitinden alinmalidir; domain dosyalarina `5_000`, `10_000`, `45_000` gibi farkli sabitler dagitilmamalidir.
+- Reusable action/assertion wrapper'lari varsayilan olarak merkezi UI timeout'ini kullanmali ve trailing `{ timeout }` override'ini alt cagrilara iletmelidir.
+- `live:check -- --timeout-ms <ms>` override'i navigation, heading, table, form ve control kontrollerinin tamaminda uygulanmalidir.
+- Navigation retry'lari timeout'i her denemede sifirlamamali; tek operation deadline butcesini paylasmalidir.
+
+---
+
+## 17.1 Allure ve Browser Metadata Kurallari
+
+- `npm test` ve `npm run test:*` komutlari `scripts/run-allure-report.js` uzerinden calisir. Varsayilan sonuc modu `current run (clean)`'dir: eski `allure-results` silinir ve `allure-report` her kosuda yeniden uretilir.
+- Sonuclar yalniz bilincli birlestirme icin acik `--append` ile korunur. `--append` ve `--clean` birlikte kullanilamaz. `npm run test:all`, Chromium kosusunu clean baslatir; basarili sonraki Firefox/WebKit komutlarini `--append` ile ekler.
+- `historyId` kosuya ozel/rastgele bir ID ile degistirilmez. Reporter'in temel test kimligi ile gercek browser adindan kararli, browser-specific history uretilir; `testCaseId` korunur.
+- Her yeni Allure result `Browser` parametresi tasir. Browser world parameters -> `BROWSER` -> `chromium` sirasi ile cozulur; Firefox/WebKit sonucu Chromium olarak hard-code edilmez. `environment.properties` birikmis result'lardaki gercek browser listesini sirali ve tekil yazar.
+- Cucumber sonucu basarisiz olsa bile uretilen result varsa rapor olusturulmaya calisilir; process exit code asli Cucumber basarisizligini korur.
+- Dogrudan `cucumber-js` cagirmak clean/append ve metadata post-processing wrapper'ini bypass edebilir. Raporlu kosular icin proje `npm` scriptleri tercih edilir.
+
+---
+
+## 17.2 Toolchain, MCP ve CI Hijyeni
+
+- Proje paketi `private: true` kalir; olmayan bir entry point'e isaret eden `main` alani eklenmez.
+- Node/npm sozlesmesinin kaynaklari `.nvmrc`, `package.json#engines` ve `packageManager` alanlaridir. Guncel pin Node `24.15.0` / npm `11.12.1`'dir; local ve CI ayni kaynaklari kullanir.
+- Dependency kurulumu lockfile ile `npm ci` kullanir. Dependency degisikliginde `package-lock.json` birlikte guncellenir ve `npm audit` sonucu kontrol edilir.
+- Playwright MCP, exact devDependency ve lockfile'daki `@playwright/mcp` surumunden calisir. `.mcp.json`, local `node_modules/@playwright/mcp/cli.js` yolunu cagirir; runtime'da `npx` ile lockfile disi indirme yapilmaz.
+- CI `.nvmrc` ve `packageManager` pinlerini kullanir; `npm ci` -> `npm run check` -> gerekli browser kurulumu -> UI suite sirasini izler.
+- Mevcut CI yalniz Chromium suite'ini calistirdigi icin yalniz `playwright:install:chromium` kurar. Firefox/WebKit ancak gercek bir CI job/matrix kosusu eklendiginde kurulmalidir.
+- `BASE_URL`, kullanici credential'lari, ortam/network/VPN ve sertifika erisimi CI dis konfigurasidir; kalite kapisinin yesil olmasi canli UI erisiminin hazir oldugunu kanitlamaz.
 
 ---
 
@@ -1255,26 +1385,28 @@ Codex yeni test uretirken asagidaki sirayi izlemelidir:
 ```text
 1. Manuel test case'i oku.
 2. Test case ID, title, steps ve expected result alanlarini analiz et.
-3. Mevcut step/locator/action/assertion/flow icin `rg` ile reuse aramasi yap.
+3. Once `INVENTORY.md`, sonra gerekirse `rg` ile mevcut step/locator/action/assertion/flow reuse'u ara.
 4. Mevcut dinamik/generic step varsa once onu kullan; yoksa sayfaya ozel step yazmadan once her yerde kullanilabilecek parametreli generic step tasarla.
 5. Action ve assertion'i ayir: click/fill/select step'i sadece aksiyonu yapsin, sonuc dogrulamasi ayri assertion step'i olsun.
 6. Ilgili mevcut flow var mi kontrol et.
 7. Ilgili flow varsa onu kullan.
-8. Flow yoksa src/data/data.ts, src/actions/ (domain dosyalari), src/assertions/ (domain dosyalari) ve src/locators/locators.ts yapisini kontrol et.
+8. Flow yoksa src/data/data.ts, src/actions/ (common/capability/domain), src/assertions/ (common/capability/domain) ve src/locators/locators.ts yapisini kontrol et.
+8b. Login regression on kosulunda mevcut `login()` akisini kullan; acik login smoke expected result'inda `verifyLoginSuccess()` ile gecikmeli fatal landing oracle'ini mutlaka calistir. URL/profil kontrolunu tek basina smoke basarisi sayma.
 9. Sidebar navigasyon ihtiyaci varsa `features/step-definitions/navigation.steps.ts` icindeki genel step'i kullan: `"UstMenu > AltMenu > SayfaAdi" menü yolundan sayfaya gidilir`. Ayri navigasyon step yazma.
 9b. Diger ortak UI ihtiyaci varsa once `common` veya `navigation` gruplarini kullan. Ornek: `Oluştur butonuna tıklanır`, `"{string} başlığı görüldüğü doğrulanır"`, `Tabloda aşağıdaki kolon başlıkları listelenir`, `Sayfada aşağıdaki input alanları görüntülenir`.
 9c. Bir degeri kaydedip baska adimda kullanacaksan (12.1) hazir generic fonksiyonlari kullan (`readElementText`/`readElementAttribute`/`fillElement`/`clickByText`/`expectTextPresent`); degeri `this.saveValue`/`this.getValue` ile sakla/oku (rapora SAVE/USE duser), `data.ts`'e veya feature'a hard-code etme. Dinamik dropdown secimi + arama gibi akislar icin kaynak alan ve hedef baglam parametreli kalibi tercih et: `"{Dropdown Adi}" dropdown'ından rastgele bir seçenek seçilir ve "{degerAnahtari}" olarak kaydedilir` -> `"{degerAnahtari}" olarak kaydedilen değer "{Hedef Tablo/Liste/Alan}" ile kayıt aranır`.
-9d. Dropdown'dan belirli bir secenek sececeksen generic step'i kullan: `"{Dropdown Adi}" dropdownından "{Secenek}" seçilir`. Sayfa-ozel `İşlem Kodu olarak {string} seçilir` gibi step yazma.
+9d. Dropdown'dan belirli bir secenek sececeksen generic step'i kullan: `"{Dropdown Adi}" dropdownından "{Secenek}" seçilir`. Secili deger dogrulamasinda normalize edilmis tam esitlik kullan; substring basarisini kabul etme. Sayfa-ozel `İşlem Kodu olarak {string} seçilir` gibi step yazma.
 9e. Bir dropdown/listbox secenek listesini dogrulayacaksan (9.1) generic step'i kullan: `"{Dropdown Adi}" dropdown listesinde aşağıdaki seçenekler listelenir` + Data Table. Sayfa-ozel `expectXOptionsVisible` veya sayfa-ozel step yazma; beklenen listeyi koda gomme.
-10. Eksik reusable parca varsa dogru yere kucuk ve temiz ekleme yap: actions/assertions icin ilgili domain dosyasina (yoksa yeni domain dosyasi ac, paylasilan primitive'leri common'dan import et); data/locators icin tek dosyaya.
+10. Eksik reusable parca varsa dogru yere kucuk ve temiz ekleme yap: ortak UI davranisini mevcut capability dosyasina, business davranisini ilgili domain dosyasina, yalniz alt seviye primitive/dinamik motoru common'a; data/locators icin tek dosyaya.
 11. Tek dosya kalan bir katman (data/locators) buyume esigini asiyorsa, sadece o katmani domain bazli dosyalara ayir (POM'a donme).
 12. Feature dosyasini test tipine gore `features/cases/smoke` veya `features/cases/regression` altinda business seviyesinde olustur.
-13. Eksik Gherkin step karsiliklarini `features/step-definitions` icinde olustur.
-14. Step definition icinden mumkunse `src/flows` fonksiyonlarini cagir.
-15. Testi calistir.
-16. Hata varsa minimum degisiklikle duzelt.
-17. Hayali locator, dogrulanmamis assertion veya TODO birakma.
-18. Zorunlu bir parca dogrulanamiyorsa o promptta yaptigin test degisikliklerini geri al ve engeli raporla.
+13. Scenario adinda authoritative manuel ID ve klasorle uyumlu category tag kullan; ID yoksa uydurma veya yeni baseline girdisiyle gizleme.
+14. Eksik Gherkin step karsiliklarini `features/step-definitions` icinde olustur; step definition icinden mumkunse `src/flows` fonksiyonlarini cagir.
+15. Yeni step/locator/action/assertion/flow eklendiyse `npm run inventory` calistir.
+16. `npm run check` ile tum statik/dry kalite kapisini calistir.
+17. Ilgili scenario/feature'i gercek browser ve ortamda calistir; check sonucunu canli test yerine sayma.
+18. Hata varsa minimum degisiklikle duzelt; hayali locator, dogrulanmamis assertion veya TODO birakma.
+19. Zorunlu bir parca dogrulanamiyorsa o promptta yaptigin test degisikliklerini geri al ve engeli raporla.
 ```
 
 Codex sunlari yapmamalidir:
@@ -1290,8 +1422,13 @@ Codex sunlari yapmamalidir:
 - Mevcut dinamik/generic step varken sayfaya ozel paket step uretme.
 - Bir action step'ine sayfaya ozel assertion gomerek onu sadece tek ekrana baglama.
 - Ortak UI elemanini sayfa sayfa yeniden tanimlama.
+- Ortak capability davranisini business domain dosyalarina kopyalama veya buyumus `common` dosyalarina geri toplama.
 - Sidebar navigasyon icin sayfa bazli ozel step yazma; genel `{string} menü yolundan sayfaya gidilir` step'ini kullan.
 - Dropdown/listbox secenek dogrulamasi icin sayfa-ozel `expectXOptionsVisible` veya sayfa-ozel step yazma; generic `{string} dropdown listesinde aşağıdaki seçenekler listelenir` step'i + Data Table kullan (9.1). Beklenen listeyi koda gomme.
+- Secili dropdown degerini substring/`contains` ile basarili sayma; normalize edilmis tam esitlik kullan.
+- Login smoke testini yalniz URL/profil veya regression `login()` setup kontroluyle yesil gecirme; tam landing health oracle'ini calistir.
+- Yeni testte eksik authoritative ID'yi uydurma veya keyfi baseline girdisi ekleyerek Gherkin ihlalini gizleme.
+- Merkezi `TIMEOUTS` sozlesmesi disinda daginik timeout sabitleri veya her retry'da sifirlanan yeni deadline uretme.
 - waitForTimeout kullanma.
 - Hayali data, hayali locator veya hayali assertion yazma.
 - TODO, placeholder step, bos assertion veya gecici locator birakma.
@@ -1367,7 +1504,7 @@ Orchestration akisi:
    Session limit, auth veya CLI hatasi varsa orchestration baslamadan blokaj raporlar.
 3. Manuel test case'i analiz eder; mevcut step/locator/action/assertion/flow reuse arar.
 4. Login gerekiyorsa `npm run env:check -- --user <Kullanici>` ile env preflight yapar.
-5. Gerekli locator veya ekran davranisi varsa Playwright MCP ile gercek browser'da dogrular.
+5. Gerekli locator veya ekran davranisi varsa repoya pinlenmis local Playwright MCP ile gercek browser'da dogrular.
    MCP `.env` okuyamadigi veya login oturumu kuramadigi icin dogrulama yapilamiyorsa,
    mevcut framework locator/action/assertion'lariyla `npm run live:check -- ...` fallback'i
    kullanilabilir; bu da dogrulayamazsa Bolum 5.3'e gore blokaj raporlanir.
@@ -1377,9 +1514,10 @@ Orchestration akisi:
    Bu helper Claude'u `opus` + `xhigh` + `UltraCode` review akliyla cagirir.
 8. Claude ciktisinda `BLOCKER` varsa Codex once ek kanit toplar, plani duzeltir veya Bolum 5.3'e gore blokaj raporlar.
 9. Claude ciktisi sadece non-blocker/oneriler iceriyorsa Codex uygun olanlari uygular ve kodu yazar.
-10. Yeni step/locator/action/flow eklendiyse `npm run inventory` calistirilir.
-11. Sonunda `npm.cmd run check` ve ilgili scenario/feature calistirilir.
-12. Final cevapta Claude review sonucu, uygulanan karar, degisen dosyalar ve kontrol/test sonucu kisa raporlanir.
+10. Yeni scenario authoritative ID/tag/category kurallarina gore kontrol edilir; bilinmeyen ID uydurulmaz veya yeni baseline girdisiyle gizlenmez.
+11. Yeni step/locator/action/assertion/flow eklendiyse `npm run inventory` calistirilir.
+12. Sonunda `npm run check` (PowerShell execution-policy engelinde `npm.cmd run check`) ve ilgili canli scenario/feature calistirilir.
+13. Final cevapta Claude review sonucu, uygulanan karar, degisen dosyalar ve kontrol/test sonucu kisa raporlanir.
 ```
 
 Claude review baglami su formatta verilmelidir:
@@ -1483,6 +1621,8 @@ Yeni bir test veya kod uretildikten sonra asagidaki kontrol listesi uygulanmalid
 ```text
 [ ] Test adi TC ID ile basliyor mu?
 [ ] Test gerekli tag'leri iceriyor mu?
+[ ] TC ID authoritative manuel kaynaktan mi; eksik ID uydurulmamis veya yeni baseline girdisiyle gizlenmemis mi?
+[ ] Smoke/regression klasoru ile `@smoke`/`@regression` category tag'i uyumlu mu?
 [ ] Feature dosyasi test tipine gore `features/cases/smoke` veya `features/cases/regression` altinda mi?
 [ ] Scenario adi TC ID ile basliyor mu?
 [ ] Gherkin step'leri business dilinde mi?
@@ -1502,6 +1642,7 @@ Yeni bir test veya kod uretildikten sonra asagidaki kontrol listesi uygulanmalid
 [ ] Sidebar navigasyon icin sayfa bazli ozel step yazilmamis, `"{string} menü yolundan sayfaya gidilir"` step'i kullanilmis mi?
 [ ] Dropdown/listbox secenek dogrulamasi icin sayfa-ozel assertion/step yazilmamis, generic `"{string} dropdown listesinde aşağıdaki seçenekler listelenir"` step'i + Data Table kullanilmis mi (9.1)?
 [ ] Beklenen secenek listesi koda gomulmemis, feature Data Table'inda mi?
+[ ] Secili dropdown degeri normalize edilmis tam esitlikle mi dogrulaniyor; substring basarisi dislanmis mi?
 [ ] Ortak UI elemani `common`, ortak navigasyon elemani `navigation` grubunda mi?
 [ ] Sayfaya ozel locator yanlislikla common gruba alinmamis mi?
 [ ] Locator mevcut mimariye gore dogru locator dosyasinda mi?
@@ -1510,12 +1651,19 @@ Yeni bir test veya kod uretildikten sonra asagidaki kontrol listesi uygulanmalid
 [ ] Reusable action mevcut mimariye gore dogru action dosyasinda mi?
 [ ] Yeni action yazmadan once mevcut action'lar `rg` ile aranmis mi?
 [ ] Assertion mevcut mimariye gore dogru assertion dosyasinda mi?
+[ ] Ortak UI davranisi dogru capability dosyasinda, business davranisi domain dosyasinda ve yalniz primitive/dinamik motor common'da mi?
 [ ] Flow business anlamli mi?
 [ ] Page Object class olusturulmamis mi?
 [ ] Domain bazli data/action/assertion/locator dosyasi gereksiz olusturulmamis mi veya buyume esigi gerekcesi var mi?
 [ ] Test bagimsiz calisabilir mi?
 [ ] Assertion expected result ile uyumlu mu?
-[ ] Test calistirilmis mi?
+[ ] Login smoke varsa tam landing health oracle'i gecikmeli fatal indikatoru izliyor mu?
+[ ] Timeout'lar merkezi `TIMEOUTS`/`resolveUiTimeout` sozlesmesinden geliyor ve override alt cagrilara iletiliyor mu?
+[ ] Rapor/screenshot/attachment/cleanup hatasi asli step hatasini maskelemiyor mu?
+[ ] Yeni step/locator/action/assertion/flow varsa `npm run inventory` calistirilmis mi?
+[ ] `npm run check` temiz gecmis mi?
+[ ] Ilgili scenario/feature canli browser'da calistirilmis mi?
+[ ] Allure sonuc modu amaca uygun mu (varsayilan clean; bilincli birlestirmede `--append`) ve browser metadata/history kararliligi korunmus mu?
 [ ] Hata varsa minimum degisiklikle duzeltilmis mi?
 [ ] Zorunlu locator/assertion dogrulanamadiysa bu prompttaki degisiklikler geri alinip engel raporlanmis mi?
 ```
@@ -1537,13 +1685,16 @@ Kullanilacak:
 - Data / Locator / Action / Assertion / Flow ayrimi
 - Tek data dosyasi: src/data/data.ts (esik asilmadi)
 - Tek locator dosyasi: src/locators/locators.ts (esik asilmadi)
-- Domain bazli action dosyalari: src/actions/common|auth|navigation|automaticParameters.actions.ts (esik asildi, bolundu)
-- Domain bazli assertion dosyalari: src/assertions/common|auth|automaticParameters.assertions.ts (esik asildi, bolundu)
+- Action katmani: `common` primitive/dinamik motoru + `control|dropdown|form|table|uiAudit` capability'leri + `auth|navigation|automaticParameters` business domain'leri
+- Assertion katmani: `common` primitive/text motoru + `control|dropdown|form|table` capability'leri + `auth|navigation|addressTemplates|identityTemplates|automaticParameters` business domain'leri
 - Kalan tek dosyali katmanlar (data/locators) esigi asildiginda domain bazli dosyalara gecer
 - Feature dosyalari: features/cases/smoke ve features/cases/regression
 - Step definitions: features/step-definitions
 - Cucumber World/Hooks: features/support
-- Config
+- Config: `src/config/env.ts` + `src/config/timeouts.ts`
+- Genis kalite kapisi: typecheck + ESLint + Prettier + unit + Gherkin policy + Cucumber dry-run + inventory
+- Allure current-run clean varsayilani, acik append ve kararli browser-specific history
+- Lockfile'a bagli local Playwright MCP ve pinli Node/npm toolchain
 - Playwright expect assertions
 ```
 

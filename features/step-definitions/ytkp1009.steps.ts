@@ -12,37 +12,55 @@ import {
 } from '../../src/assertions/automaticParameters.assertions';
 import { CustomWorld, getPage } from '../support/world';
 
-Then('Otomatik Parametre Tanımlama sayfasının açıldığı doğrulanır', async function (this: CustomWorld) {
-  await expectAutomaticParametersRouteOpened(getPage(this));
-});
+Then(
+  'Otomatik Parametre Tanımlama sayfasının açıldığı doğrulanır',
+  async function (this: CustomWorld) {
+    await expectAutomaticParametersRouteOpened(getPage(this));
+  },
+);
 
-Then('Otomatik Parametre oluşturma ekranının açıldığı doğrulanır', async function (this: CustomWorld) {
-  await expectAutomaticParametersCreatePageOpened(getPage(this));
-});
+Then(
+  'Otomatik Parametre oluşturma ekranının açıldığı doğrulanır',
+  async function (this: CustomWorld) {
+    await expectAutomaticParametersCreatePageOpened(getPage(this));
+  },
+);
 
-Then('İşlem Kodu listesinin kod ve açıklama formatında listelendiği doğrulanır', async function (this: CustomWorld) {
-  await expectOperationCodeListFormatted(getPage(this));
-});
+Then(
+  'İşlem Kodu listesinin kod ve açıklama formatında listelendiği doğrulanır',
+  async function (this: CustomWorld) {
+    await expectOperationCodeListFormatted(getPage(this));
+  },
+);
 
-Then('Tür 2 alanının aktif, KDV Oranı alanının pasif olduğu doğrulanır', async function (this: CustomWorld) {
-  await expectSubTypeEnabledKdvRateDisabled(getPage(this));
-});
+Then(
+  'Tür 2 alanının aktif, KDV Oranı alanının pasif olduğu doğrulanır',
+  async function (this: CustomWorld) {
+    await expectSubTypeEnabledKdvRateDisabled(getPage(this));
+  },
+);
 
 Then('Tür 2 ve KDV Oranı alanlarının pasif olduğu doğrulanır', async function (this: CustomWorld) {
   await expectSubTypeAndKdvRateDisabled(getPage(this));
 });
 
-Then('Tür 2 alanının pasif, KDV Oranı alanının aktif olduğu doğrulanır', async function (this: CustomWorld) {
-  await expectSubTypeDisabledKdvRateEnabled(getPage(this));
-});
+Then(
+  'Tür 2 alanının pasif, KDV Oranı alanının aktif olduğu doğrulanır',
+  async function (this: CustomWorld) {
+    await expectSubTypeDisabledKdvRateEnabled(getPage(this));
+  },
+);
 
 When('Fiş Açıklama alanına {string} yazılır', async function (this: CustomWorld, value: string) {
   await fillOperationDescription(getPage(this), value);
 });
 
-Then('Fiş Açıklama alanının en fazla 15 karakter aldığı ve Türkçe karakteri koruduğu doğrulanır', async function (this: CustomWorld) {
-  await expectOperationDescriptionMaxLengthAndTurkish(getPage(this));
-});
+Then(
+  'Fiş Açıklama alanının en fazla 15 karakter aldığı ve Türkçe karakteri koruduğu doğrulanır',
+  async function (this: CustomWorld) {
+    await expectOperationDescriptionMaxLengthAndTurkish(getPage(this));
+  },
+);
 
 Then('Fiş Açıklama alanının zorunlu olduğu doğrulanır', async function (this: CustomWorld) {
   await expectOperationDescriptionRequired(getPage(this));

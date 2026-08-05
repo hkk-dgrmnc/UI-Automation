@@ -33,7 +33,7 @@ src/
   utils/                 # Ortak raporlama/console yardımcıları
 
 scripts/
-  check-inventory.ts     # Step/locator/action/flow envanteri ve duplicate kontrolü
+  check-inventory.ts     # Step/locator/action/assertion/flow envanteri ve duplicate kontrolü
 ```
 
 Ana akış:
@@ -44,8 +44,11 @@ Feature -> Step Definition -> Flow -> Action / Assertion -> Locator / Data
 
 ## Kurulum
 
+Proje `.nvmrc` ve `packageManager` ile Node `24.15.0` / npm `11.12.1` kullanır.
+
 ```powershell
-npm install
+npm ci
+npm run playwright:install:chromium
 ```
 
 Ortam dosyasını oluştur:
@@ -108,13 +111,16 @@ Projedeki `npm test`, `npm run test:*` ve VS Code Cucumber icon kosulari,
 Cucumber kosusundan sonra `allure-report/` altinda HTML Allure raporu uretir.
 Allure CLI rapor uretimi icin makinede Java kurulu olmalidir.
 
-Allure sonuclari varsayilan olarak birikir. Yani VS Code icon'u, `npm test`,
-`npm run test:smoke` veya `npm run test:regression` ile yapilan her kosu
-`allure-results/` uzerine eklenir ve `allure-report/` yeniden uretilir.
+Allure sonuclari varsayilan olarak her kosudan once temizlenir; rapor yalnizca
+guncel kosunun sonucunu gosterir. Birden fazla tarayici sonucunu ayni raporda
+biriktirmek icin `npm run test:all` kullanilir. Manuel birlestirme gerekiyorsa
+ikinci ve sonraki kosular acikca `--append` ile baslatilir (ornegin
+`npm run test:firefox -- --append`). Her sonuc tarayici metadata'si ve tarayiciya
+ozel, kosular arasinda kararli bir history kimligi tasir.
 Dogrudan `cucumber-js` veya VS Code debug launch kullanilirsa Allure formatter
 runner'i bypass edilebilir; bu durumda proje scriptlerini tercih et veya
 sonrasinda `npm run allure:generate` calistir.
-Raporu sifirdan baslatmak icin:
+Sonuclari ve raporu elle temizlemek icin:
 
 ```powershell
 npm run allure:clean
@@ -137,6 +143,16 @@ TypeScript kontrolü:
 npm run typecheck
 ```
 
+Kod stili, unit test ve Gherkin/Cucumber kapıları:
+
+```powershell
+npm run lint
+npm run format:check
+npm run test:unit
+npm run gherkin:check
+npm run cucumber:dry
+```
+
 Inventory güncelleme:
 
 ```powershell
@@ -155,14 +171,18 @@ Tüm temel kontrol:
 npm run check
 ```
 
-`npm run check`, `typecheck` ve `inventory:check` komutlarını birlikte çalıştırır. Yeni step, locator, action veya flow eklendikten sonra `npm run inventory` çalıştırılmalı ve güncellenen [INVENTORY.md](./INVENTORY.md) dosyası commit'e dahil edilmelidir.
+`npm run check`; typecheck, ESLint, Prettier, unit test, Gherkin ID/tag policy,
+Cucumber dry-run ve inventory güncellik/duplicate kontrollerini birlikte
+çalıştırır. Yeni step, locator, action, assertion veya flow eklendikten sonra
+`npm run inventory` çalıştırılmalı ve güncellenen [INVENTORY.md](./INVENTORY.md)
+dosyası commit'e dahil edilmelidir.
 
 ## Zorunlu Bitirme Ritüeli
 
 Yeni test veya locator değişikliği tamamlanmış sayılmadan önce şu kontroller yapılmalıdır:
 
 1. Yeni veya değişen locator gerçek uygulamada Playwright MCP ile doğrulanır.
-2. Yeni step, locator, action veya flow eklendiyse `npm run inventory` çalıştırılır.
+2. Yeni step, locator, action, assertion veya flow eklendiyse `npm run inventory` çalıştırılır.
 3. `npm run check` temiz geçer. Windows PowerShell `npm.ps1` execution policy nedeniyle engellerse `npm.cmd run check` kullanılır.
 4. İlgili scenario/feature veya tüm suite çalıştırılır ve sonuç raporu kontrol edilir.
 
@@ -170,7 +190,7 @@ Bu kontrollerden biri yapılamıyorsa test kodda yarım bırakılmaz; engel net 
 
 ## Inventory ve Reuse
 
-[INVENTORY.md](./INVENTORY.md), mevcut step, locator, action ve flow sözlüğünü listeler. Yeni test yazmadan önce önce bu dosyada, gerekirse `rg` ile kod içinde reuse aranmalıdır.
+[INVENTORY.md](./INVENTORY.md), mevcut step, locator, action, assertion ve flow sözlüğünü listeler. Yeni test yazmadan önce önce bu dosyada, gerekirse `rg` ile kod içinde reuse aranmalıdır.
 
 Önerilen aramalar:
 
@@ -190,7 +210,7 @@ Inventory kontrolü şu durumları yakalar:
 ## Yeni Test Ekleme Akışı
 
 1. Manuel test case ve beklenen sonucu netleştir.
-2. [INVENTORY.md](./INVENTORY.md) içinde mevcut step, locator, action ve flow reuse'u ara.
+2. [INVENTORY.md](./INVENTORY.md) içinde mevcut step, locator, action, assertion ve flow reuse'u ara.
 3. Gerekirse `rg` ile derin arama yap.
 4. Locator'ı gerçek uygulamada doğrula.
 5. Feature dosyasını test tipine göre `features/cases/smoke` veya `features/cases/regression` altına ekle veya güncelle.
@@ -231,6 +251,9 @@ Prompt dosyasında sadece `DOLDUR` alanı ilgili test turuna göre güncellenir.
 - Action dosyası assertion içermez.
 - Assertion dosyası click/fill gibi kullanıcı aksiyonu içermez.
 - Reusable action ve assertion'lar Cucumber raporuna locator adı, locator değeri ve beklenen sonucu yazar.
+- Cucumber ve UI timeout varsayılanları `src/config/timeouts.ts` içinde tek kaynaktır; `live:check -- --timeout-ms <ms>` değeri navigation ve tüm generic assertion'lara iletilir.
+- Teardown/screenshot/attachment hataları asli step hatasını maskelemez; context ve browser kapanışı best-effort olarak ayrı ayrı denenir.
+- Dropdown seçili değerleri normalize edildikten sonra substring değil tam eşitlikle doğrulanır.
 - Şifre gibi hassas değerler raporlarda maskelenir.
 - Test sırasında yakalanan dinamik değerler (seçilen dropdown, okunan text/attribute) `ScenarioStore` (`World.store`) ile isimle saklanıp sonraki adımlarda kullanılır; `data.ts`'e veya feature'a hard-code edilmez. Detay: AGENTS.md 12.1.
 

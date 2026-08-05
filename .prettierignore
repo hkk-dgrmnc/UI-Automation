@@ -1,0 +1,11 @@
+node_modules/
+.auth/
+.playwright-mcp/
+allure-report/
+allure-results/
+playwright-report/
+snapshots/
+cucumber-report.html
+cucumber-report.json
+package-lock.json
+INVENTORY.md

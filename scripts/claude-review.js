@@ -8,12 +8,14 @@ const DEFAULT_TIMEOUT_MS = 900000;
 const DIAGNOSTIC_TIMEOUT_MS = 45000;
 
 function printUsageAndExit(exitCode = 2) {
-  console.error([
-    'Usage:',
-    '  node scripts/claude-review.js --input <file> [--output <file>] [--timeout-ms <ms>]',
-    '  Get-Content review-context.md | node scripts/claude-review.js',
-    '  node scripts/claude-review.js --self-test',
-  ].join('\n'));
+  console.error(
+    [
+      'Usage:',
+      '  node scripts/claude-review.js --input <file> [--output <file>] [--timeout-ms <ms>]',
+      '  Get-Content review-context.md | node scripts/claude-review.js',
+      '  node scripts/claude-review.js --self-test',
+    ].join('\n'),
+  );
   process.exit(exitCode);
 }
 
@@ -138,9 +140,8 @@ function buildClaudeArgs() {
 
 function buildCommand(baseArgs) {
   const command = process.platform === 'win32' ? 'cmd.exe' : 'claude';
-  const commandArgs = process.platform === 'win32'
-    ? ['/d', '/s', '/c', 'claude.cmd', ...baseArgs]
-    : baseArgs;
+  const commandArgs =
+    process.platform === 'win32' ? ['/d', '/s', '/c', 'claude.cmd', ...baseArgs] : baseArgs;
 
   return { command, commandArgs };
 }
@@ -148,16 +149,12 @@ function buildCommand(baseArgs) {
 function runClaudeRaw(prompt, timeoutMs) {
   const { command, commandArgs } = buildCommand(buildClaudeArgs());
 
-  return spawnSync(
-    command,
-    commandArgs,
-    {
-      input: prompt,
-      encoding: 'utf8',
-      timeout: timeoutMs,
-      maxBuffer: 1024 * 1024 * 5,
-    },
-  );
+  return spawnSync(command, commandArgs, {
+    input: prompt,
+    encoding: 'utf8',
+    timeout: timeoutMs,
+    maxBuffer: 1024 * 1024 * 5,
+  });
 }
 
 function getOutput(result) {
@@ -200,10 +197,7 @@ function classifyFailure(result, timeoutMs) {
 }
 
 function runDiagnostic() {
-  const result = runClaudeRaw(
-    'Saglik kontrolu. Sadece "OK" yaz.',
-    DIAGNOSTIC_TIMEOUT_MS,
-  );
+  const result = runClaudeRaw('Saglik kontrolu. Sadece "OK" yaz.', DIAGNOSTIC_TIMEOUT_MS);
   const failure = classifyFailure(result, DIAGNOSTIC_TIMEOUT_MS);
 
   if (failure) {

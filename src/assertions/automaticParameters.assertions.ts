@@ -1,9 +1,6 @@
 import { Page } from '@playwright/test';
-import {
-  LOCATOR_REPORTS,
-  OPERATION_CODE_OPTIONS,
-  locators,
-} from '../locators/locators';
+import { TIMEOUTS } from '../config/timeouts';
+import { LOCATOR_REPORTS, OPERATION_CODE_OPTIONS, locators } from '../locators/locators';
 import {
   expectCount,
   expectDisabled,
@@ -16,7 +13,7 @@ import {
 export async function expectAutomaticParametersRouteOpened(page: Page) {
   const locator = locators(page);
 
-  await expectUrl(page, /shell-app-ui\/#\/automatic-parameters/, { timeout: 30_000 });
+  await expectUrl(page, /shell-app-ui\/#\/automatic-parameters/, { timeout: TIMEOUTS.uiOperation });
   await expectVisible(
     locator.navigation.selectedSidebarMenuLink('Otomatik Parametre Tanımlama'),
     LOCATOR_REPORTS.navigation.selectedSidebarMenuLink('Otomatik Parametre Tanımlama'),
@@ -24,18 +21,20 @@ export async function expectAutomaticParametersRouteOpened(page: Page) {
   await expectVisible(
     locator.automaticParameters.listTitle,
     LOCATOR_REPORTS.automaticParameters.listTitle,
-    { timeout: 30_000 },
+    { timeout: TIMEOUTS.uiOperation },
   );
 }
 
 export async function expectAutomaticParametersCreatePageOpened(page: Page) {
   const locator = locators(page);
 
-  await expectUrl(page, /shell-app-ui\/#\/automatic-parameters\/create/, { timeout: 30_000 });
+  await expectUrl(page, /shell-app-ui\/#\/automatic-parameters\/create/, {
+    timeout: TIMEOUTS.uiOperation,
+  });
   await expectVisible(
     locator.automaticParameters.infoTitle,
     LOCATOR_REPORTS.automaticParameters.infoTitle,
-    { timeout: 30_000 },
+    { timeout: TIMEOUTS.uiOperation },
   );
 }
 
@@ -83,20 +82,38 @@ export async function expectOperationDescriptionRequired(page: Page) {
 export async function expectSubTypeEnabledKdvRateDisabled(page: Page) {
   const locator = locators(page);
 
-  await expectEnabled(locator.automaticParameters.subTypeCombobox, LOCATOR_REPORTS.automaticParameters.subTypeCombobox);
-  await expectDisabled(locator.automaticParameters.kdvRateCombobox, LOCATOR_REPORTS.automaticParameters.kdvRateCombobox);
+  await expectEnabled(
+    locator.automaticParameters.subTypeCombobox,
+    LOCATOR_REPORTS.automaticParameters.subTypeCombobox,
+  );
+  await expectDisabled(
+    locator.automaticParameters.kdvRateCombobox,
+    LOCATOR_REPORTS.automaticParameters.kdvRateCombobox,
+  );
 }
 
 export async function expectSubTypeAndKdvRateDisabled(page: Page) {
   const locator = locators(page);
 
-  await expectDisabled(locator.automaticParameters.subTypeCombobox, LOCATOR_REPORTS.automaticParameters.subTypeCombobox);
-  await expectDisabled(locator.automaticParameters.kdvRateCombobox, LOCATOR_REPORTS.automaticParameters.kdvRateCombobox);
+  await expectDisabled(
+    locator.automaticParameters.subTypeCombobox,
+    LOCATOR_REPORTS.automaticParameters.subTypeCombobox,
+  );
+  await expectDisabled(
+    locator.automaticParameters.kdvRateCombobox,
+    LOCATOR_REPORTS.automaticParameters.kdvRateCombobox,
+  );
 }
 
 export async function expectSubTypeDisabledKdvRateEnabled(page: Page) {
   const locator = locators(page);
 
-  await expectDisabled(locator.automaticParameters.subTypeCombobox, LOCATOR_REPORTS.automaticParameters.subTypeCombobox);
-  await expectEnabled(locator.automaticParameters.kdvRateCombobox, LOCATOR_REPORTS.automaticParameters.kdvRateCombobox);
+  await expectDisabled(
+    locator.automaticParameters.subTypeCombobox,
+    LOCATOR_REPORTS.automaticParameters.subTypeCombobox,
+  );
+  await expectEnabled(
+    locator.automaticParameters.kdvRateCombobox,
+    LOCATOR_REPORTS.automaticParameters.kdvRateCombobox,
+  );
 }

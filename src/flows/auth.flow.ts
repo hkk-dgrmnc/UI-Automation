@@ -1,10 +1,10 @@
 import { Page } from '@playwright/test';
+import { clickLoginButton, fillLoginPassword, fillLoginUsername } from '../actions/auth.actions';
 import {
-  clickLoginButton,
-  fillLoginPassword,
-  fillLoginUsername,
-} from '../actions/auth.actions';
-import { expectLoginPageVisible, expectLoginSuccess } from '../assertions/auth.assertions';
+  expectAuthenticationSuccess,
+  expectLoginPageVisible,
+  expectLoginSuccess,
+} from '../assertions/auth.assertions';
 import { env } from '../config/env';
 import { TestUser } from '../data/data';
 
@@ -27,5 +27,5 @@ export async function verifyLoginSuccess(page: Page) {
 export async function login(page: Page, user: TestUser) {
   await openLoginPage(page);
   await submitLogin(page, user);
-  await verifyLoginSuccess(page);
+  await expectAuthenticationSuccess(page);
 }

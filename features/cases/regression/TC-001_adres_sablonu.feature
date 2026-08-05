@@ -24,6 +24,7 @@ Feature: Posta Çeki Hesabı İşlemleri
   @kimlik-sablonu
   Scenario: kimlik-sablonu
     * "USER1" kullanıcısı ile login olunur
+    * Bulunulan sayfanın görünen iş içerikleri dil kontrolü için raporlanır
     * "Posta Çeki Hesabı İşlemleri > Kimlik Şablonu" menü yolundan sayfaya gidilir
     * "Kimlik Şablonu" menüsünün seçili olduğu doğrulanır
     * Kimlik Şablonu sayfasının açıldığı doğrulanır
@@ -31,6 +32,7 @@ Feature: Posta Çeki Hesabı İşlemleri
     * Tabloda aşağıdaki kolon başlıkları listelenir
       | Kod       |
       | Hesap Adı |
+    * Bulunulan sayfanın görünen iş içerikleri dil kontrolü için raporlanır
     * "Oluştur" butonuna tıklanır
     * "Kimlik Türü Tanım" başlığı görüldüğü doğrulanır
     * Sayfada aşağıdaki input alanları görüntülenir

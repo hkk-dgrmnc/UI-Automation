@@ -36,7 +36,9 @@ export class ScenarioStore {
    */
   get<T = string>(name: string): T {
     if (!this.values.has(name)) {
-      throw new Error(`"${name}" adiyla kaydedilmis bir deger yok. Once kaydeden adimi calistirin.`);
+      throw new Error(
+        `"${name}" adiyla kaydedilmis bir deger yok. Once kaydeden adimi calistirin.`,
+      );
     }
 
     return this.values.get(name) as T;

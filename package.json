@@ -1,8 +1,8 @@
 {
   "name": "cucumber-playwright-automation",
   "version": "1.0.0",
+  "private": true,
   "description": "Cucumber and Playwright TypeScript UI automation project.",
-  "main": "index.js",
   "scripts": {
     "test": "node scripts/run-allure-report.js cases",
     "test:smoke": "node scripts/run-allure-report.js smoke",
@@ -10,7 +10,7 @@
     "test:chromium": "node scripts/run-allure-report.js cases --world-parameters \"{\\\"browser\\\":\\\"chromium\\\"}\"",
     "test:firefox": "node scripts/run-allure-report.js cases --world-parameters \"{\\\"browser\\\":\\\"firefox\\\"}\"",
     "test:webkit": "node scripts/run-allure-report.js cases --world-parameters \"{\\\"browser\\\":\\\"webkit\\\"}\"",
-    "test:all": "npm run test:chromium && npm run test:firefox && npm run test:webkit",
+    "test:all": "npm run test:chromium && npm run test:firefox -- --append && npm run test:webkit -- --append",
     "test:headed": "node scripts/run-allure-report.js cases --world-parameters \"{\\\"browser\\\":\\\"chromium\\\",\\\"headed\\\":true}\"",
     "test:debug": "node scripts/run-allure-report.js cases --world-parameters \"{\\\"browser\\\":\\\"chromium\\\",\\\"headed\\\":true,\\\"slowMo\\\":300}\"",
     "test:allure": "node scripts/run-allure-report.js allure",
@@ -21,28 +21,47 @@
     "allure:open": "allure open allure-report",
     "allure:serve": "allure serve allure-results",
     "codegen": "playwright codegen",
+    "playwright:install:chromium": "playwright install --with-deps chromium",
     "typecheck": "tsc --noEmit",
+    "lint": "eslint . --max-warnings=0",
+    "format": "prettier --write \"src/**/*.ts\" \"features/**/*.{ts,js}\" \"scripts/**/*.{ts,js}\" \"tests/**/*.js\" \"config/**/*.json\" \"*.{js,json}\" \".mcp.json\" \".prettierrc.json\" \".github/workflows/*.yml\"",
+    "format:check": "prettier --check \"src/**/*.ts\" \"features/**/*.{ts,js}\" \"scripts/**/*.{ts,js}\" \"tests/**/*.js\" \"config/**/*.json\" \"*.{js,json}\" \".mcp.json\" \".prettierrc.json\" \".github/workflows/*.yml\"",
+    "test:unit": "node --test \"tests/**/*.test.js\"",
+    "gherkin:check": "node scripts/check-gherkin-policy.js",
+    "cucumber:dry": "node scripts/run-cucumber-dry.js",
     "inventory": "ts-node scripts/check-inventory.ts",
     "inventory:check": "ts-node scripts/check-inventory.ts --check",
     "env:check": "node scripts/check-env.js",
     "live:check": "node scripts/live-check.js",
     "claude:review": "node scripts/claude-review.js",
     "claude:review:self-test": "node scripts/claude-review.js --self-test",
-    "check": "npm run typecheck && npm run inventory:check"
+    "check": "npm run typecheck && npm run lint && npm run format:check && npm run test:unit && npm run gherkin:check && npm run cucumber:dry && npm run inventory:check"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "type": "commonjs",
+  "engines": {
+    "node": "24.x",
+    "npm": "11.x"
+  },
+  "packageManager": "npm@11.12.1",
   "devDependencies": {
     "@cucumber/cucumber": "^13.0.0",
     "@cucumber/messages": "^33.0.3",
+    "@eslint/js": "10.0.1",
+    "@playwright/mcp": "0.0.76",
     "@playwright/test": "^1.60.0",
-    "@types/node": "^25.9.1",
+    "@types/node": "24.13.3",
     "allure-commandline": "^2.43.0",
     "allure-cucumberjs": "^3.10.1",
     "dotenv": "^17.4.2",
+    "eslint": "10.8.0",
+    "eslint-config-prettier": "10.1.8",
+    "globals": "17.9.0",
+    "prettier": "3.9.6",
     "ts-node": "^10.9.2",
-    "typescript": "^6.0.3"
+    "typescript": "^6.0.3",
+    "typescript-eslint": "8.66.0"
   }
 }

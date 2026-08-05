@@ -1,30 +1,31 @@
-# Otomasyon Uretim Prompt Sablonu
+# Otomasyon Üretim Prompt Şablonu
 
 Bu dosya, manuel test case'leri Cucumber + Playwright + TypeScript otomasyonuna
-cevirmek icin kullanilacak tek standart prompt'tur.
+çevirmek için kullanılan tek standart prompt'tur.
 
-Kullanim:
+Kullanım:
 
-1. Sadece `DOLDUR` alanini ilgili test icin guncelle.
-2. AI'a `docs/prompt-template.md dosyasindaki promptu uygula` demen yeterlidir.
-3. Claude read-only reviewer olarak da devreye girsin istersen AI'a
-   `docs/prompt-template.md dosyasindaki promptu uygula, orchestration mode aktif`
-   de. Ayni `orchestration mode aktif` ifadesi manuel yazdigin diger
-   task promptlarinda da kullanilabilir; bu ifade yoksa normal tek-Codex akisi calisir.
-   Orchestration mode'da once `npm run claude:review:self-test` ile Claude CLI
-   kullanilabilirligi kontrol edilir.
-4. Kurallari prompt icinde cogaltma; ana kaynak her zaman `AGENTS.md` ve
-   mevcut reuse sozlugu `INVENTORY.md` dosyalaridir.
+1. Yalnız `DOLDUR` alanını ilgili test için güncelle.
+2. AI'a `docs/prompt-template.md dosyasındaki promptu uygula` demen yeterlidir.
+3. Claude read-only reviewer olarak da devreye girsin istersen
+   `docs/prompt-template.md dosyasındaki promptu uygula, orchestration mode aktif`
+   de. Aynı `orchestration mode aktif` ifadesi manuel yazılan diğer task
+   promptlarında da kullanılabilir. Orchestration mode'da önce
+   `npm run claude:review:self-test` ile Claude CLI kullanılabilirliği kontrol edilir.
+4. Kuralları farklı promptlarda çoğaltma. Ana kaynak `AGENTS.md`, güncel reuse
+   sözlüğü `INVENTORY.md` dosyasıdır.
 
-Dolduran kisi icin not:
+Dolduran kişi için not:
 
-- `DOLDUR` alaninda bos satir birakma.
+- `DOLDUR` alanında boş satır bırakma.
 - Bilinmeyen alanlara `yok` yaz.
-- Senaryo kararindan emin degilsen `Senaryo islemi` alanina
-  `repo yapisindan karar ver` yaz.
+- Senaryo kararından emin değilsen `Senaryo işlemi` alanına
+  `repo yapısından karar ver` yaz.
+- Yetkili manuel test case ID'si bilinmiyorsa ID uydurma; durumu `Ek not`
+  alanında açıkça belirt.
 
-AI icin not: Bu ust kisim kullanim aciklamasidir. Uygulanacak asil prompt
-`## Prompt` basligindan baslar.
+AI için not: Bu üst kısım kullanım açıklamasıdır. Uygulanacak asıl prompt
+`## Prompt` başlığından başlar.
 
 ---
 
@@ -32,117 +33,154 @@ AI icin not: Bu ust kisim kullanim aciklamasidir. Uygulanacak asil prompt
 
 Bu repo Cucumber + Playwright + TypeScript UI otomasyon projesidir.
 
-Ana kural kaynagi `AGENTS.md` dosyasidir. Once `AGENTS.md` ve `INVENTORY.md`
-dosyalarini oku. Mevcut step, locator, action, assertion veya flow varsa
-yenisini yazma; mevcut reusable yapilari kullan.
+Ana kural kaynağı `AGENTS.md` dosyasıdır. Önce `AGENTS.md` ve `INVENTORY.md`
+dosyalarını baştan sona oku. Mevcut step, locator, action, assertion veya flow
+varsa yenisini yazma; mevcut reusable yapıyı kullan.
 
 ### DOLDUR
 
 ```text
-Manuel test dosyasi: YTKP-deneme-test-cases-codex.md
-Bu turda otomasyona alinacak TC'ler: TC-003 ve TC-004
-Haric tutulacak TC'ler: TC-003 ve TC-004 hariç hepsi
-Senaryo islemi: mevcut senaryoya devam et 
-Kullanici: USER1
+Manuel test dosyası: YTKP-deneme-test-cases-codex.md
+Bu turda otomasyona alınacak TC'ler: TC-003 ve TC-004
+Hariç tutulacak TC'ler: TC-003 ve TC-004 hariç hepsi
+Senaryo işlemi: mevcut senaryoya devam et
+Kullanıcı: USER1
 Ek not: yok
 ```
 
-### Calisma Sirasi
+### Çalışma Sırası
 
-1. Manuel test case'i oku; action, data ve expected result alanlarini netlestir.
-2. `INVENTORY.md` icinde mevcut step, locator, action, assertion ve flow reuse'u ara.
-3. Gerekirse `rg` ile `src` ve `features` altinda derin arama yap.
-4. Mevcut dinamik/generic step varsa once onu kullan. Yoksa sayfaya ozel step
-   yazmadan once her yerde kullanilabilecek parametreli generic step tasarla.
-   Ornek: `Oluştur butonuna tıklanır`, `"{string} başlığı görüldüğü doğrulanır"`,
-   `Tabloda aşağıdaki kolon başlıkları listelenir`,
-   `Sayfada aşağıdaki input alanları görüntülenir`.
-5. Action ve assertion'i ayir: click/fill/select step'i sadece aksiyonu yapsin,
-   sonuc dogrulamasi ayri assertion step'i olsun.
-6. Ana test ID, feature dosyasi, step dosyasi/domain ve baslangic ekrani manuel
-   test dosyasi ile mevcut repo yapisindan cikarilmalidir.
-7. `Senaryo islemi` alanina gore hareket et:
-   - `mevcut senaryoya devam et`: mevcut feature ve mevcut scenario korunur,
-     yeni TC adimlari mevcut senaryonun sonuna eklenir.
-   - `mevcut feature icinde yeni scenario ac`: ilgili mevcut feature korunur,
-     ayni feature icinde yeni scenario olusturulur.
-   - `yeni feature ac`: test tipine gore `features/cases/smoke` veya
-     `features/cases/regression` altinda yeni feature dosyasi olusturulur;
-     gerekli scenario bu dosyada yazilir.
-   - `repo yapisindan karar ver`: mevcut feature/senaryo yapisi ve manuel test
-     akisi incelenir; emin olunamiyorsa tahminle kod yazmadan blokaj raporlanir.
-8. Login gerekiyorsa `npm run env:check -- --user <Kullanici>` ile env preflight yap,
-   mevcut auth step/flow'unu kullan; yeni login akisi yazma.
-9. Sidebar menu gecisi gerekiyorsa mevcut genel navigation step'ini kullan:
-   `"{string} menü yolundan sayfaya gidilir"`.
-10. Dropdown/listbox islemlerinde once string parametreli mevcut common/generic
-   step, action veya assertion'lari kullan. Dropdown acma icin
-   `"{string}" dropdown'ı açılır` step'ini kullan; sayfa-ozel acma step'i yazma.
-   Secenek secimi icin `"{Dropdown Adi}" dropdownından "{Secenek}" seçilir`
-   step'ini kullan; sayfa-ozel secim step'i yazma.
-   Secenek gorunurlugu icin:
-   `"{string} dropdown listesinde aşağıdaki seçenekler listelenir"` + Data Table.
-   Mevcut common/generic yapi ihtiyaci guvenli karsilamiyorsa ve gercek ekran
-   dogrulamasi gerektiriyorsa en kucuk ozel domain action/assertion ekle.
-11. Dropdown'dan secilen veya ekrandan okunan dinamik bir deger sonraki adimda
-   kullanilacaksa `ScenarioStore` standardini uygula. Kaynak UI alani ve hedef
-   kullanim baglami step metninde parametre olarak gorunmeli:
-   `"{Dropdown Adi}" dropdown'ından rastgele bir seçenek seçilir ve "{degerAnahtari}" olarak kaydedilir`
-   ve `"{degerAnahtari}" olarak kaydedilen değer "{Hedef Tablo/Liste/Alan}" ile kayıt aranır`.
-   Degeri `this.saveValue` / `this.getValue` ile sakla/oku; `data.ts`'e veya
-   feature'a hard-code etme.
-12. Yeni locator gerekiyorsa Playwright MCP ile gercek uygulamada dogrula.
-   MCP `.env` okuyamadigi veya login oturumu kuramadigi icin dogrulama yapilamiyorsa,
-   mevcut framework locator/action/assertion'lariyla `npm run live:check -- ...`
-   fallback'i kullanilabilir. Bu fallback yeni selector tahminini mesrulastirmaz.
-13. Dogrulanmayan locator, tahmini selector, TODO, placeholder step veya bos assertion
-   koda birakma.
-14. Feature dosyasi test tipine gore `features/cases/smoke` veya
-   `features/cases/regression` altinda business dilinde olsun; step keyword
-   olarak sadece `*` kullan.
-15. Step definition teknik detay veya locator icermesin; mumkunse flow cagir.
-16. Yeni action/assertion gerekiyorsa dogru domain dosyasina ekle; common primitive'leri
-    tekrar yazma.
-17. Yeni locator eklenirse `locators` ve `LOCATOR_REPORTS` birlikte guncellensin.
-18. Yeni step, locator, action veya flow eklendiyse `npm run inventory` calistir.
-19. Sonunda `npm.cmd run check` calistir.
-20. Ilgili scenario veya feature'i calistir; hata varsa minimum degisiklikle duzelt.
+1. Manuel test case'i oku; authoritative test case ID, action, data, expected
+   result, test kategorisi ve başlangıç ekranını netleştir. Bilinmeyen ID'yi
+   tahmin etme.
+2. Önce `INVENTORY.md` içinde step, locator, action, assertion ve flow reuse'u
+   ara; gerekirse `rg` ile `src` ve `features` altında derin arama yap.
+3. `Senaryo işlemi` alanına göre hareket et:
 
-### Cikti Beklentisi
+   - `mevcut senaryoya devam et`: mevcut feature ve scenario korunur, yeni TC
+     adımları mevcut scenario sonuna eklenir.
+   - `mevcut feature içinde yeni scenario aç`: ilgili feature korunur ve aynı
+     feature içinde yeni scenario oluşturulur.
+   - `yeni feature aç`: `features/cases/smoke` veya
+     `features/cases/regression` altında yeni feature oluşturulur.
+   - `repo yapısından karar ver`: mevcut yapı ve manuel akış incelenir; güvenli
+     karar verilemiyorsa tahminle kod yazılmadan blokaj raporlanır.
 
-- Kod `AGENTS.md` mimarisine uygun olmali.
-- Klasik Page Object Model veya ekran bazli `Page` class'i olusturulmamali.
-- Duplicate step, locator, action veya assertion uretilmemeli.
-- Yeni locator gercek uygulamada dogrulanmis olmali.
-- Hassas veri feature'a veya koda yazilmamali.
-- `INVENTORY.md` gerekiyorsa guncellenmis olmali.
-- `npm.cmd run check` temiz gecmeli.
-- Ilgili test sonucu final cevapta raporlanmali.
+4. Her scenario adını authoritative manuel test case ID'siyle başlat. Scenario
+   en az bir tag miras almalı veya tanımlamalı; klasörle uyumlu `@smoke` ya da
+   `@regression` category tag'i bulunmalı. Feature adımlarında yalnız `*` kullan.
+   `config/gherkin-policy-baseline.json` yalnız belgelenmiş legacy istisnalar
+   içindir; yeni ihlali gizlemek için genişletme. Stale baseline girdisini de
+   bırakma.
+5. Mevcut dinamik/generic step varsa önce onu kullan. Yoksa sayfaya özel paket
+   step yazmadan önce aynı davranışın parametreli, ekran bağımsız bir step olup
+   olamayacağını değerlendir.
+6. Action ile assertion'ı ayır: click/fill/select step'i yalnız aksiyon yapsın;
+   expected result ayrı assertion step'inde doğrulansın.
+7. Yeni action/assertion gerçekten gerekiyorsa doğru yere ekle:
 
-### Blokaj Kurali
+   - alt seviye ortak primitive ve dinamik değer motoru: `common.*`
+   - ortak UI davranışı: action için mevcut `control`, `dropdown`, `form`,
+     `table` veya `uiAudit`; assertion için mevcut `control`, `dropdown`,
+     `form` veya `table` capability dosyası
+   - business'e özel davranış: ilgili domain dosyası
 
-Locator, yetki, test data, ekran erisimi veya expected result dogrulanamiyorsa
-bu turda yaptigin test degisikliklerini geri al. Kullaniciya veya onceki branch'e
-ait degisikliklere dokunma. Kodda yarim is birakma.
+   Büyümüş `common` dosyalarına geri dönme; yeni capability/domain dosyasını
+   yalnız gerçek tekrar veya büyüme eşiği varsa aç.
+8. Login gerekiyorsa önce `npm run env:check -- --user <Kullanıcı>` ile env
+   preflight yap ve mevcut auth step/flow'unu kullan. Regression/setup `login()`
+   akışı yalnız teknik authentication ön koşulunu doğrular. Açık login smoke
+   expected result'ında `verifyLoginSuccess()` ile tam landing sağlık oracle'ı
+   çalışmalıdır; URL ve profil görünürlüğü tek başına başarı sayılmaz. Doğrulanmış
+   fatal landing göstergesi stabilite penceresinde görünürse testi yeşile
+   çevirmek için oracle'ı zayıflatma; uygulama hatasını raporla.
+9. Sidebar geçişinde mevcut genel navigation step'ini kullan:
+   `"{string} menü yolundan sayfaya gidilir"`. Menü derinliğini koda sabitleme.
+10. Dropdown/listbox işlemlerinde mevcut generic sözlüğü kullan:
 
-Final cevabi su formatta ver:
+    - açma: `"{string}" dropdown'ı açılır`
+    - seçme: `"{Dropdown Adı}" dropdownından "{Seçenek}" seçilir`
+    - seçili değer: `"{Dropdown Adı}" dropdownında "{Değer}" değeri seçili olduğu doğrulanır`
+    - seçenekler: `"{string} dropdown listesinde aşağıdaki seçenekler listelenir"`
+      + Data Table
+
+    Seçili gerçek ve beklenen değer görünmez karakter/boşluk normalizasyonundan
+    sonra tam eşitlikle karşılaştırılmalı; substring/`contains` başarı sayılmamalı.
+11. Dropdown'dan seçilen veya ekrandan okunan runtime değer sonraki adımda
+    kullanılacaksa `ScenarioStore` standardını uygula. Değeri
+    `this.saveValue` / `this.getValue` ile sakla/oku; `data.ts`'e veya feature'a
+    hard-code etme. Kaynak UI alanı ve hedef kullanım bağlamı step metninde
+    parametre olarak görünmeli.
+12. Yeni locator gerekiyorsa repo içindeki `.mcp.json` ile lockfile'a pinlenmiş
+    local Playwright MCP'yi kullanarak gerçek uygulamada doğrula. Runtime `npx`
+    indirmesi yapma. MCP login oturumu kuramıyorsa, yalnız mevcut framework
+    locator/action/assertion'larıyla `npm run live:check -- ...` fallback'i
+    kullanılabilir; bu fallback yeni selector tahminini meşrulaştırmaz.
+13. Timeout gerektiğinde `src/config/timeouts.ts` içindeki `TIMEOUTS`,
+    `TimeoutOptions` ve `resolveUiTimeout` sözleşmesini kullan. Dağınık
+    `5_000`/`10_000`/`45_000`, `waitForTimeout` veya her retry'da sıfırlanan
+    deadline üretme. Reusable composite fonksiyon trailing `{ timeout }`
+    override'ını tüm alt çağrılara iletsin; `live:check -- --timeout-ms` ilgili
+    navigation/heading/table/form/control kontrollerine ulaşsın.
+14. Doğrulanmayan locator, tahmini selector, TODO, placeholder step veya boş
+    assertion bırakma. Yeni locator eklenirse `locators` ile `LOCATOR_REPORTS`
+    birlikte güncellensin.
+15. Lifecycle/reporting koduna dokunuluyorsa mevcut best-effort desenini koru:
+    screenshot, attachment veya cleanup hatası asli step hatasını maskelemesin;
+    context ve browser kapanışı birbirinden bağımsız denensin.
+16. Yeni step, locator, action, assertion veya flow eklendiyse
+    `npm run inventory` çalıştır ve `INVENTORY.md` dosyasını güncelle.
+17. `npm run check` çalıştır. Bu komut typecheck, ESLint, Prettier, unit test,
+    Gherkin policy, env/browser gerektirmeyen Cucumber dry-run ve inventory
+    kapılarını birlikte çalıştırır. PowerShell execution-policy engelinde
+    `npm.cmd run check` kullan.
+18. İlgili scenario/feature'i proje `npm` runner'ıyla gerçek browser'da çalıştır.
+    `npm run check` canlı testin yerine geçmez. Allure varsayılanı current-run
+    clean rapordur; `--append` yalnız bilinçli çoklu browser birleştirmesinde
+    kullanılır. Browser metadata'sını, browser-specific kararlı `historyId`yi ve
+    özgün `testCaseId`yi bozma.
+19. Test veya kalite kapısı hata verirse kök nedeni kanıtla ve minimum değişiklikle
+    düzelt. Zorunlu locator, yetki, data, ekran veya expected result
+    doğrulanamıyorsa bu turdaki test değişikliklerini geri alıp blokaj raporla.
+
+### Çıktı Beklentisi
+
+- Kod `AGENTS.md` mimarisine uygun olmalı; klasik Page Object Model veya ekran
+  bazlı `Page` class'ı oluşturulmamalı.
+- Duplicate step, locator, action, assertion veya flow üretilmemeli.
+- Yeni locator gerçek uygulamada doğrulanmış olmalı.
+- Hassas veri feature'a, koda veya rapora açık yazılmamalı.
+- Scenario ID/tag/category ve yalnız `*` Gherkin kuralları sağlanmalı.
+- Dropdown seçili değerleri normalize edilmiş tam eşitlikle doğrulanmalı.
+- Login smoke bozuk landing ekranını yeşil geçirmemeli.
+- Merkezi timeout ve best-effort lifecycle/reporting sözleşmeleri korunmalı.
+- Gerekiyorsa `INVENTORY.md` güncellenmiş, `npm run check` temiz geçmiş olmalı.
+- İlgili canlı test ve Allure sonuç modu final cevapta açıkça raporlanmalı.
+
+### Blokaj Kuralı
+
+Locator, yetki, test data, ekran erişimi, authoritative ID veya expected result
+doğrulanamıyorsa bu turda yaptığın test değişikliklerini geri al. Kullanıcıya
+veya önceki branch'e ait değişikliklere dokunma. Kodda yarım iş bırakma.
+
+Final cevabı şu formatta ver:
 
 ```text
-Bu test kodda birakilmadi.
+Bu test kodda bırakılmadı.
 Sebep:
 Denendi:
-Gereken duzeltme:
-Geri alinanlar:
+Gereken düzeltme:
+Geri alınanlar:
 ```
 
-### Final Cevap Formati
+### Final Cevap Formatı
 
-Is tamamlandiysa final cevapta kisaca sunlari yaz:
+İş tamamlandıysa final cevapta kısaca şunları yaz:
 
 ```text
-Tamamlandi:
-Degisen dosyalar:
-Calistirilan kontroller:
+Tamamlandı:
+Değişen dosyalar:
+Çalıştırılan kontroller:
 Test sonucu:
 Notlar:
 ```

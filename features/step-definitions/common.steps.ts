@@ -1,39 +1,41 @@
 import { DataTable, Then, When } from '@cucumber/cucumber';
-import {
-  clickButtonByName,
-  clickTableColumnValue,
-  collectVisibleBusinessTexts,
-  fillInputFieldByName,
-  openDropdown,
-  selectDropdownOption,
-} from '../../src/actions/common.actions';
+import { clickButtonByName } from '../../src/actions/control.actions';
+import { openDropdown, selectDropdownOption } from '../../src/actions/dropdown.actions';
+import { fillInputFieldByName } from '../../src/actions/form.actions';
+import { clickTableColumnValue } from '../../src/actions/table.actions';
+import { collectVisibleBusinessTexts } from '../../src/actions/uiAudit.actions';
+import { expectHeadingVisible } from '../../src/assertions/common.assertions';
 import {
   expectButtonNotVisible,
   expectButtonVisible,
+} from '../../src/assertions/control.assertions';
+import {
   expectDropdownFieldSelectedValue,
   expectDropdownFieldsVisible,
-  expectHeadingVisible,
+  expectListboxOptionsVisible,
+} from '../../src/assertions/dropdown.assertions';
+import {
   expectInputFieldValue,
   expectInputFieldValueLengthLessThanOrEqual,
   expectInputFieldsVisible,
-  expectListboxOptionsVisible,
+} from '../../src/assertions/form.assertions';
+import {
   expectTableColumnHeadersVisible,
   expectTableColumnValuesVisible,
-} from '../../src/assertions/common.assertions';
+} from '../../src/assertions/table.assertions';
 import { COLORS as C, INDENT } from '../../src/utils/console-format';
 import { CustomWorld, getPage } from '../support/world';
 
-When('{string} dropdown\'ı açılır', async function (this: CustomWorld, dropdownName: string) {
+When("{string} dropdown'ı açılır", async function (this: CustomWorld, dropdownName: string) {
   await openDropdown(getPage(this), dropdownName);
 });
 
-When('{string} dropdownından {string} seçilir', async function (
-  this: CustomWorld,
-  dropdownName: string,
-  optionText: string,
-) {
-  await selectDropdownOption(getPage(this), dropdownName, optionText);
-});
+When(
+  '{string} dropdownından {string} seçilir',
+  async function (this: CustomWorld, dropdownName: string, optionText: string) {
+    await selectDropdownOption(getPage(this), dropdownName, optionText);
+  },
+);
 
 When('{string} butonuna tıklanır', async function (this: CustomWorld, buttonName: string) {
   await clickButtonByName(getPage(this), buttonName);
@@ -73,9 +75,12 @@ Then(
   },
 );
 
-Then('{string} başlığı görüldüğü doğrulanır', async function (this: CustomWorld, headingText: string) {
-  await expectHeadingVisible(getPage(this), headingText);
-});
+Then(
+  '{string} başlığı görüldüğü doğrulanır',
+  async function (this: CustomWorld, headingText: string) {
+    await expectHeadingVisible(getPage(this), headingText);
+  },
+);
 
 Then(
   'Tabloda aşağıdaki kolon başlıkları listelenir',
@@ -123,13 +128,19 @@ Then(
   },
 );
 
-Then('{string} butonu görüldüğü doğrulanır', async function (this: CustomWorld, buttonName: string) {
-  await expectButtonVisible(getPage(this), buttonName);
-});
+Then(
+  '{string} butonu görüldüğü doğrulanır',
+  async function (this: CustomWorld, buttonName: string) {
+    await expectButtonVisible(getPage(this), buttonName);
+  },
+);
 
-Then('{string} butonunun görülmediği doğrulanır', async function (this: CustomWorld, buttonName: string) {
-  await expectButtonNotVisible(getPage(this), buttonName);
-});
+Then(
+  '{string} butonunun görülmediği doğrulanır',
+  async function (this: CustomWorld, buttonName: string) {
+    await expectButtonNotVisible(getPage(this), buttonName);
+  },
+);
 
 Then(
   'Bulunulan sayfanın görünen iş içerikleri dil kontrolü için raporlanır',
@@ -144,7 +155,9 @@ Then(
       ...audit.lines.map((line, index) => `${index + 1}. ${line}`),
     ];
 
-    console.log(`${INDENT}${C.bold}${C.yellow}  AUDIT ${C.reset}  ${C.bold}Görünen İş İçeriği${C.reset}`);
+    console.log(
+      `${INDENT}${C.bold}${C.yellow}  AUDIT ${C.reset}  ${C.bold}Görünen İş İçeriği${C.reset}`,
+    );
     for (const line of reportLines.slice(1)) {
       console.log(`${INDENT}         ${C.dim}${line}${C.reset}`);
     }
