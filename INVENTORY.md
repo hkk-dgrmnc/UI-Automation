@@ -23,6 +23,7 @@
 ### features/step-definitions/common.steps.ts
 
 - `When` {string} dropdown'ı açılır
+- `When` {string} saniye beklenir
 - `When` {string} dropdownından {string} seçilir
 - `When` {string} butonuna tıklanır
 - `When` {string} input alanına {string} değeri yazılır
@@ -110,10 +111,11 @@
 
 - `fill(locator: Locator, locatorReport: LocatorReport, value: string, maskValue?: boolean, options?: TimeoutOptions): Promise<void>` — satir 11 — kullanim: 3
 - `click(locator: Locator, locatorReport: LocatorReport, options?: ClickOptions): Promise<void>` — satir 33 — kullanim: 9
-- `readElementText(locator: Locator, locatorReport: LocatorReport, options?: TimeoutOptions): Promise<string>` — satir 62 — kullanim: 0 (UNUSED)
-- `readElementAttribute(locator: Locator, locatorReport: LocatorReport, attribute: string, options?: TimeoutOptions): Promise<string>` — satir 83 — kullanim: 0 (UNUSED)
-- `fillElement(locator: Locator, locatorReport: LocatorReport, value: string, maskValue?: boolean, options?: TimeoutOptions): Promise<void>` — satir 110 — kullanim: 1
-- `clickByText(page: Page, value: string, options?: TextMatchOptions): Promise<void>` — satir 121 — kullanim: 0 (UNUSED)
+- `waitForSeconds(secondsText: string): Promise<void>` — satir 74 — kullanim: 1
+- `readElementText(locator: Locator, locatorReport: LocatorReport, options?: TimeoutOptions): Promise<string>` — satir 106 — kullanim: 0 (UNUSED)
+- `readElementAttribute(locator: Locator, locatorReport: LocatorReport, attribute: string, options?: TimeoutOptions): Promise<string>` — satir 127 — kullanim: 0 (UNUSED)
+- `fillElement(locator: Locator, locatorReport: LocatorReport, value: string, maskValue?: boolean, options?: TimeoutOptions): Promise<void>` — satir 154 — kullanim: 1
+- `clickByText(page: Page, value: string, options?: TextMatchOptions): Promise<void>` — satir 165 — kullanim: 0 (UNUSED)
 
 ### src/actions/control.actions.ts
 

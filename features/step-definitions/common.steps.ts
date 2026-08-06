@@ -1,4 +1,5 @@
 import { DataTable, Then, When } from '@cucumber/cucumber';
+import { waitForSeconds } from '../../src/actions/common.actions';
 import { clickButtonByName } from '../../src/actions/control.actions';
 import { openDropdown, selectDropdownOption } from '../../src/actions/dropdown.actions';
 import { fillInputFieldByName } from '../../src/actions/form.actions';
@@ -28,6 +29,10 @@ import { CustomWorld, getPage } from '../support/world';
 
 When("{string} dropdown'ı açılır", async function (this: CustomWorld, dropdownName: string) {
   await openDropdown(getPage(this), dropdownName);
+});
+
+When('{string} saniye beklenir', async function (this: CustomWorld, seconds: string) {
+  await waitForSeconds(seconds);
 });
 
 When(

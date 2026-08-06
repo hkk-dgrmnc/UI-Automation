@@ -1,5 +1,5 @@
 import { Locator, Page } from '@playwright/test';
-import { resolveUiTimeout, TimeoutOptions } from '../config/timeouts';
+import { resolveUiTimeout, TIMEOUTS, TimeoutOptions } from '../config/timeouts';
 import { LocatorReport, reportAction, reportError } from '../utils/action-report';
 
 export type ClickOptions = TimeoutOptions;
@@ -44,6 +44,50 @@ export async function click(
     await locator.click({ timeout: resolveUiTimeout(options) });
   } catch (error) {
     reportError({ action: 'Click', locatorName: locatorReport.name, error });
+    throw error;
+  }
+}
+
+function resolveWaitMilliseconds(secondsText: string) {
+  const normalized = secondsText.trim().replace(',', '.');
+  const maximumWaitMilliseconds = TIMEOUTS.cucumberStep - 1_000;
+
+  if (!/^(?:0|[1-9]\d*)(?:\.\d{1,3})?$/.test(normalized)) {
+    throw new RangeError(`Bekleme suresi pozitif bir sayi olmalidir. Alinan: "${secondsText}"`);
+  }
+
+  const milliseconds = Number(normalized) * 1_000;
+  if (
+    !Number.isSafeInteger(milliseconds) ||
+    milliseconds <= 0 ||
+    milliseconds > maximumWaitMilliseconds
+  ) {
+    throw new RangeError(
+      `Bekleme suresi 0 ile ${maximumWaitMilliseconds / 1_000} saniye arasinda olmalidir. Alinan: "${secondsText}"`,
+    );
+  }
+
+  return milliseconds;
+}
+
+/** Feature'dan string olarak gelen saniye degeri kadar raporlanan dinamik bekleme yapar. */
+export async function waitForSeconds(secondsText: string) {
+  const timerReport: LocatorReport = {
+    name: 'timer',
+    value: 'duration-based delay; no UI locator',
+  };
+
+  try {
+    const milliseconds = resolveWaitMilliseconds(secondsText);
+    reportAction({
+      action: 'Wait',
+      locatorName: timerReport.name,
+      locatorValue: timerReport.value,
+      value: `${milliseconds / 1_000} saniye`,
+    });
+    await new Promise<void>((resolve) => setTimeout(resolve, milliseconds));
+  } catch (error) {
+    reportError({ action: 'Wait', locatorName: timerReport.name, error });
     throw error;
   }
 }
