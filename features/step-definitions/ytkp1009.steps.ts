@@ -1,5 +1,4 @@
-import { Then, When } from '@cucumber/cucumber';
-import { fillOperationDescription } from '../../src/actions/automaticParameters.actions';
+import { Then } from '@cucumber/cucumber';
 import {
   expectAutomaticParametersCreatePageOpened,
   expectAutomaticParametersRouteOpened,
@@ -50,10 +49,6 @@ Then(
     await expectSubTypeDisabledKdvRateEnabled(getPage(this));
   },
 );
-
-When('Fiş Açıklama alanına {string} yazılır', async function (this: CustomWorld, value: string) {
-  await fillOperationDescription(getPage(this), value);
-});
 
 Then(
   'Fiş Açıklama alanının en fazla 15 karakter aldığı ve Türkçe karakteri koruduğu doğrulanır',

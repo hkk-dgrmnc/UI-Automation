@@ -28,9 +28,7 @@ const TEXTS = {
   automaticParameters: {
     listTitle: 'Otomatik Parametre Listesi',
     infoTitle: 'Otomatik Parametre Bilgileri',
-    operationCodeLabel: 'İşlem Kodu',
     operationCodeOptions: ['[001] KAPAMA', '[002] VERGİSEL ŞUBE KAPAMA', '[003] DÖKÜM'],
-    typeLabel: 'Tür',
     subTypeLabel: 'Tür 2',
     kdvRateLabel: 'KDV Oranı',
     operationDescriptionLabel: 'Fiş Açıklama',
@@ -58,7 +56,6 @@ export const locators = (page: Page) => ({
       .first(),
   },
   common: {
-    createLink: page.locator(SELECTORS.common.createLink),
     clickableControl: (name: string) =>
       page
         .getByRole('button', { name, exact: true })
@@ -108,13 +105,6 @@ export const locators = (page: Page) => ({
   automaticParameters: {
     listTitle: page.getByText(TEXTS.automaticParameters.listTitle, { exact: true }),
     infoTitle: page.getByText(TEXTS.automaticParameters.infoTitle, { exact: true }),
-    operationCodeCombobox: page.getByRole('combobox', {
-      name: TEXTS.automaticParameters.operationCodeLabel,
-    }),
-    typeCombobox: page.getByRole('combobox', {
-      name: TEXTS.automaticParameters.typeLabel,
-      exact: true,
-    }),
     subTypeCombobox: page.getByRole('combobox', { name: TEXTS.automaticParameters.subTypeLabel }),
     kdvRateCombobox: page.getByRole('combobox', { name: TEXTS.automaticParameters.kdvRateLabel }),
     operationDescriptionInput: page.getByRole('textbox', {
@@ -155,7 +145,6 @@ export const LOCATOR_REPORTS = {
     },
   },
   common: {
-    createLink: { name: 'common.createLink', value: SELECTORS.common.createLink },
     clickableControl: (name: string) => ({
       name: `common.clickableControl('${name}')`,
       value: `role=button/link name="${name}" (exact) or ${SELECTORS.common.createLink} has text "${name}"`,
@@ -213,14 +202,6 @@ export const LOCATOR_REPORTS = {
     infoTitle: {
       name: 'automaticParameters.infoTitle',
       value: `getByText('${TEXTS.automaticParameters.infoTitle}', { exact: true })`,
-    },
-    operationCodeCombobox: {
-      name: 'automaticParameters.operationCodeCombobox',
-      value: `role=combobox name="${TEXTS.automaticParameters.operationCodeLabel}"`,
-    },
-    typeCombobox: {
-      name: 'automaticParameters.typeCombobox',
-      value: `role=combobox name="${TEXTS.automaticParameters.typeLabel}" (exact)`,
     },
     subTypeCombobox: {
       name: 'automaticParameters.subTypeCombobox',

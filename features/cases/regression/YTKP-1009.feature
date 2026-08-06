@@ -15,7 +15,7 @@ Feature: YTKP-1009 Otomatik Parametre Tanımlama
     * Tür 2 ve KDV Oranı alanlarının pasif olduğu doğrulanır
     * "İşlem Kodu" dropdownından "[003] DÖKÜM" seçilir
     * Tür 2 alanının pasif, KDV Oranı alanının aktif olduğu doğrulanır
-    * Fiş Açıklama alanına "Yıl Sonu Kapanışı" yazılır
+    * "Fiş Açıklama" input alanına "Yıl Sonu Kapanışı" değeri yazılır
     * Fiş Açıklama alanının en fazla 15 karakter aldığı ve Türkçe karakteri koruduğu doğrulanır
     * Fiş Açıklama alanının zorunlu olduğu doğrulanır
     * "Tür" dropdown'ı açılır

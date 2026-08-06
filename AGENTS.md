@@ -158,8 +158,7 @@ playwright-automation/
     │   ├── table.actions.ts
     │   ├── uiAudit.actions.ts
     │   ├── auth.actions.ts
-    │   ├── navigation.actions.ts
-    │   └── automaticParameters.actions.ts
+    │   └── navigation.actions.ts
     │
     ├── assertions/                 # Common primitive + capability + domain
     │   ├── common.assertions.ts    # Paylasilan expect* primitive + generic text
@@ -326,7 +325,7 @@ Gecis kurallari:
 Guncel durum (bu repo):
 
 - `actions` ve `assertions` katmanlari buyume esigini (200-300 satir) astigi icin domain ve capability bazli dosyalara BOLUNMUSTUR. Gecerli yapi:
-  - `src/actions/`: `common.actions.ts` (paylasilan `click`/`fill` + dinamik deger motoru), capability dosyalari (`control`/`dropdown`/`form`/`table`/`uiAudit`), `auth.actions.ts`, `navigation.actions.ts`, `automaticParameters.actions.ts`
+  - `src/actions/`: `common.actions.ts` (paylasilan `click`/`fill` + dinamik deger motoru), capability dosyalari (`control`/`dropdown`/`form`/`table`/`uiAudit`), `auth.actions.ts`, `navigation.actions.ts`
   - `src/assertions/`: `common.assertions.ts` (paylasilan `expectVisible`/`expectCount`/... primitive'leri + generic text), capability dosyalari (`control`/`dropdown`/`form`/`table`), `auth.assertions.ts`, `automaticParameters.assertions.ts`
 - `src/data/data.ts` ve `src/locators/locators.ts` hala TEK dosyadir (esik asilmadi); buyuyunce ayni strateji ile bolunur.
 - Yeni ortak UI action/assertion eklerken once mevcut capability dosyasini kullan: `control`, `dropdown`, `form`, `table` veya `uiAudit`. Business'e ozel davranis ilgili domain dosyasinda kalir. Yalniz en alt seviye ortak primitive veya dinamik deger motoru `common.actions` / `common.assertions` icine eklenir.
@@ -338,7 +337,12 @@ Guncel durum (bu repo):
 
 Bu projede farkli branch ve farkli PC'lerde calisan kisilerin ayni otomasyon dilini kullanmasi hedeflenir. Codex veya gelistirici yeni test uretirken once mevcut sozlugu ve reusable parcalari aramalidir.
 
-Reuse aramasinin hizli yolu `INVENTORY.md` dosyasidir. Bu dosya otomatik uretilir (`npm run inventory`) ve mevcut tum step / locator / action / assertion / flow sozlugunu tek yerde listeler. Yeni test yazmadan once once bu dosya okunmali, ardindan gerekiyorsa `rg` ile derinlemesine arama yapilmalidir:
+Reuse aramasinin hizli yolu `INVENTORY.md` dosyasidir. Bu dosya otomatik uretilir
+(`npm run inventory`); step/locator sozlugunu ve action/assertion/flow
+fonksiyonlarinin imza, kaynak satiri ve statik kullanim sayilarini tek yerde
+listeler. `UNUSED` kaydi otomatik silme karari degil, reuse/dead-code inceleme
+isaretidir. Yeni test yazmadan once once bu dosya okunmali, ardindan gerekiyorsa
+`rg` ile derinlemesine arama yapilmalidir:
 
 ```powershell
 rg "Oluştur|Kaydet|Sil|Ara|Temizle|Vazgeç|Onayla|Geri" src features
@@ -346,12 +350,18 @@ rg "step metni veya beklenen ekran basligi" features src
 rg "locator adi veya UI metni" src/locators src/actions src/assertions src/flows features/step-definitions
 ```
 
-Reuse kurallari mekanik kapilarla da korunur. `npm run check`; typecheck, ESLint, Prettier, unit test, Gherkin policy, Cucumber dry-run ve `inventory:check` kapilarini birlikte calistirir. Asagidaki reuse ihlallerinde de hata verir:
+Reuse kurallari mekanik kapilarla da korunur. `npm run check`; typecheck, ESLint,
+Prettier, unit test, architecture policy, Gherkin policy, Cucumber dry-run ve
+`inventory:check` kapilarini birlikte calistirir. Asagidaki reuse/mimari
+ihlallerinde de hata verir:
 
 - Ayni selector (locator value) iki farkli locator isminde tanimliysa.
 - `LOCATOR_REPORTS` icindeki `name`, kendi `grup.key` yolu ile uyusmuyorsa.
 - Normalize edildiginde (kucuk harf, noktalama, bosluk) ayni metne dusen iki step tanimi varsa.
 - `INVENTORY.md` guncel degilse (step/locator/action/assertion/flow ekleyip `npm run inventory` calistirilmamissa).
+- Step definition Playwright/locator katmanina dogrudan erisirse, action `expect`
+  kullanirsa, assertion mutating UI action yaparsa, `waitForTimeout` veya Page
+  Object yapisi eklenirse.
 
 `npm run check` statik ve dry-run kalite kapisidir; canli browser senaryosunun yerine gecmez. Kapidan sonra ilgili scenario/feature gercek ortamda ayrica calistirilmalidir.
 
@@ -1362,6 +1372,10 @@ Kurallar:
 - `historyId` kosuya ozel/rastgele bir ID ile degistirilmez. Reporter'in temel test kimligi ile gercek browser adindan kararli, browser-specific history uretilir; `testCaseId` korunur.
 - Her yeni Allure result `Browser` parametresi tasir. Browser world parameters -> `BROWSER` -> `chromium` sirasi ile cozulur; Firefox/WebKit sonucu Chromium olarak hard-code edilmez. `environment.properties` birikmis result'lardaki gercek browser listesini sirali ve tekil yazar.
 - Cucumber sonucu basarisiz olsa bile uretilen result varsa rapor olusturulmaya calisilir; process exit code asli Cucumber basarisizligini korur.
+- Tek feature hedefleniyorsa `npm run test:feature -- <feature-yolu>` kullanilir.
+  Suite profili (`cases`/`smoke`/`regression`) ile CLI feature path'ini birlikte
+  vermek path'leri birlestirip hedef disi senaryolari da calistirabilecegi icin
+  kullanilmaz.
 - Dogrudan `cucumber-js` cagirmak clean/append ve metadata post-processing wrapper'ini bypass edebilir. Raporlu kosular icin proje `npm` scriptleri tercih edilir.
 
 ---
@@ -1440,27 +1454,52 @@ Codex sunlari yapmamalidir:
 
 ## 19. Ortak Prompt Kullanim Standardi
 
-Bu projede yeni test uretirken tek standart prompt dosyasi kullanilmalidir:
+Bu projede yeni test uretirken tek ve degismez calisma sozlesmesi kullanilmalidir:
 
 ```text
 docs/prompt-template.md
 ```
 
-Kullanim:
+Bu dosya test veya ekip bazinda DUZENLENMEZ. Ekip uyesi dosyadaki bos gorev
+blogunu kopyalar, yalniz o tura ait degerleri sohbet mesajinda doldurur ve
+sozlesmeyle birlikte uygulatir:
 
 ```text
 docs/prompt-template.md dosyasindaki promptu uygula.
+
+Kaynak: repo:manual-tests/<dosya>.md
+TC kapsami: <TC-ID listesi>
+Yerlesim: AUTO
+Hedef feature: AUTO
+Hedef scenario: AUTO
+Kullanici profili: <USER anahtari>
+Ortam profili: mevcut .env
+Ek kabul kriterleri: YOK
+Bilinmeyen bilgiler: YOK
+Calisma modu: NORMAL
 ```
 
 Kurallar:
 
-- `docs/prompt-template.md` icindeki `DOLDUR` alani ilgili test turu icin doldurulmalidir.
-- Kullanici sadece `docs/prompt-template.md dosyasindaki promptu uygula.` derse NORMAL MOD calisir: Codex bu dokumandaki standart akisi tek basina uygular.
+- Gorev verisi `docs/prompt-template.md` icine yazilmaz ve bu ortak dosya task
+  sirasinda degistirilmez.
+- `Kaynak`, `TC kapsami`, yerlesim/hedef, kullanici/ortam ve goreve ozel kabul
+  kriterleri sohbet mesajindaki gorev blogunda verilir. Desteklenen kaynak
+  bicimleri ve final raporlar sozlesmede tanimlidir.
+- `AUTO`, AI'in repo ve authoritative kaynak kanitina gore karar vermesi;
+  `YOK`, alanin bilincli olarak uygulanmamasi; `BİLİNMİYOR`, gerekli bilginin
+  eksik olmasi anlamina gelir. Bos alan birakilmaz ve bilinmeyen bilgi icin
+  `YOK` kullanilmaz.
+- Hedef feature/scenario veya yerlesim karari AI'a birakilacaksa ilgili alana
+  `AUTO` yazilir. Guvenli karar verilemiyorsa tahminle kod yazilmaz; sozlesmedeki
+  blokaj raporu kullanilir.
+- Kullanici gorev blogunda `Calisma modu: NORMAL` belirtirse Codex standart akisi
+  tek basina uygular.
 - Kullanici herhangi bir talepte acikca `orchestration mode aktif` ifadesini kullanirsa ORCHESTRATION MOD calisir (bkz. 19.1). Bu tetikleyici prompt-template'e ozel degildir.
-- Bos alan birakilmamalidir; bilinmeyen alanlara `yok` yazilmalidir.
-- Senaryo kararindan emin olunmuyorsa `Senaryo islemi` alanina `repo yapisindan karar ver` yazilmalidir.
 - Prompt icinde bu dokumandaki kurallar tekrar cogaltilmamalidir; ana kural kaynagi her zaman `AGENTS.md`, reuse sozlugu ise `INVENTORY.md` dosyasidir.
-- Eski uzun prompt kopyalari kullanilmamalidir. Prompt standardi degisecekse `docs/prompt-template.md` guncellenmelidir.
+- Eski uzun prompt kopyalari veya ortak dosyada task verisi kullanilmaz. Sozlesme
+  standardi degisecekse `docs/prompt-template.md` ayri bir standart degisikligi
+  olarak guncellenmelidir.
 
 ---
 
@@ -1524,7 +1563,7 @@ Claude review baglami su formatta verilmelidir:
 
 ```text
 Task:
-[kullanici talebi ve prompt-template DOLDUR alani]
+[kullanici talebi ve sohbet gorev blogu]
 
 Relevant AGENTS/INVENTORY summary:
 [reuse ve uygulanacak kurallar]
@@ -1692,7 +1731,7 @@ Kullanilacak:
 - Step definitions: features/step-definitions
 - Cucumber World/Hooks: features/support
 - Config: `src/config/env.ts` + `src/config/timeouts.ts`
-- Genis kalite kapisi: typecheck + ESLint + Prettier + unit + Gherkin policy + Cucumber dry-run + inventory
+- Genis kalite kapisi: typecheck + ESLint + Prettier + unit + architecture policy + Gherkin policy + Cucumber dry-run + inventory
 - Allure current-run clean varsayilani, acik append ve kararli browser-specific history
 - Lockfile'a bagli local Playwright MCP ve pinli Node/npm toolchain
 - Playwright expect assertions

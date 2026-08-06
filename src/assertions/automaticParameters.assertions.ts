@@ -9,15 +9,13 @@ import {
   expectUrl,
   expectVisible,
 } from './common.assertions';
+import { expectSelectedSidebarMenu } from './navigation.assertions';
 
 export async function expectAutomaticParametersRouteOpened(page: Page) {
   const locator = locators(page);
 
   await expectUrl(page, /shell-app-ui\/#\/automatic-parameters/, { timeout: TIMEOUTS.uiOperation });
-  await expectVisible(
-    locator.navigation.selectedSidebarMenuLink('Otomatik Parametre Tanımlama'),
-    LOCATOR_REPORTS.navigation.selectedSidebarMenuLink('Otomatik Parametre Tanımlama'),
-  );
+  await expectSelectedSidebarMenu(page, 'Otomatik Parametre Tanımlama');
   await expectVisible(
     locator.automaticParameters.listTitle,
     LOCATOR_REPORTS.automaticParameters.listTitle,

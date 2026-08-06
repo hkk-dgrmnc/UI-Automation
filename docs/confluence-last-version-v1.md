@@ -53,7 +53,7 @@ Bu standart aşağıdaki alanları kapsar:
 | Aksiyon ve doğrulama | Domain bazlı action/assertion katmanları |
 | Akış yönetimi | `src/flows` içindeki business flow fonksiyonları |
 | Raporlama | Cucumber HTML/JSON raporu ve reusable action/assertion logları |
-| Kalite kontrolleri | TypeScript, ESLint, Prettier, unit, Gherkin policy, Cucumber dry-run ve inventory/duplicate kapıları |
+| Kalite kontrolleri | TypeScript, ESLint, Prettier, unit, AST mimari policy, Gherkin policy, Cucumber dry-run ve inventory/duplicate kapıları |
 | AI kullanımı | Codex/Claude gibi araçlarla kurallı test üretimi |
 
 Kapsam dışı alanlar:
@@ -219,13 +219,15 @@ Bu mimari belirli bir uygulamanın testlerinden bağımsızdır. Aşağıdaki ya
 | Generic listbox assertion | `"{string} dropdown listesinde aşağıdaki seçenekler listelenir"` + Data Table ile seçenek doğrulama |
 | `ScenarioStore` | Senaryo içinde runtime değer saklama ve sonraki adımda kullanma |
 | `LOCATOR_REPORTS` | Locator adı/değeri bilgisini raporlanabilir ve denetlenebilir tutma |
-| `INVENTORY.md` | Step, locator, action, assertion ve flow reuse sözlüğünü tek yerde görme |
-| `npm run check` | TypeScript, ESLint, Prettier, unit, Gherkin policy, Cucumber dry-run ve inventory kapısı |
+| `INVENTORY.md` | Step/locator sözlüğü ile action/assertion/flow imza, kaynak satırı ve kullanım sayılarını tek yerde görme |
+| `npm run check` | TypeScript, ESLint, Prettier, unit, AST mimari policy, Gherkin policy, Cucumber dry-run ve inventory kapısı |
 | `docs/prompt-template.md` | Manuel test senaryosunu standart şekilde otomasyona dönüştürme prompt'u |
 
 ## Inventory ve Mekanik Kontroller
 
-`INVENTORY.md`, mevcut step, locator, action, assertion ve flow sözlüğünü tek yerde listeler. Bu yapılardan biri eklendikten sonra güncellenmelidir.
+`INVENTORY.md`, mevcut step ve locator sözlüğünü; action, assertion ve flow'ların
+imza, kaynak satırı ve proje içi kullanım sayılarını tek yerde listeler. Bu
+yapılardan biri eklendikten sonra güncellenmelidir.
 
 Komutlar:
 
@@ -242,6 +244,7 @@ npm run check
 | Locator report name/path uyumu | `LOCATOR_REPORTS` içindeki `name`, kendi `grup.key` yolu ile uyuşmuyorsa |
 | Duplicate step | Normalize edildiğinde aynı metne düşen iki step tanımı varsa |
 | Inventory güncelliği | Locator veya step eklenip `INVENTORY.md` güncellenmemişse |
+| Mimari policy | Step'te raw Playwright/locator, action'da expect, assertion'da mutating işlem, Page Object veya waitForTimeout varsa |
 | TypeScript hatası | `tsc --noEmit` başarısızsa |
 | Kod stili | ESLint veya Prettier kontrolü başarısızsa |
 | Unit test | Tooling/lifecycle saf fonksiyon testleri başarısızsa |
@@ -672,7 +675,7 @@ Geri alınanlar: [bu turda oluşturulan dosya veya değişiklik özeti]
 
 ## Ortak Prompt Kullanımı
 
-Yeni test üretiminde tek standart prompt dosyası kullanılmalıdır. Ortak prompt'un ana kaynağı repodaki `docs/prompt-template.md` dosyasıdır.
+Yeni test üretiminde repodaki tek ve değişmez çalışma sözleşmesi kullanılmalıdır:
 
 ```text
 docs/prompt-template.md
@@ -680,77 +683,65 @@ docs/prompt-template.md
 
 ### Amaç
 
-Ortak prompt, manuel test case'leri farklı kişiler veya farklı AI oturumları tarafından aynı otomasyon standardıyla üretmek için kullanılır. Hedef, her yeni testte aynı mimari akışı, aynı step sözlüğünü, aynı locator doğrulama disiplinini ve aynı kalite kapılarını işletmektir.
+Bu sözleşme, manuel test case'lerin farklı ekipler veya AI oturumları tarafından
+aynı otomasyon standardıyla üretilmesini sağlar. Kalıcı mimari ve kalite kuralları
+`AGENTS.md`, güncel reuse sözlüğü `INVENTORY.md` içinde kalır; görev kapsamı ve
+parametreleri ise sohbet mesajında verilir.
 
-Bu template ile amaçlananlar:
+Bu modelin amaçları:
 
 - AI'ın önce `AGENTS.md` ve `INVENTORY.md` dosyalarını okuyarak mevcut reusable step, locator, action, assertion ve flow yapılarını kullanması.
 - Aynı işi yapan farklı step metinlerinin veya locator/action kopyalarının oluşmasını engellemek.
-- Feature dosyalarının doğru suite altında (`features/cases/smoke` veya `features/cases/regression`) ve business dilinde oluşmasını sağlamak.
-- Locator doğrulanamıyorsa, beklenen sonuç belirsizse veya ekran erişilemiyorsa yarım/TODO test kodu bırakılmasını önlemek.
-- Her test üretiminden sonra `npm run inventory`, `npm.cmd run check` ve ilgili scenario koşumu gibi kalite adımlarını standartlaştırmak.
+- Ortak prompt dosyasında ekip veya test bazlı değişiklik ve merge conflict oluşmasını önlemek.
+- Doğrulanamayan bilgi için tahmini ya da yarım test kodu bırakılmasını engellemek.
+- Kontrol, canlı test ve blokaj sonuçlarının aynı formatta raporlanmasını sağlamak.
 
-### Neden Tek Prompt?
+### Kullanım İlkesi
 
-Tek prompt kullanımı, ekip içinde otomasyon dilinin dağılmasını engeller. Prompt kuralları farklı mesajlarda kopyalanırsa zamanla eski sürümler dolaşır; biri eski klasör yapısını, biri eski dropdown step'lerini, biri farklı locator önceliğini kullanabilir. Bu yüzden uzun kurallar sohbetlere tekrar tekrar yapıştırılmaz; güncel kararlar `AGENTS.md`, reuse sözlüğü `INVENTORY.md`, çalıştırılacak standart istek ise `docs/prompt-template.md` üzerinden yönetilir.
+`docs/prompt-template.md` test üretimi sırasında düzenlenmez. Ekip üyesi dosyadaki
+boş görev bloğunu kopyalar ve yalnız o tura ait değerleri sohbet mesajında
+doldurur. Böylece kalıcı sözleşme ile geçici görev verisi birbirinden ayrılır.
 
-Prompt değişecekse Confluence metni veya eski chat mesajları değil, önce `docs/prompt-template.md` güncellenmelidir. Böylece herkes ve AI aracı aynı kaynağa bakar.
+Sözleşme standardı değişecekse bu, test görevinin parçası olarak değil ayrı bir
+standart değişikliği olarak `docs/prompt-template.md` üzerinde yapılır.
 
 ### Nasıl Kullanılır?
 
-1. Otomasyona alınacak manuel test case bilgileri hazırlanır.
-2. `docs/prompt-template.md` dosyasındaki yalnızca `DOLDUR` alanı ilgili test turuna göre doldurulur.
-3. AI'a aşağıdaki kısa komut verilir:
-
-```text
-docs/prompt-template.md dosyasındaki promptu uygula.
-```
-
-4. AI, prompt gereği önce `AGENTS.md` ve `INVENTORY.md` dosyalarını okur.
-5. Mevcut reusable yapı varsa yenisini yazmaz; yoksa doğru katmana küçük ve doğrulanmış ekleme yapar.
-6. İş sonunda inventory/check/test sonuçlarını final cevapta raporlar.
-
-### Doldurulacak Template
-
-Her test üretiminde aşağıdaki alanlar doldurulmalıdır:
-
-```text
-Manuel test dosyasi:
-Bu turda otomasyona alinacak TC'ler:
-Haric tutulacak TC'ler:
-Senaryo islemi: [mevcut senaryoya devam et | mevcut feature icinde yeni scenario ac | yeni feature ac | repo yapisindan karar ver]
-Kullanici:
-Ek not: yok
-```
-
-Alan açıklamaları:
-
-- `DOLDUR` alanı ilgili test için doldurulur.
-- Boş alan bırakılmaz, bilinmeyen alanlara `yok` yazılır.
-- `Manuel test dosyasi`: AI'ın okuyacağı manuel case dokümanı veya dosya yolu.
-- `Bu turda otomasyona alinacak TC'ler`: Örneğin `TC-003, TC-004` veya `YTKP-1009 tamamı`.
-- `Haric tutulacak TC'ler`: Bu turda özellikle otomasyona alınmayacak case'ler.
-- `Senaryo islemi`: Mevcut feature'a devam mı edilecek, aynı feature içinde yeni scenario mu açılacak, yeni feature mı oluşturulacak, yoksa repo yapısından mı karar verilecek.
-- `Kullanici`: `.env` içinde tanımlı kullanıcı anahtarı; örnek `USER1`.
-- `Ek not`: Ekran yolu, yetki notu, özel data veya dikkat edilmesi gereken durum varsa yazılır; yoksa `yok`.
-- Senaryo kararından emin olunmuyorsa `Senaryo islemi` alanına `repo yapisindan karar ver` yazılır.
-- Kurallar prompt içine tekrar kopyalanmaz; ana kaynak `AGENTS.md`, reuse sözlüğü `INVENTORY.md` dosyasıdır.
-
-### Kullanım Örneği
+1. Authoritative manuel test kaynağı ve otomasyona alınacak TC kapsamı hazırlanır.
+2. Aşağıdaki görev bloğu kopyalanıp köşeli parantezli alanlar sohbet mesajında doldurulur.
+3. Hassas değerler yazılmaz; yalnızca `.env` kullanıcı veya ortam anahtarı verilir.
+4. AI sözleşme gereği `AGENTS.md` ve `INVENTORY.md` dosyalarını okuyup görevi yürütür.
 
 ```text
 docs/prompt-template.md dosyasındaki promptu uygula.
 
-DOLDUR
-Manuel test dosyasi: YTKP-1009-test-cases-codex.md
-Bu turda otomasyona alinacak TC'ler: TC-008, TC-009, TC-010
-Haric tutulacak TC'ler: yok
-Senaryo islemi: mevcut feature icinde yeni scenario ac
-Kullanici: USER1
-Ek not: Dropdown acma icin generic "{string}" dropdown'ı açılır step'i kullanılmalı.
+Kaynak: [repo:<göreli-yol> | ek:<dosya-adı> | mcp:<sistem>/<kaynak-id> | metin:<içerik> | url:<adres>]
+TC kapsamı: [TC-ID listesi | TÜMÜ]
+Yerleşim: [AUTO | MEVCUT SENARYOYA DEVAM | MEVCUT FEATURE'DA YENİ SENARYO | YENİ FEATURE]
+Hedef feature: [AUTO | feature dosya yolu/adı | YOK | BİLİNMİYOR]
+Hedef scenario: [AUTO | scenario adı | YOK | BİLİNMİYOR]
+Kullanıcı profili: [USER anahtarı | YOK | BİLİNMİYOR]
+Ortam profili: [mevcut .env | profil adı | YOK | BİLİNMİYOR]
+Ek kabul kriterleri: [metin | YOK | BİLİNMİYOR]
+Bilinmeyen bilgiler: [açık liste | YOK]
+Çalışma modu: [NORMAL | orchestration mode aktif]
 ```
 
-Not: Yukarıdaki örnek sadece kullanım şeklini gösterir. Güncel ve bağlayıcı prompt metni her zaman `docs/prompt-template.md` dosyasındadır.
+Kaynak biçimleri:
+
+- `repo:` workspace içindeki dosyayı, `ek:` sohbete eklenen dosyayı belirtir.
+- `mcp:` erişilebilir MCP kaynağını, `metin:` mesaj içindeki test case'i belirtir.
+- `url:` erişilebilir dış kaynağı belirtir; kimlik bilgisi URL'ye yazılmaz.
+
+### Özel Değerler
+
+- `AUTO`: AI repo ve authoritative kaynak kanıtına göre karar verir.
+- `YOK`: Alan bilinçli olarak uygulanmıyor veya ek bilgi bulunmuyor demektir.
+- `BİLİNMİYOR`: Gerekli bilgi eksiktir. AI güvenle bulamazsa tahmin etmez ve
+  blokaj raporlar.
+
+Alanlar boş bırakılmaz ve bilinmeyen bilgi için `YOK` kullanılmaz. Tamamlanma ve
+blokaj raporlarının bağlayıcı formatı `docs/prompt-template.md` içindedir.
 
 ## Manuel Test Case Formatı
 
@@ -801,6 +792,7 @@ npm run typecheck
 npm run lint
 npm run format:check
 npm run test:unit
+npm run architecture:check
 npm run gherkin:check
 npm run cucumber:dry
 npm run check
@@ -810,6 +802,7 @@ Test komutları:
 
 ```powershell
 npm test
+npm run test:feature -- features/cases/regression/YTKP-1009.feature
 npm run test:chromium
 npm run test:firefox
 npm run test:webkit

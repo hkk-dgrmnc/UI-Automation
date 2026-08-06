@@ -5,6 +5,7 @@
   "description": "Cucumber and Playwright TypeScript UI automation project.",
   "scripts": {
     "test": "node scripts/run-allure-report.js cases",
+    "test:feature": "node scripts/run-allure-report.js default",
     "test:smoke": "node scripts/run-allure-report.js smoke",
     "test:regression": "node scripts/run-allure-report.js regression",
     "test:chromium": "node scripts/run-allure-report.js cases --world-parameters \"{\\\"browser\\\":\\\"chromium\\\"}\"",
@@ -27,6 +28,7 @@
     "format": "prettier --write \"src/**/*.ts\" \"features/**/*.{ts,js}\" \"scripts/**/*.{ts,js}\" \"tests/**/*.js\" \"config/**/*.json\" \"*.{js,json}\" \".mcp.json\" \".prettierrc.json\" \".github/workflows/*.yml\"",
     "format:check": "prettier --check \"src/**/*.ts\" \"features/**/*.{ts,js}\" \"scripts/**/*.{ts,js}\" \"tests/**/*.js\" \"config/**/*.json\" \"*.{js,json}\" \".mcp.json\" \".prettierrc.json\" \".github/workflows/*.yml\"",
     "test:unit": "node --test \"tests/**/*.test.js\"",
+    "architecture:check": "ts-node scripts/check-architecture.ts",
     "gherkin:check": "node scripts/check-gherkin-policy.js",
     "cucumber:dry": "node scripts/run-cucumber-dry.js",
     "inventory": "ts-node scripts/check-inventory.ts",
@@ -35,7 +37,7 @@
     "live:check": "node scripts/live-check.js",
     "claude:review": "node scripts/claude-review.js",
     "claude:review:self-test": "node scripts/claude-review.js --self-test",
-    "check": "npm run typecheck && npm run lint && npm run format:check && npm run test:unit && npm run gherkin:check && npm run cucumber:dry && npm run inventory:check"
+    "check": "npm run typecheck && npm run lint && npm run format:check && npm run test:unit && npm run architecture:check && npm run gherkin:check && npm run cucumber:dry && npm run inventory:check"
   },
   "keywords": [],
   "author": "",

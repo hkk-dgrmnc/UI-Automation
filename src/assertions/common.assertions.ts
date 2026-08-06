@@ -82,29 +82,6 @@ export async function expectCount(
   }
 }
 
-export async function expectNotAttribute(
-  locator: Locator,
-  locatorReport: LocatorReport,
-  attributeName: string,
-  attributeValue: string,
-  options: AssertionOptions = {},
-) {
-  reportAssertion({
-    assertion: 'Not To Have Attribute',
-    locatorName: locatorReport.name,
-    locatorValue: locatorReport.value,
-    expected: `${attributeName} is not "${attributeValue}"`,
-  });
-  try {
-    await expect(locator).not.toHaveAttribute(attributeName, attributeValue, {
-      timeout: resolveUiTimeout(options),
-    });
-  } catch (error) {
-    reportError({ action: 'Not To Have Attribute', locatorName: locatorReport.name, error });
-    throw error;
-  }
-}
-
 export async function expectHasValue(
   locator: Locator,
   locatorReport: LocatorReport,

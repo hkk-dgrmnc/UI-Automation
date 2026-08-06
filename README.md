@@ -75,6 +75,7 @@ Kullanıcı bilgileri `USER<N>_USERNAME` / `USER<N>_PASSWORD` bloklarıyla okunu
 
 ```powershell
 npm test
+npm run test:feature -- features/cases/regression/YTKP-1009.feature
 npm run test:smoke
 npm run test:regression
 ```
@@ -117,6 +118,8 @@ biriktirmek icin `npm run test:all` kullanilir. Manuel birlestirme gerekiyorsa
 ikinci ve sonraki kosular acikca `--append` ile baslatilir (ornegin
 `npm run test:firefox -- --append`). Her sonuc tarayici metadata'si ve tarayiciya
 ozel, kosular arasinda kararli bir history kimligi tasir.
+Dogrudan tek feature kosmak icin pathsiz `test:feature` profili kullanilir; bu,
+suite profilindeki path'lerle CLI path'inin birlesmesini engeller.
 Dogrudan `cucumber-js` veya VS Code debug launch kullanilirsa Allure formatter
 runner'i bypass edilebilir; bu durumda proje scriptlerini tercih et veya
 sonrasinda `npm run allure:generate` calistir.
@@ -149,6 +152,7 @@ Kod stili, unit test ve Gherkin/Cucumber kapıları:
 npm run lint
 npm run format:check
 npm run test:unit
+npm run architecture:check
 npm run gherkin:check
 npm run cucumber:dry
 ```
@@ -165,17 +169,21 @@ Inventory güncellik ve duplicate kontrolü:
 npm run inventory:check
 ```
 
+Üretilen inventory, action/assertion/flow fonksiyonlarının imzasını, kaynak
+satırını ve statik kullanım sayısını da gösterir. `UNUSED`, otomatik silme
+talimatı değil; incelenmesi gereken bir reuse/dead-code işaretidir.
+
 Tüm temel kontrol:
 
 ```powershell
 npm run check
 ```
 
-`npm run check`; typecheck, ESLint, Prettier, unit test, Gherkin ID/tag policy,
-Cucumber dry-run ve inventory güncellik/duplicate kontrollerini birlikte
-çalıştırır. Yeni step, locator, action, assertion veya flow eklendikten sonra
-`npm run inventory` çalıştırılmalı ve güncellenen [INVENTORY.md](./INVENTORY.md)
-dosyası commit'e dahil edilmelidir.
+`npm run check`; typecheck, ESLint, Prettier, unit test, AST tabanlı mimari
+policy, Gherkin ID/tag policy, Cucumber dry-run ve inventory
+güncellik/duplicate kontrollerini birlikte çalıştırır. Yeni step, locator,
+action, assertion veya flow eklendikten sonra `npm run inventory` çalıştırılmalı
+ve güncellenen [INVENTORY.md](./INVENTORY.md) dosyası commit'e dahil edilmelidir.
 
 ## Zorunlu Bitirme Ritüeli
 
@@ -223,19 +231,36 @@ Belirsiz locator, yetki, veri veya beklenen sonuç varsa koda TODO, geçici sele
 
 ## AI ile Test Üretimi
 
-Ekip, manuel test case'leri AI ile otomasyona çevirirken tek standart prompt dosyasını kullanır:
+Ekip, manuel test case'leri AI ile otomasyona çevirirken tek ve değişmez çalışma
+sözleşmesini kullanır:
 
 ```text
 docs/prompt-template.md
 ```
 
-Kullanım:
+Bu ortak dosya test bazında düzenlenmez. Dosyadaki boş görev bloğu kopyalanır,
+yalnızca o tura ait değerler sohbet mesajında doldurulur:
 
 ```text
 docs/prompt-template.md dosyasındaki promptu uygula.
+
+Kaynak: repo:<göreli-yol>
+TC kapsamı: <TC-ID listesi>
+Yerleşim: AUTO
+Hedef feature: AUTO
+Hedef scenario: AUTO
+Kullanıcı profili: <USER anahtarı>
+Ortam profili: mevcut .env
+Ek kabul kriterleri: YOK
+Bilinmeyen bilgiler: YOK
+Çalışma modu: NORMAL
 ```
 
-Prompt dosyasında sadece `DOLDUR` alanı ilgili test turuna göre güncellenir. Senaryonun mevcut akışa mı ekleneceği, mevcut feature içinde yeni scenario mu açılacağı veya yeni feature mı oluşturulacağı `Senaryo islemi` alanıyla belirtilir. Karar net değilse `repo yapisindan karar ver` yazılır; AI mevcut repo yapısını inceler, emin olamazsa tahminle kod yazmaz ve blokaj raporlar.
+Kaynak `repo:`, `ek:`, `mcp:`, `metin:` veya `url:` biçiminde verilebilir.
+`AUTO`, AI'ın repo ve kaynak kanıtına göre karar vermesi; `YOK`, alanın bilinçli
+olarak uygulanmaması; `BİLİNMİYOR`, gerekli bilginin eksik olması demektir.
+Eksik bilgi güvenle bulunamazsa AI tahminde bulunmaz ve blokaj raporlar. Alanların
+tam açıklaması ve final rapor formatları `docs/prompt-template.md` içindedir.
 
 ## Mevcut Senaryolar
 
